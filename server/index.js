@@ -10,7 +10,11 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-mongoose.connect('mongodb://127.0.0.1:27017/Psychiatrist');
+mongoose.connect(
+  'mongodb+srv://Patient:pf_BSIT2-3@telepsychiatrist.eilqljn.mongodb.net/Psychiatrist?retryWrites=true&w=majority'
+)
+.then(() => console.log('Connected to Atlas'))
+.catch(err => console.error('Error connecting to Atlas:', err));
 
 app.post('/login', (req, res) => {
 
@@ -46,8 +50,9 @@ app.post('/register', async (req, res) => {
 
     res.json(user);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Error saving to database' });
+    console.error('Register error:', err);
+    // Return error details for debugging (remove details in production)
+    res.status(500).json({ error: 'Error saving to database', details: err.message });
   }
 });
 
