@@ -16,22 +16,31 @@ mongoose.connect(
 .then(() => console.log('Connected to Atlas'))
 .catch(err => console.error('Error connecting to Atlas:', err));
 
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
 
-    const {email, password} = req.body;
-    PsychiatristModel.findOne({email:email})
-    .then(user => {
-        if(user){
-            if(user.password === password){
-                res.json("Success")
-            } else {
-                res.json("Password didn't match")
-            }
-        } else {
-            res.json("User not registered")
-        }
-    })
-})
+    // Try psychiatrist first, then patient
+    let user = await PsychiatristModel.findOne({ email });
+    if (!user) {
+      user = await PatientModel.findOne({ email });
+    }
+
+    if (!user) {
+      return res.json({ status: 'not_found', message: 'User not registered' });
+    }
+
+    if (user.password !== password) {
+      return res.json({ status: 'wrong_password', message: "Password didn't match" });
+    }
+
+    // Success
+    return res.json({ status: 'success', role: user.role, userId: user._id });
+  } catch (err) {
+    console.error('Login error:', err);
+    return res.status(500).json({ status: 'error', message: 'Server error', details: err.message });
+  }
+});
 
 
 
