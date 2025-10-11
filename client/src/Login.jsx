@@ -12,9 +12,16 @@ function Login() {
     e.preventDefault()
     axios.post('http://localhost:3001/login', {email, password})
     .then(result => {
-        console.log(result)
-        if(result.data === "Success") {
-            navigate('/dashboard') // Redirect to dashboard on successful login
+        console.log('login response', result.data)
+        const data = result.data
+        if (data && data.status === 'success') {
+          navigate('/dashboard') // Redirect to dashboard on successful login
+        } else if (data && data.status === 'wrong_password') {
+          alert('Incorrect password')
+        } else if (data && data.status === 'not_found') {
+          alert('User not registered')
+        } else {
+          alert('Login failed')
         }
     })
     .catch(err=> console.log(err))
@@ -31,7 +38,7 @@ function Login() {
           </div>
         </div>
 
-        <h2>Welcome Back</h2>
+        <h2>Login to your Account</h2>
 
         <form onSubmit={handleSubmit}>
           <input
