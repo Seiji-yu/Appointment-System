@@ -10,13 +10,21 @@ function Signup() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [role, setRole] = useState('')
+  const [termsChecked, setTermsChecked] = useState(false)
   const navigate = useNavigate()
 
   const handleSubmit = (e) => {
     e.preventDefault()
 
+    console.log('handleSubmit called', { firstName, lastName, email, password, role, termsChecked })
+
     if (!role) {
       alert('Please select a role')
+      return
+    }
+
+    if (!termsChecked) {
+      alert('Please agree to the Terms & Conditions')
       return
     }
 
@@ -40,13 +48,13 @@ function Signup() {
           <div className="tabs-bg">
             <div className="indicator" style={{ transform: activeTab === 'signin' ? 'translateX(100%)' : 'translateX(0%)' }} />
             <button type="button" className={`tab ${activeTab === 'signup' ? 'active-tab' : ''}`} onClick={() => setActiveTab('signup')}>Sign up</button>
-            <button type="button" className={`tab ${activeTab === 'signin' ? 'active-tab' : ''}`} onClick={() => setActiveTab('signin')}>Sign in</button>
+            <button type="button" className={`tab ${activeTab === 'signin' ? 'active-tab' : ''}`} onClick={() => navigate('/login')}>Sign in</button>
           </div>
         </div>
 
         <h2>Create an Account</h2>
 
-        <form onSubmit={handleSubmit}>
+  <form onSubmit={handleSubmit} noValidate>
           <div className="name-fields">
             <input
               type="text"
@@ -86,25 +94,13 @@ function Signup() {
           </select>
 
           <div className="terms">
-            <input type="checkbox" required />
+            <input type="checkbox" checked={termsChecked} onChange={(e) => setTermsChecked(e.target.checked)} />
             <label>I agree to the <span>Terms & Conditions</span></label>
           </div>
 
-          <button type="submit" className="submit-btn">Create an Account</button>
+          <button type="submit" className="submit-btn" onClick={() => console.log('submit button clicked')}>Create an Account</button>
         </form>
 
-        <div className="divider">Or register with</div>
-
-        <div className="social-login">
-          <button className="google-btn">
-            <img src="https://www.svgrepo.com/show/355037/google.svg" alt="Google" />
-            Google
-          </button>
-          <button className="apple-btn">
-            <img src="https://www.svgrepo.com/show/349527/apple.svg" alt="Apple" />
-            Apple
-          </button>
-        </div>
       </div>
     </div>
   )
