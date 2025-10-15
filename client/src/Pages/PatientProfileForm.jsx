@@ -20,7 +20,7 @@ function PatientProfileForm() {
   useEffect(() => {
     const email = localStorage.getItem('email');
     if (!email) {
-      // send to login if not registered
+      // redirect to login if not registered
       navigate('/login');
       return;
     }
@@ -35,7 +35,7 @@ function PatientProfileForm() {
             patient.age && patient.gender && patient.contact && patient.address;
 
           if (isComplete) {
-            navigate('/dashboard'); //return to dashboard if profile is complete
+            navigate('/dashboard'); //return to pdashboard if profile is complete
             return;
           }
 
