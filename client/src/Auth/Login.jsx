@@ -43,7 +43,7 @@ function Login() {
           const check = await axios.post('http://localhost:3001/patient/check-profile', { email: userEmail })
           console.log('check-profile response:', check.data)
           if (check.data && check.data.complete) {
-            navigate('/dashboard')
+            navigate('/patient/dashboard')
           } else {
             navigate('/patient/profile')
           }
@@ -57,7 +57,7 @@ function Login() {
           console.log('get-profile response:', res.data)
           const patient = res.data?.patient || null
           if (profileIsComplete(patient)) {
-            navigate('/dashboard')
+            navigate('/patient/dashboard')
           } else {
             navigate('/patient/profile')
           }
