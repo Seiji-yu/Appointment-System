@@ -4,6 +4,7 @@ const cors = require('cors');
 
 const PsychiatristModel = require('./Models/Psychiatrist');
 const PatientModel = require('./Models/Patient');
+const AppointmentModel = require('./Models/Appointment');
 
 
 const app = express();
@@ -74,6 +75,81 @@ app.post('/register', async (req, res) => {
   } catch (err) {
     console.error('Register error:', err);
     res.status(500).json({ error: 'Error saving to database', details: err.message });
+  }
+});
+
+app.get('/api/patients/count', async (req, res) => {
+  try {
+    const count = await PatientModel.countDocuments();
+    res.json({ count });
+  } catch (err) {
+    console.error('Error fetching patient count:', err);
+    res.status(500).json({ error: 'Database error' });
+  }
+  
+});
+
+app.get('/api/appointments/stats', async (req, res) => {
+  try {
+    const now = new Date();
+
+    const upcoming = await AppointmentModel.countDocuments({ date: { $gte: now } });
+    const pending = await AppointmentModel.countDocuments({ status: "Pending" });
+    const completed = await AppointmentModel.countDocuments({ status: "Completed" });
+
+    res.json({upcoming, pending, completed});
+
+  } catch (err) {
+    console.error('Error fetching appointment stats:', err);
+    res.status(500).json({error: 'Database error'});
+  }
+});
+
+// Patient Profile Form
+app.post('/patient/profile', async (req, res) => {
+  try {
+    const { email, firstName, lastName, birthday, age, gender, contact, address, medicalHistory } = req.body;
+
+    // find patient by email and update profile fields
+    const updatedPatient = await PatientModel.findOneAndUpdate(
+      { email },
+      { firstName, lastName, birthday, age, gender, contact, address, medicalHistory },
+      { new: true, upsert: true }
+    );
+
+    res.json({ status: 'success', patient: updatedPatient });
+  } catch (err) {
+    console.error('Profile save error:', err);
+    res.status(500).json({ status: 'error', message: 'Error saving profile', details: err.message });
+  }
+});
+
+app.post('/patient/check-profile', async (req, res) => {
+  try {
+    const { email } = req.body;
+    const patient = await PatientModel.findOne({ email });
+    if (!patient) {
+      return res.json({ complete: false });
+    }
+    // check if all required details are filled
+    const isComplete = patient.name && patient.age && patient.gender && patient.contact && patient.address;
+    res.json({ complete: !!isComplete });
+  } catch (err) {
+    res.status(500).json({ complete: false, error: err.message });
+  }
+});
+
+// check if patient already filled patient form
+app.post('/patient/get-profile', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Email required' });
+
+    const patient = await PatientModel.findOne({ email });
+    res.json({ patient: patient || null });
+  } catch (err) {
+    console.error('Get profile error:', err);
+    res.status(500).json({ error: err.message });
   }
 });
 

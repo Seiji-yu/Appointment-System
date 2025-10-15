@@ -1,42 +1,45 @@
+//Sidebar Doctor
+
 import React from 'react'
 import * as FaIcons from "react-icons/fa"
 import * as IoIcons from "react-icons/io"
 import * as AiIcons from "react-icons/ai"
+import { IoInformationOutline } from "react-icons/io5";
 
 
 export const SidebarData = [
     {
         title: 'Home',
         path: '/dashboard',
-        icon: <AiIcons.AiFillHome/>,
+        icon: <AiIcons.AiFillHome />,
         cName: 'nav-text'
     },
 
     {
-        title: 'Doctor List',
-        path: '/doctors',
-        icon: <FaIcons.FaCalendarAlt/>,
+        title: 'Booking Logs',
+        path: '/DoctorLogs',
+        icon: <FaIcons.FaBook />,
         cName: 'nav-text'
     },
 
     {
-        title: 'Appoint Doctor',
-        path: '/appointments',
-        icon: <FaIcons.FaCalendarPlus/>,
+        title: 'Manage Appointments',
+        path: '/Appointments',
+        icon: <FaIcons.FaCalendarPlus />,
         cName: 'nav-text'
     },
 
     {
         title: 'Settings',
-        path: '/settings',
-        icon: <IoIcons.IoMdSettings/>,
+        path: '/Settings',
+        icon: <IoIcons.IoMdSettings />,
         cName: 'nav-text'
     },
 
     {
         title: 'About',
-        path: '/about',
-        icon: <IoIcons.IoInformationOutline/>,
+        path: '/About',
+        icon: <IoInformationOutline />,
         cName: 'nav-text'
     },
 
