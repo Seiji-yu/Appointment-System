@@ -6,7 +6,11 @@ import '../Styles/Login.css'
 function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+<<<<<<< HEAD
   const [loading, setLoading] = useState(false)
+=======
+  const [loading, setLoading] = useState('')
+>>>>>>> 78f26d55f55ef3828c80996bc0bcec69889ffe11
   const [error, setError] = useState('')
   const navigate = useNavigate()
 
@@ -14,8 +18,13 @@ function Login() {
     if (!p) return false
     return !!(p.firstName && p.lastName && p.birthday && p.age && p.gender && p.contact && p.address)
   }
+<<<<<<< HEAD
 
   const handleSubmit = async (e) => {
+=======
+  
+  const handleSubmit = (e) => {
+>>>>>>> 78f26d55f55ef3828c80996bc0bcec69889ffe11
     e.preventDefault()
     setError('')
     setLoading(true)
@@ -23,6 +32,7 @@ function Login() {
       const result = await axios.post('http://localhost:3001/login', { email: email.trim(), password })
       console.log('login response:', result.data)
       const data = result.data
+<<<<<<< HEAD
 
       if (data && data.status === 'success') {
         const userEmail = email.trim()
@@ -32,12 +42,28 @@ function Login() {
         const role = data.user?.role || data.role || data.roleName || null
         if (role) localStorage.setItem('role', role)
 
+=======
+      
+      if (data && data.status === 'success') {
+        const userEmail = email.trim()
+        localStorage.setItem('email', userEmail)
+        
+        // read role in the server
+        const role = data.user?.role || data.role || data.roleName || null
+        if (role) localStorage.setItem('role', role)
+
+        // if role is Psychiatrist, redirect to dashboard
+>>>>>>> 78f26d55f55ef3828c80996bc0bcec69889ffe11
         if (role === 'Psychiatrist') {
           navigate('/dashboard')
           return
         }
 
+<<<<<<< HEAD
         // If patient, check profile
+=======
+        // if the role is patient, check if profile is filled in the server
+>>>>>>> 78f26d55f55ef3828c80996bc0bcec69889ffe11
         try {
           const check = await axios.post('http://localhost:3001/patient/check-profile', { email: userEmail })
           console.log('check-profile response:', check.data)
