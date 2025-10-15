@@ -77,6 +77,54 @@ app.post('/register', async (req, res) => {
   }
 });
 
+// Patient Profile Form
+app.post('/patient/profile', async (req, res) => {
+  try {
+    const { email, firstName, lastName, birthday, age, gender, contact, address, medicalHistory } = req.body;
+
+    // find patient by email and update profile fields
+    const updatedPatient = await PatientModel.findOneAndUpdate(
+      { email },
+      { firstName, lastName, birthday, age, gender, contact, address, medicalHistory },
+      { new: true, upsert: true }
+    );
+
+    res.json({ status: 'success', patient: updatedPatient });
+  } catch (err) {
+    console.error('Profile save error:', err);
+    res.status(500).json({ status: 'error', message: 'Error saving profile', details: err.message });
+  }
+});
+
+app.post('/patient/check-profile', async (req, res) => {
+  try {
+    const { email } = req.body;
+    const patient = await PatientModel.findOne({ email });
+    if (!patient) {
+      return res.json({ complete: false });
+    }
+    // check if all required details are filled
+    const isComplete = patient.name && patient.age && patient.gender && patient.contact && patient.address;
+    res.json({ complete: !!isComplete });
+  } catch (err) {
+    res.status(500).json({ complete: false, error: err.message });
+  }
+});
+
+// check if patient already filled patient form
+app.post('/patient/get-profile', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Email required' });
+
+    const patient = await PatientModel.findOne({ email });
+    res.json({ patient: patient || null });
+  } catch (err) {
+    console.error('Get profile error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.listen(3001, () => {
   console.log('Server is running');
 });
