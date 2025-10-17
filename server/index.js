@@ -153,6 +153,17 @@ app.post('/patient/get-profile', async (req, res) => {
   }
 });
 
+// doctors list
+app.get('/api/doctors', async (req, res) => {
+  try {
+    const doctors = await PsychiatristModel.find({}, { password: 0 }); // exclude passwords
+    res.json(doctors);
+  } catch (err) {
+    console.error('Error fetching doctors:', err);
+    res.status(500).json({ error: 'Error fetching doctors' });
+  }
+});
+
 app.listen(3001, () => {
   console.log('Server is running');
 });
