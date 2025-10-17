@@ -35,7 +35,7 @@ function PatientProfileForm() {
             patient.age && patient.gender && patient.contact && patient.address;
 
           if (isComplete) {
-            navigate('/patient/dashboard'); //return to patient dashboard if profile is complete
+            navigate('/PatientDashboard'); //return to patient dashboard if profile is complete
             return;
           }
 
@@ -68,7 +68,7 @@ function PatientProfileForm() {
       const submitForm = { ...form, email }; // Add email to data sent PPF
       const res = await axios.post('http://localhost:3001/patient/profile', submitForm);
       setMessage('Profile saved successfully!');
-      setTimeout(() => navigate('/patient/dashboard'), 1000); //redirect to patient dashboard upon saving profile
+      setTimeout(() => navigate('/PatientDashboard'), 1000); //redirect to patient dashboard upon saving profile
     } catch (err) {
       setMessage('Error saving profile.');
       console.error(err);
