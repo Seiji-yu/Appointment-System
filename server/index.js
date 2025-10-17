@@ -78,7 +78,6 @@ app.post('/register', async (req, res) => {
   }
 });
 
-<<<<<<< HEAD
 app.get('/api/patients/count', async (req, res) => {
   try {
     const count = await PatientModel.countDocuments();
@@ -106,8 +105,6 @@ app.get('/api/appointments/stats', async (req, res) => {
   }
 });
 
-=======
->>>>>>> 78f26d55f55ef3828c80996bc0bcec69889ffe11
 // Patient Profile Form
 app.post('/patient/profile', async (req, res) => {
   try {
