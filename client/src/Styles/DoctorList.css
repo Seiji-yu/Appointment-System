@@ -1,0 +1,101 @@
+.doctor-page {
+  padding: 20px;
+}
+
+.doctor-title {
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 30px;
+  font-size: 35px;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.doctor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  justify-content: center;
+  gap: 25px;
+}
+
+.doctor-card {
+  display: flex;
+  align-items: center;
+  background-color: #ffffff;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  padding: 15px;
+  width: 320px;
+  height: 160px;
+  margin: 0 auto;
+}
+
+.doctor-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* Left side - picture */
+.doctor-image img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-right: 20px;
+}
+
+/* Right side - info */
+.doctor-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.doctor-name {
+  margin: 0;
+  font-size: 20px;
+  color: #34495e;
+  font-weight: 600;
+}
+
+.doctor-role {
+  margin: 5px 0;
+  color: #7f8c8d;
+  font-size: 15px;
+}
+
+.doctor-price {
+  font-size: 16px;
+  color: #27ae60;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+/* Buttons */
+.doctor-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.book-btn,
+.details-btn {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.book-btn {
+  background-color: #081047;
+  color: white;
+}
+
+.book-btn:hover {
+  background-color: #050c38;
+}
+
+
