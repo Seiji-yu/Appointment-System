@@ -43,9 +43,9 @@ function Login() {
           const check = await axios.post('http://localhost:3001/patient/check-profile', { email: userEmail })
           console.log('check-profile response:', check.data)
           if (check.data && check.data.complete) {
-            navigate('/patient/dashboard')
+            navigate('/PatientDashboard')
           } else {
-            navigate('/patient/profile')
+            navigate('/PatientForm')
           }
           return
         } catch (chkErr) {
@@ -57,13 +57,13 @@ function Login() {
           console.log('get-profile response:', res.data)
           const patient = res.data?.patient || null
           if (profileIsComplete(patient)) {
-            navigate('/patient/dashboard')
+            navigate('/PatientDashboard')
           } else {
-            navigate('/patient/profile')
+            navigate('/PatientForm')
           }
         } catch (gErr) {
           console.error('get-profile failed, redirecting to profile:', gErr)
-          navigate('/patient/profile')
+          navigate('/PatientForm')
         }
 
       } else if (data && data.status === 'wrong_password') {
