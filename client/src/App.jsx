@@ -13,6 +13,7 @@ import PDashboard from './Pages/PatientSide/PDashboard'
 import BookApp from './Pages/PatientSide/BookApp'
 import DoctorLists from './Pages/PatientSide/DoctorLists'
 import AppHistory from './Pages/PatientSide/AppHistory'
+import DoctorProfile from './Pages/DoctorSide/DoctorProfile'
 
 function App() {
 
@@ -33,6 +34,7 @@ function App() {
         <Route path='/DoctorLists' element={<DoctorLists />} />
         <Route path='/BookApp' element={<BookApp />} />
         <Route path='/AppHistory' element={<AppHistory />} />
+        <Route path='/DoctorProfile' element={<DoctorProfile />} />
       </Routes>
     </BrowserRouter>
   )

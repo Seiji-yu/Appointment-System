@@ -29,16 +29,18 @@ function Signup() {
     }
 
     axios.post('http://localhost:3001/register', {
-      name: `${firstName} ${lastName}`,
+      firstName,
+      lastName,
       email,
       password,
       role
     })
-    .then(result => {
-      console.log(result)
-      navigate('/login')
-    })
-    .catch(err => console.log(err))
+      .then(result => {
+        console.log('Signup success:', result.data);
+        navigate('/login');
+      })
+      .catch(err => console.error('Signup error:', err));
+
   }
 
   return (
@@ -54,7 +56,7 @@ function Signup() {
 
         <h2>Create an Account</h2>
 
-  <form onSubmit={handleSubmit} noValidate>
+        <form onSubmit={handleSubmit} noValidate>
           <div className="name-fields">
             <input
               type="text"

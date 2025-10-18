@@ -4,7 +4,7 @@
   height: 100vh;
   background-color: #ffffff;
   font-family: 'Poppins', sans-serif;
-  color: #333;
+  color: #7a6767;
   overflow-x: hidden;
 }
 
@@ -133,10 +133,10 @@
   border: none;
   width: 100%;
   border-radius: 10px;
-  box-shadow: none; /* Remove shadow since container has it */
+  box-shadow: none; 
 }
 
-/* FIXED: Better responsive behavior */
+/* Can be removed */
 @media (max-width: 1200px) {
   .dashboard-content {
     flex-direction: row; /* Keep side-by-side longer */
@@ -202,3 +202,23 @@
     width: 100%;
   }
 }
+
+/* Inaadjust yung sa sidebar ng doctor */
+:root {
+  --doctor-sidebar-open: 260px;
+  --doctor-sidebar-closed: 0px;
+}
+
+.doctor-layout { min-height: 100vh; }
+.doctor-main {
+  min-height: 100vh;
+  padding: 16px;
+  transition: margin-left 0.2s ease;
+}
+.doctor-layout.sidebar-open .doctor-main { margin-left: var(--doctor-sidebar-open); }
+.doctor-layout.sidebar-collapsed .doctor-main { margin-left: var(--doctor-sidebar-closed); }
+
+.doctor-layout .sidebar { z-index: 1000; }
+
+.doctor-layout .sidebar ~ .sidebar { display: none !important; }
+

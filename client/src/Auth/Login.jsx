@@ -23,17 +23,18 @@ function Login() {
       const result = await axios.post('http://localhost:3001/login', { email: email.trim(), password })
       console.log('login response:', result.data)
       const data = result.data
-      
+
       if (data && data.status === 'success') {
         const userEmail = email.trim()
         localStorage.setItem('email', userEmail)
-        
+
         // read role in the server
         const role = data.user?.role || data.role || data.roleName || null
         if (role) localStorage.setItem('role', role)
 
         // if role is Psychiatrist, redirect to dashboard
         if (role === 'Psychiatrist') {
+          localStorage.setItem('doctorEmail', userEmail) 
           navigate('/dashboard')
           return
         }
@@ -43,9 +44,9 @@ function Login() {
           const check = await axios.post('http://localhost:3001/patient/check-profile', { email: userEmail })
           console.log('check-profile response:', check.data)
           if (check.data && check.data.complete) {
-            navigate('/patient/dashboard')
+            navigate('/PatientDashboard')
           } else {
-            navigate('/patient/profile')
+            navigate('/PatientForm')
           }
           return
         } catch (chkErr) {
@@ -57,13 +58,13 @@ function Login() {
           console.log('get-profile response:', res.data)
           const patient = res.data?.patient || null
           if (profileIsComplete(patient)) {
-            navigate('/patient/dashboard')
+            navigate('/PatientDashboard')
           } else {
-            navigate('/patient/profile')
+            navigate('/PatientForm')
           }
         } catch (gErr) {
           console.error('get-profile failed, redirecting to profile:', gErr)
-          navigate('/patient/profile')
+          navigate('/PatientForm')
         }
 
       } else if (data && data.status === 'wrong_password') {
