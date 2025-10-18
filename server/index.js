@@ -10,7 +10,7 @@ const AppointmentModel = require('./Models/Appointment');
 const app = express();
 app.use(express.json({ limit: '10mb' }));
 app.use(express.json());
-app.use(cors()); 
+app.use(cors());
 
 // Database URI
 mongoose.connect(
@@ -43,11 +43,11 @@ app.post('/login', async (req, res) => {
     delete safeUser.password;
 
     // Return the user data along with status and role
-    return res.json({ 
-      status: 'success', 
-      role: user.role, 
+    return res.json({
+      status: 'success',
+      role: user.role,
       userId: user._id,
-      user: safeUser  
+      user: safeUser
     });
   } catch (err) {
     console.error('Login error:', err);
@@ -76,7 +76,7 @@ app.post('/register', async (req, res) => {
         role
       });
     } else if (role === 'Patient') {
-      
+
       // For patients,  combine firstName + lastName into `name` field
       user = await PatientModel.create({
         name: `${firstName} ${lastName}`,
@@ -190,17 +190,17 @@ app.post('/doctor/get-profile', async (req, res) => {
 // Update doctor profile
 app.post('/doctor/profile', async (req, res) => {
   try {
-    const { 
-      email, 
-      firstName, 
-      lastName, 
-      fees, 
-      experience, 
-      education, 
-      about, 
-      address1, 
+    const {
+      email,
+      firstName,
+      lastName,
+      fees,
+      experience,
+      education,
+      about,
+      address1,
       address2,
-      profileImage  
+      profileImage
     } = req.body;
 
     if (!email) {
@@ -209,16 +209,16 @@ app.post('/doctor/profile', async (req, res) => {
 
     const updatedDoctor = await PsychiatristModel.findOneAndUpdate(
       { email },
-      { 
-        firstName, 
-        lastName, 
-        fees, 
-        experience, 
-        education, 
-        about, 
-        address1, 
+      {
+        firstName,
+        lastName,
+        fees,
+        experience,
+        education,
+        about,
+        address1,
         address2,
-        profileImage  
+        profileImage
       },
       { new: true, upsert: true }
     );
