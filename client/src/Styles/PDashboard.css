@@ -1,0 +1,107 @@
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;           
+  grid-template-rows: auto auto;            
+  grid-template-areas:
+    "welcome calendar"
+    "appointments calendar";
+  column-gap: 30px;                                
+  row-gap: 0px;
+  max-width: 1100px;
+  margin: 18px auto 0 auto;
+  align-items: start;
+  box-sizing: border-box;
+  padding: 0 12px;
+}
+
+.welcome-box {
+  grid-area: welcome;                       
+  background: #2c3e50;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  padding: 22px;
+  box-sizing: border-box;
+  margin-top: 25px; 
+  margin-bottom: 0px;
+}
+
+.calendar-section {
+  grid-area: calendar;                      
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  padding: 22px;
+  box-sizing: border-box;
+  margin-top: 0px;
+  align-self: flex-start;
+}
+
+.appointments-section {
+  grid-area: appointments;                  
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  padding: 22px;
+  box-sizing: border-box;
+}
+
+.welcome-box h1 {
+  font-size: 28px;
+  color: #ffffff;
+  font-weight: 700;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.welcome-box p {
+  color: #ffffff;
+  font-size: 16px;
+}
+
+.appointments-section h3 { 
+  font-size: 28px; 
+  color: #2c3e50; 
+  font-weight: 700;
+}
+.appointments-section p { 
+  color: #7f8c8d; 
+}
+
+.book-btn {
+  background-color: #081047;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+}
+.book-btn:hover { background-color: #050b36; }
+
+/* responsive design */
+@media (max-width: 992px) {
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr; 
+    grid-template-areas:
+      "welcome"
+      "calendar"
+      "appointments";
+    grid-auto-rows: auto;
+    gap: 16px;
+    justify-content: center;
+    align-items: center;
+    max-width: 600px;
+    margin: 18 auto; 
+  }
+
+  .welcome-box,
+  .calendar-section,
+  .appointments-section {
+    width: 100%;
+    max-width: 500px; 
+    margin-left: auto;
+    margin-right: auto;
+    padding: 18px;
+  }
+}
