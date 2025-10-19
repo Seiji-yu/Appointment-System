@@ -7,7 +7,7 @@ const PsychiatristSchema = new mongoose.Schema({
   password: { type: String, required: true },
   role: { type: String, enum: ['Psychiatrist'], required: true },
 
-  // Added profile fields
+  // profile fields
   fees: { type: Number, default: 0 },
   experience: { type: String, default: '' },
   education: { type: [String], default: [] },
