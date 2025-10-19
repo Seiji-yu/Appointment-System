@@ -12,7 +12,8 @@ const PatientSchema = new mongoose.Schema({
     address: String,
     medicalHistory: String,
     password: String,
-    role: { type: String, enum: ['Patient'], required: true }
+    role: { type: String, enum: ['Patient'], required: true },
+    profileImage: { type: String, default: '' }
 });
 
 const PatientModel = mongoose.model("Patient", PatientSchema);

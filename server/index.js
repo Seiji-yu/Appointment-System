@@ -12,6 +12,9 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.json());
 app.use(cors());
 
+// Hardcoded psychiatrist license (strict match)
+const PSYCHIATRIST_LICENSE = '1234-1234-123';
+
 // Database URI
 mongoose.connect(
   'mongodb+srv://Patient:pf_BSIT2-3@telepsychiatrist.eilqljn.mongodb.net/Psychiatrist?retryWrites=true&w=majority'
@@ -23,7 +26,7 @@ const bcrypt = require('bcrypt')
 
 app.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, role, licenseNumber } = req.body;
 
     let user = await PsychiatristModel.findOne({ email });
     if (!user) {
@@ -37,6 +40,37 @@ app.post('/login', async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.json({ status: 'wrong_password', message: "Password didn't match" });
+    }
+
+    if (role && role !== user.role) {
+      return res.status(403).json({
+        status: 'role_mismatch',
+        message: 'Selected role does not match this account'
+      })
+    }
+
+    // Require license only for psychiatrists
+    if (user.role === 'Psychiatrist') {
+      const supplied = (licenseNumber || '').trim();
+      if (!supplied) {
+        return res.json({
+          status: 'license_required',
+          message: 'License number is required for Psychiatrist Login'
+        });
+      }
+      const pattern = /^\d{4}-\d{4}-\d{3}$/; // Regex for ####-####-###
+      if (!pattern.test(supplied)) {
+        return res.json({
+          status: 'invalid_license_format',
+          message: 'Invalide License Format. Use: 1234-1234-123'
+        });
+      }
+      if (supplied != PSYCHIATRIST_LICENSE) {
+        return res.json({
+          status: 'invalid_license',
+          message: 'License Number not Recognized'
+        });
+      }
     }
 
     const safeUser = user.toObject();
@@ -55,7 +89,7 @@ app.post('/login', async (req, res) => {
   }
 });
 
-
+// Sign Up
 app.post('/register', async (req, res) => {
   const { firstName, lastName, email, password, role } = req.body;
 
@@ -98,7 +132,7 @@ app.post('/register', async (req, res) => {
   }
 });
 
-
+// Patient Count in Doctor Dashboard
 app.get('/api/patients/count', async (req, res) => {
   try {
     const count = await PatientModel.countDocuments();
@@ -109,6 +143,7 @@ app.get('/api/patients/count', async (req, res) => {
   }
 
 });
+
 
 app.get('/api/appointments/stats', async (req, res) => {
   try {
@@ -126,15 +161,38 @@ app.get('/api/appointments/stats', async (req, res) => {
   }
 });
 
-// Patient Profile Form
+// Save/Update Patient Profile Form
 app.post('/patient/profile', async (req, res) => {
   try {
-    const { email, firstName, lastName, birthday, age, gender, contact, address, medicalHistory } = req.body;
+    const { 
+      email, 
+      firstName, 
+      lastName, 
+      birthday, 
+      age, 
+      gender, 
+      contact, 
+      address, 
+      medicalHistory,
+      profileImage
+     } = req.body;
+
+    if (!email) return res.status(400).json({ status: 'error', message: 'Email is required' });
+    const update = {};
+    if (firstName !== undefined) update.firstName = firstName;
+    if (lastName !== undefined) update.lastName = lastName;
+    if (birthday !== undefined) update.birthday = birthday;
+    if (age !== undefined) update.age = age;
+    if (gender !== undefined) update.gender = gender;
+    if (contact !== undefined) update.contact = contact;
+    if (address !== undefined) update.address = address;
+    if (medicalHistory !== undefined) update.medicalHistory = medicalHistory;
+    if (profileImage !== undefined) update.profileImage = profileImage;
 
     // find patient by email and update profile fields
     const updatedPatient = await PatientModel.findOneAndUpdate(
       { email },
-      { firstName, lastName, birthday, age, gender, contact, address, medicalHistory },
+      { firstName, lastName, birthday, age, gender, contact, address, medicalHistory, profileImage },
       { new: true, upsert: true }
     );
 
@@ -241,6 +299,53 @@ app.get('/api/doctors', async (req, res) => {
   }
 });
 
+// Recent patients for a doctor (from completed appointments)
+app.get('/api/patients/recent', async (req, res) => {
+  try {
+    const { doctorId, limit = '6' } = req.query;
+    if (!doctorId) {
+      return res.status(400).json({ status: 'bad_request', message: 'doctorId is required' });
+    }
+    if (!mongoose.Types.ObjectId.isValid(doctorId)) {
+      return res.status(400).json({ status: 'bad_request', message: 'Invalid doctorId' });
+    }
+    const lim = Math.min(Math.max(parseInt(limit, 10) || 6, 1), 24);
+
+    const items = await AppointmentModel.aggregate([
+      { $match: { doctor: new mongoose.Types.ObjectId(doctorId), status: 'completed' } },
+      { $sort: { date: -1, updatedAt: -1 } },
+      { $group: { _id: '$patient', lastAppointmentDate: { $first: '$date' } } },
+      { $sort: { lastAppointmentDate: -1 } },
+      { $limit: lim },
+      {
+        $lookup: {
+          from: 'patients',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'patient'
+        }
+      },
+      { $unwind: '$patient' },
+      {
+        $project: {
+          _id: 0,
+          patientId: '$_id',
+          firstName: '$patient.firstName',
+          lastName: '$patient.lastName',
+          email: '$patient.email',
+          lastAppointmentDate: 1
+        }
+      }
+    ]);
+
+    return res.json({ status: 'success', patients: items });
+  } catch (err) {
+    console.error('recent patients error:', err);
+    return res.status(500).json({ status: 'error', message: 'Server error', details: err.message });
+  }
+});
+
+// Prints in terminal that server is Running
 app.listen(3001, () => {
   console.log('Server is running');
 });
