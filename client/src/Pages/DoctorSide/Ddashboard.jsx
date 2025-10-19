@@ -11,7 +11,7 @@ export default function Ddashboard() {
   const [pendingCount, setPendingCount] = useState(0);
   const [completedCount, setCompletedCount] = useState(0);
 
-  // Replace placeholders with server data (fallback to placeholders if empty)
+  // Replace placeholders with server data (add lang kapag gusto pa dagdagan)
   const placeholderPatients = [
     { id: 'p1', name: 'Patient 1' }, { id: 'p2', name: 'Patient 2' },
     { id: 'p3', name: 'Patient 3' }, { id: 'p4', name: 'Patient 4' },
@@ -71,9 +71,9 @@ export default function Ddashboard() {
             <input type="text" placeholder="Search doctor, patient, or appointment..." />
           </div>
 
-          {/* Two-column layout: left = cards + recent patients, right = calendar */}
+        
           <div className="dashboard-grid">
-            {/* Cards (left, row 1) */}
+            {/* Cards */}
             <section className="cards-section grid-cards">
               <div className="dashboard-cards">
                 <div className="card"><h4>Total Patients</h4><p>{totalPatients}</p></div>
@@ -83,12 +83,12 @@ export default function Ddashboard() {
               </div>
             </section>
 
-            {/* Calendar (right, spans rows) */}
+            
             <aside className="calendar-section grid-calendar">
               <CalendarC />
             </aside>
 
-            {/* Previous Patients (left, row 2 under cards, beside calendar) */}
+            
             <section className="recent-patients-section grid-recent">
               <div className="section-header">
                 <h3>Previous Patients</h3>
