@@ -9,7 +9,7 @@ export default function DoctorLogs() {
     <div className={`doctor-layout ${sidebarOpen ? 'sidebar-open' : 'sidebar-collapsed'}`}>
       <Navbar isOpen={sidebarOpen} onToggle={setSidebarOpen} />
       <main className="doctor-main">
-        <h2>Booking Logs</h2>
+        <h1>Booking Logs</h1>
         <div className="dashboard-cards">
           <div className="card">
             <h4>Log #1</h4>

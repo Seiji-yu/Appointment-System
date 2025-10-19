@@ -10,7 +10,7 @@ export default function ManageApp() {
       <Navbar isOpen={sidebarOpen} onToggle={setSidebarOpen} />
       <main className="doctor-main">
         <div className="dashboard-main">
-          <h2>Manage Appointments</h2>
+          <h1>Manage Appointments</h1>
         </div>
       </main>
     </div>

@@ -9,7 +9,7 @@ function About() {
     <div className="dashboard">
       <Navbar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <div className="dashboard-main">
-        <h2>About Page</h2>
+        <h1>About Page</h1>
       </div>
     </div>
   );

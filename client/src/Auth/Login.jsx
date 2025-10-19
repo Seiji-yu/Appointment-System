@@ -6,6 +6,8 @@ import '../Styles/Login.css'
 function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [role, setRole] = useState('Patient')            // role state exists
+  const [licenseNumber, setLicenseNumber] = useState('') // license state exists
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const navigate = useNavigate()
@@ -20,53 +22,66 @@ function Login() {
     setError('')
     setLoading(true)
     try {
-      const result = await axios.post('http://localhost:3001/login', { email: email.trim(), password })
+      // Validate license client-side only if Psychiatrist
+      if (role === 'Psychiatrist') {
+        const lic = licenseNumber.trim()
+        const ok = /^\d{4}-\d{4}-\d{3}$/.test(lic)
+        if (!ok) {
+          setError('Enter a valid license number (1234-1234-123)')
+          setLoading(false)
+          return
+        }
+      }
+
+      const result = await axios.post('http://localhost:3001/login', {
+        email: email.trim(),
+        password,
+        role, // send selected role
+        licenseNumber: role === 'Psychiatrist' ? licenseNumber.trim() : undefined
+      })
       console.log('login response:', result.data)
       const data = result.data
 
       if (data && data.status === 'success') {
         const userEmail = email.trim()
         localStorage.setItem('email', userEmail)
+        if (data.userId) localStorage.setItem('userId', data.userId)   // store userId
 
-        // read role in the server
-        const role = data.user?.role || data.role || data.roleName || null
-        if (role) localStorage.setItem('role', role)
+        const roleFromServer = data.user?.role || data.role || null
+        if (roleFromServer) localStorage.setItem('role', roleFromServer)
 
-        // if role is Psychiatrist, redirect to dashboard
-        if (role === 'Psychiatrist') {
-          localStorage.setItem('doctorEmail', userEmail) 
+        if (roleFromServer === 'Psychiatrist') {
+          localStorage.setItem('doctorEmail', userEmail)
           navigate('/dashboard')
           return
         }
 
-        // if the role is patient, check if profile is filled in the server
         try {
           const check = await axios.post('http://localhost:3001/patient/check-profile', { email: userEmail })
-          console.log('check-profile response:', check.data)
           if (check.data && check.data.complete) {
             navigate('/PatientDashboard')
           } else {
             navigate('/PatientForm')
           }
           return
-        } catch (chkErr) {
-          console.warn('check-profile failed, falling back to get-profile', chkErr)
-        }
+        } catch (_) {}
 
         try {
           const res = await axios.post('http://localhost:3001/patient/get-profile', { email: userEmail })
-          console.log('get-profile response:', res.data)
           const patient = res.data?.patient || null
           if (profileIsComplete(patient)) {
             navigate('/PatientDashboard')
           } else {
             navigate('/PatientForm')
           }
-        } catch (gErr) {
-          console.error('get-profile failed, redirecting to profile:', gErr)
+        } catch {
           navigate('/PatientForm')
         }
 
+      } else if (data && data.status === 'role_mismatch') {
+        setError('Selected role does not match this account')
+      } else if (data && (data.status === 'license_required' || data.status === 'invalid_license' || data.status === 'invalid_license_format')) {
+        setError(data.message || 'License verification failed')
       } else if (data && data.status === 'wrong_password') {
         setError('Incorrect password')
       } else if (data && data.status === 'not_found') {
@@ -74,9 +89,10 @@ function Login() {
       } else {
         setError('Login failed')
       }
+      
     } catch (err) {
       console.error('login error', err)
-      setError('Unable to login. Check server and network.')
+      setError('Your account is not for Psychiatrist. Use patient Login instead.')
     } finally {
       setLoading(false)
     }
@@ -98,6 +114,28 @@ function Login() {
         {error && <p style={{ color: 'red', marginBottom: '10px' }}>{error}</p>}
         {loading && <p style={{ color: 'blue', marginBottom: '10px' }}>Loading...</p>}
 
+        {/* Role toggle */}
+        <div style={{ display: 'flex', gap: '12px', marginBottom: '10px' }}>
+          <label>
+            <input
+              type="radio"
+              name="role"
+              value="Patient"
+              checked={role === 'Patient'}
+              onChange={() => setRole('Patient')}
+            /> Patient
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="role"
+              value="Psychiatrist"
+              checked={role === 'Psychiatrist'}
+              onChange={() => setRole('Psychiatrist')}
+            /> Psychiatrist
+          </label>
+        </div>
+
         <form onSubmit={handleSubmit}>
           <input
             type="email"
@@ -114,6 +152,19 @@ function Login() {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
+
+          {role === 'Psychiatrist' && (
+            <input
+              type="text"
+              placeholder="License number (1234-1234-123)"
+              name="license"
+              value={licenseNumber}
+              onChange={(e) => setLicenseNumber(e.target.value)}
+              pattern="[0-9]{4}-[0-9]{4}-[0-9]{3}"
+              title="Format: 1234-1234-123"
+              required
+            />
+          )}
 
           <button type="submit" className="submit-btn" disabled={loading}>
             Sign in

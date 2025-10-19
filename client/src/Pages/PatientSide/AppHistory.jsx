@@ -9,7 +9,7 @@ function AppHistory() {
     <div className="dashboard">
       <PNavbar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <div className="dashboard-main">
-        <h2>Appointment History</h2>
+        <h1>Appointment History</h1>
         {/* You can add cards, tables, or lists here */}
       </div>
     </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'  
 import PNavbar from '../../SideBar/PNavbar'
 import '../../Styles/Ddashboard.css'
 import '../../Styles/DoctorList.css'
@@ -6,6 +7,7 @@ import '../../Styles/DoctorList.css'
 function DoctorLists() {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [doctors, setDoctors] = useState([])
+  const navigate = useNavigate()               
 
   useEffect(() => {
     fetch('http://localhost:3001/api/doctors')
@@ -27,19 +29,27 @@ function DoctorLists() {
                 {/* doctor picture on left side */}
                 <div className="doctor-image">
                   <img
-                    src="https://via.placeholder.com/120" // placeholder for now sabi ni bespren // May error sa console
-                    alt={`${doc.name}`}
+                    src="https://via.placeholder.com/120"
+                    alt={`${(doc.firstName || '') + ' ' + (doc.lastName || '')}`}
                   />
                 </div>
 
-                {/* info + book now on left side*/}
                 <div className="doctor-info">
-                  <h3 className="doctor-name">{doc.name}</h3>
-                  <p className="doctor-role">{doc.role}</p>
-                  <p className="doctor-price">₱ — / session</p> {/* placeholder for fees */}
+                  <h3 className="doctor-name">
+                    {(doc.firstName || '') + ' ' + (doc.lastName || '')}
+                  </h3>
+                  <p className="doctor-role">{doc.role || 'Psychiatrist'}</p>
+                  <p className="doctor-price">₱ {doc.fees ?? '—'} / session</p>
 
                   <div className="doctor-buttons">
-                    <button className="book-btn">Book Now</button>
+                    <button
+                      className="book-btn"
+                      onClick={() =>
+                        navigate(`/BookApp/${encodeURIComponent(doc.email)}`, { state: { email: doc.email } })
+                      }
+                    >
+                      Book Now
+                    </button>
                   </div>
                 </div>
               </div>
