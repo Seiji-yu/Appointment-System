@@ -5,7 +5,7 @@ import PNavbar from '../../SideBar/PNavbar'
 import '../../Styles/Ddashboard.css'
 
 export default function BookApp() {
-  const { email: emailParam } = useParams()
+  const { email: emailParam } = useParams() // Email parameters
   const location = useLocation()
 
   const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -67,7 +67,7 @@ export default function BookApp() {
       setError('Please select a time slot')
       return
     }
-    // Placeholder only (no server call yet)
+    // Placeholder only (no server side call)
     alert(`Booking (placeholder): ${displayName || 'Doctor'} on ${date} at ${selectedSlot}\nConcerns: ${concerns || '(none)'}`)
     
   }
@@ -82,7 +82,7 @@ export default function BookApp() {
           <p style={{ color: 'red' }}>{error}</p>
         ) : (
           <div className="dashboard-grid">
-            {/* Left: Doctor Profile preview */}
+            {/* Left Side */}
             <section className="card" style={{ alignSelf: 'start' }}>
               <h3 style={{ marginTop: 0 }}>Doctor Profile</h3>
               <div style={{ display: 'flex', gap: 16 }}>
@@ -110,7 +110,7 @@ export default function BookApp() {
               </div>
             </section>
 
-            {/* Right: Booking panel */}
+            {/* Right Side */}
             <aside className="card grid-calendar" style={{ alignSelf: 'start' }}>
               <h3 style={{ marginTop: 0 }}>Booking Appointment</h3>
 
