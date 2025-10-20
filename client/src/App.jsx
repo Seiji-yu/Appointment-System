@@ -10,9 +10,11 @@ import Settings from './Pages/Others/Settings'
 import About from './Pages/Others/About'
 import PatientProfileForm from './Pages/PatientSide/PatientProfileForm'
 import PDashboard from './Pages/PatientSide/PDashboard'
+import PatientProfile from './Pages/PatientSide/PatientProfile'
 import BookApp from './Pages/PatientSide/BookApp'
 import DoctorLists from './Pages/PatientSide/DoctorLists'
 import AppHistory from './Pages/PatientSide/AppHistory'
+import DoctorProfile from './Pages/DoctorSide/DoctorProfile'
 
 function App() {
 
@@ -31,8 +33,10 @@ function App() {
         <Route path='/PatientForm' element={< PatientProfileForm />} />
         <Route path='/PatientDashboard' element={<PDashboard />} />
         <Route path='/DoctorLists' element={<DoctorLists />} />
-        <Route path='/BookApp' element={<BookApp />} />
+        <Route path='/PatientProfile' element={<PatientProfile />} />
+        <Route path='/BookApp/:email' element={<BookApp />} /> 
         <Route path='/AppHistory' element={<AppHistory />} />
+        <Route path='/DoctorProfile' element={<DoctorProfile />} />
       </Routes>
     </BrowserRouter>
   )

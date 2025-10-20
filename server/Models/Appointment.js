@@ -28,8 +28,11 @@ const AppointmentSchema = new mongoose.Schema({
 
     notes: {
         type: String,
-    }, 
+    },
 
 }, { timestamps: true });
+
+// Helpful index for recent-patient queries
+AppointmentSchema.index({ doctor: 1, status: 1, date: -1 });
 
 module.exports = mongoose.model('Appointment', AppointmentSchema)

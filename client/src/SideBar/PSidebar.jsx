@@ -6,6 +6,7 @@ import * as AiIcons from 'react-icons/ai'
 import { IoInformationOutline } from "react-icons/io5";
 
 export const PSidebar = [
+
     {
         title: 'Home',
         path: '/PatientDashboard',
@@ -13,14 +14,8 @@ export const PSidebar = [
         cName: 'nav-text'
     },
     {
-        title: 'List of Doctors',
+        title: 'Book An Appointment',
         path: '/DoctorLists',
-        icon: <FaIcons.FaUser />,
-        cName: 'nav-text'
-    },
-    {
-        title: 'Book Appointment',
-        path: '/BookApp',
         icon: <FaIcons.FaBookmark />,
         cName: 'nav-text'
     },
@@ -32,12 +27,18 @@ export const PSidebar = [
     },
 
     {
+        title: 'Account Profile',
+        path: '/PatientProfile',
+        icon: <FaIcons.FaUser /> ,
+        cName: 'nav-text'
+    },
+
+    {
         title: 'Settings',
         path: '/Settings',
         icon: <AiIcons.AiFillSetting />,
         cName: 'nav-text'
     },
-
     {
         title: 'About',
         path: '/About',

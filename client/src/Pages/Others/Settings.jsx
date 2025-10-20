@@ -9,7 +9,7 @@ function Settings() {
     <div className="dashboard">
       <Navbar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <div className="dashboard-main">
-        <h2>Settings</h2>
+        <h1>Settings</h1>
       </div>
     </div>
   );

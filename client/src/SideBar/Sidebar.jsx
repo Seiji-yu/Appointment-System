@@ -28,6 +28,13 @@ export const SidebarData = [
         icon: <FaIcons.FaCalendarPlus />,
         cName: 'nav-text'
     },
+    
+        {
+        title: 'Account Profile',
+        path: '/DoctorProfile',
+        icon: <FaIcons.FaWpforms />,
+        cName: 'nav-text'
+    },
 
     {
         title: 'Settings',

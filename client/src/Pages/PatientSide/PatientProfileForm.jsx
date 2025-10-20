@@ -16,6 +16,41 @@ function PatientProfileForm() {
   const [message, setMessage] = useState('');
   const navigate = useNavigate(); // to redirect to pdashboard
 
+
+    //Computes Age
+const computeAge = (dateStr) => {
+  if (!dateStr) return '';
+  
+  try {
+    const today = new Date();
+    const birthDate = new Date(dateStr);
+    
+    // Validate dates
+    if (isNaN(birthDate.getTime())) return '';
+    
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    
+    // Check if birthday hasn't occurred yet this year --> 0 Output kapag lagpas sa date today, or today naglagay
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    
+    // Ensure age is not negative
+    return age >= 0 ? String(age) : '0';
+  } catch (error) {
+    console.error('Error calculating age:', error);
+    return '';
+  }
+};
+
+    useEffect(() => {
+    const nextAge = computeAge(form.birthday);
+    if (nextAge !== form.age) {
+      setForm(prev => ({ ...prev, age: nextAge }));
+    }
+  }, [form.birthday]);
+
   // check if patient is already registered and if their profile is complete
   useEffect(() => {
     const email = localStorage.getItem('email');
@@ -94,7 +129,7 @@ function PatientProfileForm() {
         </div>
         <div className="mb-3">
           <label className="form-label">Age</label>
-          <input type="number" className="form-control" name="age" value={form.age} onChange={handleChange} required />
+          <input type="number" className="form-control" name="age" value={form.age} readOnly required />
         </div>
         <div className="mb-3">
           <label className="form-label">Gender</label>

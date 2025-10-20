@@ -37,7 +37,7 @@
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
 }
 
-/* Left side - picture */
+/* Left side picture */
 .doctor-image img {
   width: 120px;
   height: 120px;
@@ -46,7 +46,7 @@
   margin-right: 20px;
 }
 
-/* Right side - info */
+/* Right side info */
 .doctor-info {
   display: flex;
   flex-direction: column;
@@ -97,5 +97,3 @@
 .book-btn:hover {
   background-color: #050c38;
 }
-
-
