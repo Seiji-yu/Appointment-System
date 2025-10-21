@@ -8,7 +8,7 @@ function AppHistory() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState('upcoming');
 
-  // Simulated appointment status (would normally come from backend or shared context)
+  
   const [appointments, setAppointments] = useState([
     { id: 1, name: 'Kween Lengleng', date: 'Sunday, 2 November 2025', status: 'Pending' },
     { id: 2, name: 'Kween Yasmin', date: 'Sunday, 2 November 2025', status: 'Pending' }

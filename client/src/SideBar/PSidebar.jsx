@@ -8,12 +8,6 @@ import { IoInformationOutline } from "react-icons/io5";
 export const PSidebar = [
 
     {
-        title: 'MyAccount',
-        path: '/PatientProfile',
-        icon: <FaIcons.FaUser /> ,
-        cName: 'nav-text'
-    },
-    {
         title: 'Home',
         path: '/PatientDashboard',
         icon: <AiIcons.AiFillHome />,
@@ -31,6 +25,14 @@ export const PSidebar = [
         icon: <AiIcons.AiOutlineHistory />,
         cName: 'nav-text'
     },
+
+    {
+        title: 'Account Profile',
+        path: '/PatientProfile',
+        icon: <FaIcons.FaUser /> ,
+        cName: 'nav-text'
+    },
+
     {
         title: 'Settings',
         path: '/Settings',

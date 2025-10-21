@@ -13,6 +13,7 @@ export default function Ddashboard() {
 
   // Replace placeholders with server data (add lang kapag gusto pa dagdagan)
   const placeholderPatients = [
+<<<<<<< HEAD
     { id: 'p1', name: 'Patient 1' }, 
     { id: 'p2', name: 'Patient 2' },
     { id: 'p3', name: 'Patient 3' }, 
@@ -25,6 +26,11 @@ export default function Ddashboard() {
     { id: 'p10', name: 'Patient 10' }, 
     { id: 'p11', name: 'Patient 11' }, 
     { id: 'p12', name: 'Patient 12' }
+=======
+    { id: 'p1', name: 'Patient 1' }, { id: 'p2', name: 'Patient 2' },
+    { id: 'p3', name: 'Patient 3' }, { id: 'p4', name: 'Patient 4' },
+    { id: 'p5', name: 'Patient 5' }, { id: 'p6', name: 'Patient 6' },
+>>>>>>> 9a97ff5ce7f04d5956599f209f97267214db8c36
   ];
   const [recentPatients, setRecentPatients] = useState(placeholderPatients);
   const [recentLoading, setRecentLoading] = useState(true);
