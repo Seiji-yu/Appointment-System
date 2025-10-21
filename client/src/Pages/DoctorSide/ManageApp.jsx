@@ -48,7 +48,7 @@ export default function ManageApp() {
       <main className="doctor-main container py-4">
         <h2 className="text-center mb-4">Manage Appointments</h2>
 
-        {/* Tabs */}
+        
         <ul className="nav nav-tabs mb-3">
           <li className="nav-item">
             <button className={`nav-link ${activeTab === 'upcoming' ? 'active' : ''}`} onClick={() => setActiveTab('upcoming')}>Upcoming</button>
@@ -61,11 +61,11 @@ export default function ManageApp() {
           </li>
         </ul>
 
-        {/* Tab Content */}
+        
         <div className="tab-content">
           {activeTab === 'upcoming' && (
             <div className="row">
-              {/* Left Column */}
+              
               <div className="col-md-8">
                 <h5 className="mb-3">Pending Appointment Requests</h5>
                 {pending.map(p => (
@@ -101,7 +101,7 @@ export default function ManageApp() {
                 ))}
               </div>
 
-              {/* Right Column: Calendar */}
+              
               <div className="col-md-4">
                 <aside className="calendar-section grid-calendar">
                   <CalendarC />
