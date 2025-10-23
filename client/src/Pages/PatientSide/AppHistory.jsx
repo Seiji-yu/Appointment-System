@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import PNavbar from '../../SideBar/PNavbar'
 import '../../Styles/Ddashboard.css'
 import CalendarC from '../../Calendar/CalendarC.jsx';
@@ -9,10 +9,27 @@ function AppHistory() {
   const [activeTab, setActiveTab] = useState('upcoming');
 
   
-  const [appointments, setAppointments] = useState([
-    { id: 1, name: 'Kween Lengleng', date: 'Sunday, 2 November 2025', status: 'Pending' },
-    { id: 2, name: 'Kween Yasmin', date: 'Sunday, 2 November 2025', status: 'Pending' }
-  ]);
+  const [appointments, setAppointments] = useState([]);
+
+ useEffect(() => {
+  const patientId = localStorage.getItem('patientId');
+  if (!patientId) return;
+
+  const fetchAppointments = () => {
+    fetch(`http://localhost:3001/api/appointments?patientId=${patientId}`)
+      .then(res => res.json())
+      .then(data => setAppointments(data));
+  };
+
+  fetchAppointments();
+
+  const interval = setInterval(fetchAppointments, 5000); 
+
+  return () => clearInterval(interval); 
+}, []);
+
+
+
 
   return (
     <div className={`dashboard ${sidebarOpen ? 'sidebar-open' : 'sidebar-collapsed'}`}>

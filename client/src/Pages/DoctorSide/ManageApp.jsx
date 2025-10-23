@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../../SideBar/Navbar.jsx';
 import '../../Styles/Ddashboard.css';
 import CalendarC from '../../Calendar/CalendarC.jsx';
@@ -9,38 +9,76 @@ export default function ManageApp() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState('upcoming');
 
-  const [pending, setPending] = useState([
-    { id: 1, name: 'Kween Lengleng', date: 'Sunday, 2 November 2025', status: 'Pending' },
-    { id: 2, name: 'Kween Yasmin', date: 'Sunday, 2 November 2025', status: 'Pending' }
-  ]);
+  const [pending, setPending] = useState([]);
+  const [doctorId, setDoctorId] = useState(null);
+
+  useEffect(() => {
+  const storedDoctorId = localStorage.getItem('doctorId');
+  if (storedDoctorId) {
+    setDoctorId(storedDoctorId);
+  }
+}, []);
+
+useEffect(() => {
+  if (doctorId) {
+    refreshAppointments();
+  }
+}, [doctorId]);
+
+
+const refreshAppointments = () => {
+  fetch(`/api/appointments?doctorId=${doctorId}`)
+    .then(res => res.json())
+    .then(data => {
+      setPending(data.filter(a => a.status === 'Pending'));
+      setApproved(data.filter(a => a.status === 'Accepted'));
+      setCompleted(data.filter(a => a.status === 'Completed'));
+      setCancelled(data.filter(a => a.status === 'Rejected' || a.status === 'Cancelled'));
+    });
+};
+
 
   const [approved, setApproved] = useState([]);
   const [completed, setCompleted] = useState([]);
   const [cancelled, setCancelled] = useState([]);
 
-  const handleAccept = (id) => {
-    const accepted = pending.find(p => p.id === id);
-    setApproved([...approved, { ...accepted, status: 'Accepted' }]);
-    setPending(pending.filter(p => p.id !== id));
-  };
+  const handleAccept = async (id) => {
+  await fetch(`/api/appointments/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status: 'Accepted' })
+  });
+  refreshAppointments();
+};
 
-  const handleReject = (id) => {
-    const rejected = pending.find(p => p.id === id);
-    setCancelled([...cancelled, { ...rejected, status: 'Rejected' }]);
-    setPending(pending.filter(p => p.id !== id));
-  };
+const handleReject = async (id) => {
+  await fetch(`/api/appointments/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status: 'Rejected' })
+  });
+  refreshAppointments();
+};
 
-  const markCompleted = (id) => {
-    const done = approved.find(a => a.id === id);
-    setCompleted([...completed, { ...done, status: 'Completed' }]);
-    setApproved(approved.filter(a => a.id !== id));
-  };
 
-  const markCancelled = (id) => {
-    const cancelledApp = approved.find(a => a.id === id);
-    setCancelled([...cancelled, { ...cancelledApp, status: 'Cancelled' }]);
-    setApproved(approved.filter(a => a.id !== id));
-  };
+  const markCompleted = async (id) => {
+  await fetch(`/api/appointments/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status: 'Completed' })
+  });
+  refreshAppointments();
+};
+
+const markCancelled = async (id) => {
+  await fetch(`/api/appointments/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status: 'Cancelled' })
+  });
+  refreshAppointments();
+};
+
 
   return (
     <div className={`doctor-layout ${sidebarOpen ? 'sidebar-open' : 'sidebar-collapsed'}`}>
