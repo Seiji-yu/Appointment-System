@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import '../../Styles/PatientProfileForm.css';
 
 function PatientProfileForm() {
+  const hmoInputRef = useRef(null);
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',
@@ -12,39 +14,38 @@ function PatientProfileForm() {
     contact: '',
     address: '',
     medicalHistory: '',
+    hmoNumber: '',
+    emergencyName: '',
+    emergencyContact: '',
+    emergencyAddress: '',
+    hmoCardImage: '',
   });
+  const [hmoPreview, setHmoPreview] = useState('');
+  const [showHmoOptions, setShowHmoOptions] = useState(false);
   const [message, setMessage] = useState('');
   const navigate = useNavigate(); // to redirect to pdashboard
 
 
-    //Computes Age
-const computeAge = (dateStr) => {
-  if (!dateStr) return '';
-  
-  try {
-    const today = new Date();
-    const birthDate = new Date(dateStr);
-    
-    // Validate dates
-    if (isNaN(birthDate.getTime())) return '';
-    
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    
-    // Check if birthday hasn't occurred yet this year --> 0 Output kapag lagpas sa date today, or today naglagay
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
+  // Computes Age
+  const computeAge = (dateStr) => {
+    if (!dateStr) return '';
+    try {
+      const today = new Date();
+      const birthDate = new Date(dateStr);
+      if (isNaN(birthDate.getTime())) return '';
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      return age >= 0 ? String(age) : '0';
+    } catch (error) {
+      console.error('Error calculating age:', error);
+      return '';
     }
-    
-    // Ensure age is not negative
-    return age >= 0 ? String(age) : '0';
-  } catch (error) {
-    console.error('Error calculating age:', error);
-    return '';
-  }
-};
+  };
 
-    useEffect(() => {
+  useEffect(() => {
     const nextAge = computeAge(form.birthday);
     if (nextAge !== form.age) {
       setForm(prev => ({ ...prev, age: nextAge }));
@@ -67,7 +68,8 @@ const computeAge = (dateStr) => {
         if (patient) {
           const isComplete =
             patient.firstName && patient.lastName && patient.birthday &&
-            patient.age && patient.gender && patient.contact && patient.address;
+            patient.age && patient.gender && patient.contact && patient.address && 
+            patient.emergencyName && patient.emergencyContact && patient.emergencyAddress;
 
           if (isComplete) {
             navigate('/PatientDashboard'); //return to patient dashboard if profile is complete
@@ -84,7 +86,13 @@ const computeAge = (dateStr) => {
             contact: patient.contact || '',
             address: patient.address || '',
             medicalHistory: patient.medicalHistory || '',
+            hmoNumber: patient.hmoNumber || '',
+            emergencyName: patient.emergencyName || '',
+            emergencyContact: patient.emergencyContact || '',
+            emergencyAddress: patient.emergencyAddress || '',
           });
+          // load existing hmo card preview if available
+          if (patient.hmoCardImage) setHmoPreview(patient.hmoCardImage);
         }
       })
       .catch(err => {
@@ -96,11 +104,27 @@ const computeAge = (dateStr) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const handleHmoUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setHmoPreview(reader.result);
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveHmo = () => {
+    setHmoPreview('');
+    if (hmoInputRef.current) {
+      hmoInputRef.current.value = '';
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const email = localStorage.getItem('email'); // Get email from storage PPF
-      const submitForm = { ...form, email }; // Add email to data sent PPF
+      const email = localStorage.getItem('email'); 
+      // HMO preview
+      const submitForm = { ...form, email, hmoCardImage: hmoPreview };
       const res = await axios.post('http://localhost:3001/patient/profile', submitForm);
       setMessage('Profile saved successfully!');
       setTimeout(() => navigate('/PatientDashboard'), 1000); //redirect to patient dashboard upon saving profile
@@ -113,7 +137,6 @@ const computeAge = (dateStr) => {
   return (
     <div className="container mt-5">
       <h1 className="mb-4 text-center">Patient Profile Form</h1>
-      <h2>Patient Profile</h2>
       <form onSubmit={handleSubmit} className="p-4 border rounded bg-light">
         <div className="mb-3">
           <label className="form-label">First Name</label>
@@ -151,6 +174,57 @@ const computeAge = (dateStr) => {
         <div className="mb-3">
           <label className="form-label">Medical History</label>
           <textarea className="form-control" name="medicalHistory" value={form.medicalHistory} onChange={handleChange} rows={3} />
+        </div>
+        <div className="mb-3">
+          <label className="form-label">HMO Number</label>
+          <input type="text" className="form-control" name="hmoNumber" value={form.hmoNumber} onChange={handleChange} />
+        </div>
+        <div className="mb-3">
+          <label className="form-label">HMO Card</label>
+        </div>
+        <div className="hmo-upload-container">
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleHmoUpload}
+            style={{ display: 'none' }}
+            ref={hmoInputRef}
+            id="hmo-upload-input"
+          /> 
+          {!hmoPreview ? (
+            <label htmlFor="hmo-upload-input" className="hmo-upload-box">
+              <span className="hmo-plus">+</span>
+            </label>
+          ) : (
+            <div
+              className="hmo-upload-box hmo-has-image"
+              style={{ backgroundImage: `url(${hmoPreview})` }}
+              onMouseEnter={() => setShowHmoOptions(true)}
+              onMouseLeave={() => setShowHmoOptions(false)}
+            > 
+              {showHmoOptions && (
+                <div className="hmo-options">
+                  <label htmlFor="hmo-upload-input" className="hmo-option-btn">Change</label>
+                  <button type="button" className="hmo-option-btn" onClick={handleRemoveHmo}>Remove</button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+        <div className="mb-3">
+          <label className="form-label">Emergency Contact Information</label>
+        </div>
+        <div className="mb-3">
+          <label className="form-label">Name</label>
+          <input type="text" className="form-control" name="emergencyName" value={form.emergencyName} onChange={handleChange} required />
+        </div>
+        <div className="mb-3">
+          <label className="form-label">Contact Number</label>
+          <input type="text" className="form-control" name="emergencyContact" value={form.emergencyContact} onChange={handleChange} required />
+        </div>
+        <div className="mb-3">
+          <label className="form-label">Address</label>
+          <input type="text" className="form-control" name="emergencyAddress" value={form.emergencyAddress} onChange={handleChange} required />
         </div>
         <button type="submit" className="btn btn-primary">Save Profile</button>
       </form>

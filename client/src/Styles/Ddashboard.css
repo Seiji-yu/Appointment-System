@@ -401,6 +401,49 @@
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
+/* Patient profile HMO card styles */
+.hmo-card-section {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.hmo-card-title {
+  font-weight: 600;
+  color: #374151;
+}
+
+.hmo-card-img {
+  width: 160px;
+  height: 110px;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #f5f5f5;
+  border: 1px solid #e5e7eb;
+}
+
+.hmo-card-placeholder {
+  width: 160px;
+  height: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px dashed #d1d5db;
+  color: #6b7280;
+}
+
+@media (max-width: 700px) {
+  .hmo-card-img,
+  .hmo-card-placeholder {
+    width: 120px;
+    height: 86px;
+  }
+}
+
 .card {
   background: #ffffff;
   border: 1px solid #e5e7eb;

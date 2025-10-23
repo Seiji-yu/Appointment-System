@@ -14,7 +14,9 @@ function Login() {
 
   const profileIsComplete = (p) => {
     if (!p) return false
-    return !!(p.firstName && p.lastName && p.birthday && p.age && p.gender && p.contact && p.address)
+    return !!(p.firstName && p.lastName && p.birthday && p.age && p.gender && p.contact && p.address && p.hmoNumber 
+      && p.emergencyName && p.emergencyContact && p.emergencyAddress
+    )
   }
 
   const handleSubmit = async (e) => {

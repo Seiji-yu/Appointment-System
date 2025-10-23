@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import PNavbar from '../../SideBar/PNavbar'
 import '../../Styles/Ddashboard.css'
+import '../../Styles/PatientProfile.css'
 
 function PatientProfile() {
   const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -11,6 +12,7 @@ function PatientProfile() {
   const [message, setMessage] = useState('')
   const [patient, setPatient] = useState(null)
   const [preview, setPreview] = useState('')
+  const [hmoPreview, setHmoPreview] = useState('')
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -31,6 +33,7 @@ function PatientProfile() {
         }
         setPatient(p)
         setPreview(p.profileImage || '')
+        setHmoPreview(p.hmoCardImage || '')
       })
       .catch(() => setError('Failed to load profile'))
       .finally(() => setLoading(false))
@@ -79,46 +82,75 @@ function PatientProfile() {
         ) : error ? (
           <p style={{ color: 'red' }}>{error}</p>
         ) : (
-          <div className="card" style={{ maxWidth: 900 }}>
-            <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start' }}>
-              {/* Photo */}
-              <div style={{ minWidth: 160 }}>
-                <img
-                  src={preview || '/default-avatar.png'}
-                  alt="Profile"
-                  style={{ width: 160, height: 160, objectFit: 'cover', borderRadius: 12, background: '#eee' }}
-                />
-                <div style={{ marginTop: 10, display: 'flex', gap: 8 }}>
-                  <label className="btn btn-secondary" style={{ cursor: 'pointer' }}>
-                    Change
-                    <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} />
-                  </label>
-                  <button className="btn btn-primary" onClick={handleSavePhoto}>Save Photo</button>
-                </div>
-              </div>
+<div className="patient-profile-container">
+  {/* profile picture */}
+  <div className="profile-box profile-image-box">
+    <h3>Profile Picture</h3>
+    <img
+      src={preview || '/default-avatar.png'}
+      alt="Profile"
+      className="profile-img"
+    />
+    <div className="profile-buttons">
+      <label className="btn btn-secondary" style={{ cursor: 'pointer' }}>
+        Change
+        <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} />
+      </label>
+      <button className="btn btn-primary" onClick={handleSavePhoto}>Save Photo</button>
+    </div>
+  </div>
 
-              {/* Details */}
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '180px 1fr', rowGap: 8, columnGap: 12 }}>
-                  <div><strong>First Name</strong></div><div>{patient?.firstName || ''}</div>
-                  <div><strong>Last Name</strong></div><div>{patient?.lastName || ''}</div>
-                  <div><strong>Birthday</strong></div><div>{formatDate(patient?.birthday)}</div>
-                  <div><strong>Age</strong></div><div>{patient?.age ?? ''}</div>
-                  <div><strong>Gender</strong></div><div>{patient?.gender || ''}</div>
-                  <div><strong>Contact</strong></div><div>{patient?.contact || ''}</div>
-                  <div><strong>Address</strong></div><div>{patient?.address || ''}</div>
-                  <div><strong>Medical History</strong></div>
-                  <div style={{ whiteSpace: 'pre-wrap' }}>{patient?.medicalHistory || ''}</div>
-                </div>
-              </div>
-            </div>
+  {/* patient information */}
+  <div className="profile-box profile-info-box">
+    <h3>Patient Information</h3>
+    <div className="info-grid">
+      <div className="label">First Name</div><div className="value">{patient?.firstName || ''}</div>
+      <div className="label">Last Name</div><div className="value">{patient?.lastName || ''}</div>
+      <div className="label">Birthday</div><div className="value">{formatDate(patient?.birthday)}</div>
+      <div className="label">Age</div><div className="value">{patient?.age ?? ''}</div>
+      <div className="label">Gender</div><div className="value">{patient?.gender || ''}</div>
+      <div className="label">Contact</div><div className="value">{patient?.contact || ''}</div>
+      <div className="label">Address</div><div className="value">{patient?.address || ''}</div>
+      <div className="label">Emergency Contact Name</div><div className="value">{patient?.emergencyName || ''}</div>
+      <div className="label">Emergency Contact Number</div><div className="value">{patient?.emergencyContact || ''}</div>
+      <div className="label">Emergency Contact Address</div><div className="value">{patient?.emergencyAddress || ''}</div>
+    </div>
+  </div>
 
-            {message && <div className="alert alert-info mt-3">{message}</div>}
-          </div>
+  {/* HMO number and card */}
+  <div className="profile-box profile-hmo-box">
+    <h3>HMO Number and Card</h3>
+    <div className="hmo-inner">
+      <div className="hmo-left">
+        <p className="hmo-number"><strong>HMO Number:</strong> {patient?.hmoNumber || 'Not available'}</p>
+      </div>
+      <div className="hmo-right">
+        {hmoPreview ? (
+          <img src={hmoPreview} alt="HMO Card" className="hmo-card-img" />
+        ) : (
+          <div className="hmo-card-placeholder">No HMO card uploaded</div>
         )}
       </div>
     </div>
-  )
+  </div>
+
+  {/* medical history */}
+  <div className="profile-box profile-medbox">
+    <h3>Medical History</h3>
+    <div className="medical-history">
+      {patient?.medicalHistory ? (
+        <p style={{ whiteSpace: 'pre-wrap' }}>{patient.medicalHistory}</p>
+      ) : (
+        <p>No medical history provided.</p>
+      )}
+    </div>
+  </div>
+</div>
+        )}      
+        {message && <div className="alert alert-info mt-3">{message}</div>}
+      </div>
+    </div>
+  );
 }
 
-export default PatientProfile
+export default PatientProfile;

@@ -26,30 +26,35 @@ function DoctorLists() {
           <div className="doctor-grid">
             {doctors.map((doc) => (
               <div key={doc._id} className="doctor-card">
-                {/* doctor picture on left side */}
-                <div className="doctor-image">
-                  <img
-                    src="https://via.placeholder.com/120"
-                    alt={`${(doc.firstName || '') + ' ' + (doc.lastName || '')}`}
-                  />
-                </div>
+                <div className="card-grid">
+                  {/* doctor image */}
+                  <div className="card-image">
+                    <img
+                      src={doc.profileImage || 'https://via.placeholder.com/120'}
+                      alt={`${(doc.firstName || '') + ' ' + (doc.lastName || '')}`}
+                    />
+                  </div>
 
-                <div className="doctor-info">
-                  <h3 className="doctor-name">
-                    {(doc.firstName || '') + ' ' + (doc.lastName || '')}
-                  </h3>
-                  <p className="doctor-role">{doc.role || 'Psychiatrist'}</p>
-                  <p className="doctor-price">₱ {doc.fees ?? '—'} / session</p>
+                  {/* info */}
+                  <div className="card-info">
+                    <h3 className="doctor-name">{(doc.firstName || '') + ' ' + (doc.lastName || '')}</h3>
+                    <p className="doctor-role">{doc.role || 'Psychiatrist'}</p>
+                    <p className="doctor-price">₱ {doc.fees ?? '—'} / session</p>
+                  </div>
 
-                  <div className="doctor-buttons">
+                  {/* book button */}
+                  <div className="card-action card-action-left">
                     <button
                       className="book-btn"
-                      onClick={() =>
-                        navigate(`/BookApp/${encodeURIComponent(doc.email)}`, { state: { email: doc.email } })
-                      }
+                      onClick={() => navigate(`/BookApp/${encodeURIComponent(doc.email)}`, { state: { email: doc.email } })}
                     >
                       Book Now
                     </button>
+                  </div>
+
+                  {/* favorite button */}
+                  <div className="card-action card-action-right">
+                    <button className="fav-btn" onClick={() => alert('Added to favorites!')}>Favorite</button>
                   </div>
                 </div>
               </div>

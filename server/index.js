@@ -164,42 +164,67 @@ app.get('/api/appointments/stats', async (req, res) => {
 // Save/Update Patient Profile Form
 app.post('/patient/profile', async (req, res) => {
   try {
-    const { 
-      email, 
-      firstName, 
-      lastName, 
-      birthday, 
-      age, 
-      gender, 
-      contact, 
-      address, 
+    const {
+      email,
+      firstName,
+      lastName,
+      birthday,
+      age,
+      gender,
+      contact,
+      address,
       medicalHistory,
+      hmoNumber,
+      emergencyName,
+      emergencyContact,
+      emergencyAddress,
+      hmoCardImage,
+      profileImage 
+    } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ status: 'error', message: 'Email is required' });
+    }
+
+    // build update object cleanly
+    const update = {
+      firstName,
+      lastName,
+      birthday,
+      age,
+      gender,
+      contact,
+      address,
+      medicalHistory,
+      hmoNumber,
+      emergencyName,
+      emergencyContact,
+      emergencyAddress,
+      hmoCardImage,
       profileImage
-     } = req.body;
+    };
 
-    if (!email) return res.status(400).json({ status: 'error', message: 'Email is required' });
-    const update = {};
-    if (firstName !== undefined) update.firstName = firstName;
-    if (lastName !== undefined) update.lastName = lastName;
-    if (birthday !== undefined) update.birthday = birthday;
-    if (age !== undefined) update.age = age;
-    if (gender !== undefined) update.gender = gender;
-    if (contact !== undefined) update.contact = contact;
-    if (address !== undefined) update.address = address;
-    if (medicalHistory !== undefined) update.medicalHistory = medicalHistory;
-    if (profileImage !== undefined) update.profileImage = profileImage;
+    // filter out undefined values to avoid overwriting existing data
+    Object.keys(update).forEach(key => update[key] === undefined && delete update[key]);
 
-    // find patient by email and update profile fields
+    // ensure name field (for compatibility)
+    if (firstName && lastName) update.name = `${firstName} ${lastName}`;
+
+    // find by email and update or create if not found
     const updatedPatient = await PatientModel.findOneAndUpdate(
       { email },
-      { firstName, lastName, birthday, age, gender, contact, address, medicalHistory, profileImage },
+      { $set: update },
       { new: true, upsert: true }
     );
 
     res.json({ status: 'success', patient: updatedPatient });
   } catch (err) {
     console.error('Profile save error:', err);
-    res.status(500).json({ status: 'error', message: 'Error saving profile', details: err.message });
+    res.status(500).json({
+      status: 'error',
+      message: 'Error saving profile',
+      details: err.message
+    });
   }
 });
 
@@ -211,7 +236,8 @@ app.post('/patient/check-profile', async (req, res) => {
       return res.json({ complete: false });
     }
     // check if all required details are filled
-    const isComplete = patient.name && patient.age && patient.gender && patient.contact && patient.address;
+    const isComplete = patient.name && patient.age && patient.gender && patient.contact && patient.address 
+    && patient.emergencyName && patient.emergencyContact && patient.emergencyAddress;
     res.json({ complete: !!isComplete });
   } catch (err) {
     res.status(500).json({ complete: false, error: err.message });

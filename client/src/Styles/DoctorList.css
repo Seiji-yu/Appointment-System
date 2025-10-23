@@ -19,16 +19,14 @@
 }
 
 .doctor-card {
-  display: flex;
-  align-items: center;
-  background-color: #ffffff;
-  border-radius: 15px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  background-color: #FAF8F1;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  padding: 15px;
-  width: 320px;
-  height: 160px;
+  padding: 12px;
+  width: 100%;
+  max-width: 720px;
   margin: 0 auto;
 }
 
@@ -37,63 +35,103 @@
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
 }
 
-/* Left side picture */
-.doctor-image img {
+.card-grid {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  grid-template-rows: auto 56px;
+  gap: 12px 18px;
+  align-items: center;
+}
+
+.card-image {
+  grid-column: 1 / 2;
+  grid-row: 1 / 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-image img {
   width: 120px;
   height: 120px;
   object-fit: cover;
   border-radius: 10px;
-  margin-right: 20px;
 }
 
-/* Right side info */
+.card-info {
+  grid-column: 2 / 3;
+  grid-row: 1 / 2;
+}
+
+.card-action {
+  grid-row: 2 / 3;
+  display: flex;
+  align-items: center;
+}
+
+.card-action-left { grid-column: 1 / 2; justify-content: center; }
+.card-action-right { grid-column: 2 / 3; justify-content: center; }
+
+/* right side info */
 .doctor-info {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-between; 
+  padding-left: 16px;
+  flex: 1;
 }
 
 .doctor-name {
   margin: 0;
   font-size: 20px;
-  color: #34495e;
+  color: #334443;
   font-weight: 600;
 }
 
 .doctor-role {
   margin: 5px 0;
   color: #7f8c8d;
-  font-size: 15px;
+  font-size: 14px;
 }
 
 .doctor-price {
-  font-size: 16px;
-  color: #27ae60;
+  font-size: 14px;
+  color: #34656D;
   font-weight: 500;
-  margin-bottom: 10px;
+  margin: 6px 0 10px 0;
 }
 
-/* Buttons */
-.doctor-buttons {
-  display: flex;
-  gap: 10px;
-}
-
-.book-btn,
-.details-btn {
-  padding: 8px 14px;
+.image-actions .book-btn,
+.card-action .book-btn,
+.card-action-left .book-btn {
+  padding: 8px 20px;
   border: none;
   border-radius: 8px;
   font-size: 14px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  background-color: #334443;
+  color: #fff;
 }
 
-.book-btn {
-  background-color: #081047;
-  color: white;
+.image-actions .book-btn:hover,
+.card-action .book-btn:hover,
+.card-action-left .book-btn:hover { background-color: #172423; }
+
+.info-actions {
+  display: flex;
+  justify-content: center; 
+  margin-top: auto; 
+  width: 100%;
 }
 
-.book-btn:hover {
-  background-color: #050c38;
+.fav-btn {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  background: #fff;
+  border: 1px solid #e5e7eb;
 }
+
+.fav-btn:hover { background: #f3f4f6; }

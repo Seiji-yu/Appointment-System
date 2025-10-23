@@ -11,9 +11,14 @@ const PatientSchema = new mongoose.Schema({
     contact: String,
     address: String,
     medicalHistory: String,
+    hmoNumber: String,
+    emergencyName: String,
+    emergencyContact: String,
+    emergencyAddress: String,
     password: String,
     role: { type: String, enum: ['Patient'], required: true },
-    profileImage: { type: String, default: '' }
+    profileImage: { type: String, default: '' },
+    hmoCardImage: { type: String, default: '' }
 });
 
 const PatientModel = mongoose.model("Patient", PatientSchema);

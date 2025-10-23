@@ -1,0 +1,134 @@
+.patient-profile-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 720px;               
+  max-width: 95%;
+  margin: 32px auto;        
+  padding: 0 16px;
+}
+
+.profile-box {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(2,6,23,0.06);
+  padding: 18px 20px;
+}
+
+.profile-box h3 {
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #0f172a;
+}
+
+.profile-image-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.profile-img {
+  width: 160px;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 50%;
+  background: #f2f4f7;
+  border: 3px solid #fff;
+  box-shadow: 0 6px 18px rgba(2,6,23,0.06);
+}
+
+.profile-buttons {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* added another two columns for info section */
+  row-gap: 10px;
+  column-gap: 24px;
+  align-items: center;
+}
+
+.info-grid .label {
+  font-weight: 700;
+  text-align: left;
+}
+
+.info-grid .value {
+  text-align: right;
+  color: #374151;
+}
+
+.hmo-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.hmo-left {
+  flex: 1 1 240px;
+}
+
+.hmo-right {
+  flex: 0 0 240px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.hmo-number {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.hmo-card-img {
+  width: 240px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #e6e9ef;
+}
+
+.hmo-card-placeholder {
+  width: 240px;
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: #fbfdff;
+  border: 1px dashed #dbe6f0;
+  color: #6b7280;
+}
+
+.medical-history {
+  white-space: pre-wrap;
+  line-height: 1.6;
+  color: #333;
+  min-height: 40px; 
+}
+
+@media (max-width: 720px) {
+  .patient-profile-container {
+    width: 95%;
+    margin: 14px auto;
+  }
+
+  .profile-img {
+    width: 120px;
+    height: 120px;
+  }
+
+  .hmo-card-img,
+  .hmo-card-placeholder {
+    width: 160px;
+    height: 100px;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
