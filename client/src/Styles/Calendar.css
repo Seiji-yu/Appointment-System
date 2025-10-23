@@ -38,7 +38,6 @@
   overflow: hidden;
 }
 
-
 .react-calendar__tile:enabled:focus {
   background: linear-gradient(135deg, #3a81e4 0%, #50dbd4 100%);
   color: white;
