@@ -1,0 +1,41 @@
+/* Center the page content */
+.patient-history .ph-container {
+  padding-left: 3rem !important;
+  padding-right: 3rem !important;
+}
+
+/* Center the tabs row */
+.patient-history .nav-tabs {
+  display: flex !important;
+  justify-content: center !important;
+}
+
+/* Calendar overrides (keep) */
+.patient-history .ph-calendar,
+.patient-history .calendar-section {
+  max-width: none !important;
+  width: 100% !important;
+  position: static !important;
+  top: auto !important;
+  margin-top: 0 !important;
+  background: #fff !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 12px !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06) !important;
+  padding: 1rem !important;
+}
+
+.patient-history .react-calendar { 
+    width: 100% !important; 
+}
+
+.patient-history .appointment-card .status {
+  font-weight: 600 !important;
+  color: #374151 !important;
+}
+
+.patient-history .row.justify-content-center {
+  justify-content: center !important;
+}
+
+
