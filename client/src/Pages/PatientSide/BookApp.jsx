@@ -92,7 +92,7 @@ export default function BookApp() {
     setSelectedSlot(''); // reset selection on date/doctor change
     try {
       const res = await axios.get('http://localhost:3001/api/doctor/' + dId + '/available-slots', {
-        params: { date: ymd, slot: 30 }
+        params: { date: ymd, slot: 0 }
       });
       setAvailableSlots(res.data?.slots || []);
     } catch (e) {

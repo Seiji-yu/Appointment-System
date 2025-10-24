@@ -491,7 +491,7 @@ app.get('/api/doctor/:doctorId/available-slots', async (req, res) => {
       return res.status(400).json({ status: 'bad_request', message: 'Invalid date format' });
     }
 
-    const slotLen = Math.min(Math.max(parseInt(slot, 10) || 30, 5), 240);
+    const slotLen = Math.min(Math.max(parseInt(slot, 10) || 60, 5), 240);
 
     const availability = await AvailabilityModel.findOne({
       doctor: new mongoose.Types.ObjectId(doctorId),

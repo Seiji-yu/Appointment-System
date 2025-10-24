@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import Navbar from '../../SideBar/Navbar.jsx';
 import '../../Styles/Ddashboard.css';
@@ -8,6 +8,9 @@ export default function DoctorLogs() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [logs, setLogs] = useState([]);
+
+  // NEW: status filter
+  const [statusFilter, setStatusFilter] = useState('all'); // all | completed | cancelled
 
   const loadLogs = async () => {
     try {
@@ -43,24 +46,71 @@ export default function DoctorLogs() {
     loadLogs();
   }, []);
 
+  // NEW: derived list based on status filter
+  const filteredLogs = useMemo(() => {
+    if (statusFilter === 'all') return logs;
+    return logs.filter(a => (a.status || '').toLowerCase() === statusFilter);
+  }, [logs, statusFilter]);
+
+  const counts = useMemo(() => {
+    const c = { completed: 0, cancelled: 0 };
+    for (const a of logs) {
+      const s = (a.status || '').toLowerCase();
+      if (s === 'completed') c.completed++;
+      if (s === 'cancelled') c.cancelled++;
+    }
+    return c;
+  }, [logs]);
+
   return (
     <div className={`doctor-layout ${sidebarOpen ? 'sidebar-open' : 'sidebar-collapsed'}`}>
       <Navbar isOpen={sidebarOpen} onToggle={setSidebarOpen} />
       <main className="doctor-main">
         <div className="dashboard-main">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
             <h1>Booking Logs</h1>
-            <button className="btn btn-secondary" onClick={loadLogs} disabled={loading}>
-              {loading ? 'Refreshing...' : 'Refresh'}
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {/* NEW: Filter buttons */}
+              <div className="btn-group" role="group" aria-label="Filter by status">
+                <button
+                  type="button"
+                  className={`btn btn-outline-secondary ${statusFilter === 'all' ? 'active' : ''}`}
+                  onClick={() => setStatusFilter('all')}
+                >
+                  All
+                </button>
+                <button
+                  type="button"
+                  className={`btn btn-outline-secondary ${statusFilter === 'completed' ? 'active' : ''}`}
+                  onClick={() => setStatusFilter('completed')}
+                >
+                  Completed ({counts.completed})
+                </button>
+                <button
+                  type="button"
+                  className={`btn btn-outline-secondary ${statusFilter === 'cancelled' ? 'active' : ''}`}
+                  onClick={() => setStatusFilter('cancelled')}
+                >
+                  Cancelled ({counts.cancelled})
+                </button>
+              </div>
+
+              <button className="btn btn-secondary" onClick={loadLogs} disabled={loading}>
+                {loading ? 'Refreshing...' : 'Refresh'}
+              </button>
+            </div>
           </div>
 
           {loading ? (
             <p>Loading...</p>
           ) : error ? (
             <p style={{ color: 'red' }}>{error}</p>
-          ) : logs.length === 0 ? (
-            <div className="card" style={{ padding: 16 }}>No completed or cancelled appointments yet.</div>
+          ) : filteredLogs.length === 0 ? (
+            <div className="card" style={{ padding: 16 }}>
+              {statusFilter === 'completed' && 'No completed appointments yet.'}
+              {statusFilter === 'cancelled' && 'No cancelled appointments yet.'}
+              {statusFilter === 'all' && 'No completed or cancelled appointments yet.'}
+            </div>
           ) : (
             <div className="card" style={{ overflowX: 'auto' }}>
               <table className="table" style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -75,7 +125,7 @@ export default function DoctorLogs() {
                   </tr>
                 </thead>
                 <tbody>
-                  {logs.map(appt => {
+                  {filteredLogs.map(appt => {
                     const p = appt.patient || {};
                     const name = `${p.firstName || ''} ${p.lastName || ''}`.trim() || p.name || '—';
                     const when = new Date(appt.date);
