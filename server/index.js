@@ -375,3 +375,39 @@ app.get('/api/patients/recent', async (req, res) => {
 app.listen(3001, () => {
   console.log('Server is running');
 });
+
+// Add or remove a doctor from patient's favorites
+app.post('/patient/favorites', async (req, res) => {
+  try {
+    const { email, doctorId, action } = req.body;
+
+    if (!email || !doctorId) {
+      return res.status(400).json({ status: 'error', message: 'email and doctorId are required' });
+    }
+
+    const patient = await PatientModel.findOne({ email });
+    if (!patient) {
+      return res.status(404).json({ status: 'error', message: 'Patient not found' });
+    }
+
+    // initialize favorites if missing
+    if (!Array.isArray(patient.favorites)) patient.favorites = [];
+
+    if (action === 'add') {
+      if (!patient.favorites.find((id) => id.toString() === doctorId.toString())) {
+        patient.favorites.push(doctorId);
+      }
+    } else if (action === 'remove') {
+      patient.favorites = patient.favorites.filter((id) => id.toString() !== doctorId.toString());
+    } else {
+      return res.status(400).json({ status: 'error', message: 'Invalid action. Use "add" or "remove"' });
+    }
+
+    await patient.save();
+
+    return res.json({ status: 'success', favorites: patient.favorites });
+  } catch (err) {
+    console.error('Favorites update error:', err);
+    return res.status(500).json({ status: 'error', message: 'Server error', details: err.message });
+  }
+});
