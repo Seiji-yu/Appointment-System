@@ -16,6 +16,7 @@ import DoctorLists from './Pages/PatientSide/DoctorLists'
 import AppHistory from './Pages/PatientSide/AppHistory'
 import DoctorProfile from './Pages/DoctorSide/DoctorProfile'
 import Admin from './Pages/Admin/Admin'
+import PatientAppDetails from './Pages/PatientSide/PatientAppDetails'
 
 function App() {
 
@@ -36,6 +37,7 @@ function App() {
         <Route path='/DoctorLists' element={<DoctorLists />} />
         <Route path='/PatientProfile' element={<PatientProfile />} />
         <Route path='/BookApp/:email' element={<BookApp />} /> 
+        <Route path='/PatientAppDetails' element={<PatientAppDetails />} />
         <Route path='/AppHistory' element={<AppHistory />} />
         <Route path='/DoctorProfile' element={<DoctorProfile />} />
         <Route path='/Admin' element={<Admin />} />

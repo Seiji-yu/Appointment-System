@@ -639,6 +639,27 @@ app.post('/api/appointments', async (req, res) => {
   }
 });
 
+// Get appointment by id (populated)
+app.get('/api/appointments/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ status: 'bad_request', message: 'Invalid appointment id' });
+    }
+
+    const appt = await AppointmentModel.findById(id)
+      .populate('patient', 'firstName lastName name email age gender contact hmoNumber hmoCardImage')
+      .populate('doctor', 'firstName lastName email contact fees role profileImage');
+
+    if (!appt) return res.status(404).json({ status: 'not_found', message: 'Appointment not found' });
+
+    return res.json({ status: 'success', appointment: appt });
+  } catch (err) {
+    console.error('Get appointment error:', err);
+    return res.status(500).json({ status: 'error', message: 'Server error', details: err.message });
+  }
+});
+
 // Update appointment status or notes
 app.patch('/api/appointments/:id', async (req, res) => {
   try {
