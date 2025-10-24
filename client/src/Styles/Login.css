@@ -113,3 +113,14 @@ input::placeholder {
 .submit-btn:hover {
   background: #d8d8d8;
 }
+
+
+.admin-login input {
+  color: #111 !important;
+  background-color: #fff !important;
+  caret-color: #111;
+}
+
+.admin-login input::placeholder {
+  color: #888;
+}

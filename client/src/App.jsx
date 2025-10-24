@@ -16,6 +16,7 @@ import DoctorLists from './Pages/PatientSide/DoctorLists'
 import AppHistory from './Pages/PatientSide/AppHistory'
 import DoctorProfile from './Pages/DoctorSide/DoctorProfile'
 import Admin from './Pages/Admin/Admin'
+import AdminLog from './Auth/AdminLog'
 
 function App() {
 
@@ -39,6 +40,7 @@ function App() {
         <Route path='/AppHistory' element={<AppHistory />} />
         <Route path='/DoctorProfile' element={<DoctorProfile />} />
         <Route path='/Admin' element={<Admin />} />
+        <Route path='/AdminLog' element={<AdminLog />} />
       </Routes>
     </BrowserRouter>
   )
