@@ -62,7 +62,7 @@ export default function BookApp() {
           firstName: d.firstName || '',
           lastName: d.lastName || '',
           email: d.email || email,
-          role: d.role || 'Psychiatrist',
+          specialty: d.specialty || 'Mental Health',
           fees: d.fees ?? '—',
           experience: d.experience || '',
           education: Array.isArray(d.education) ? d.education : [],
@@ -93,7 +93,7 @@ export default function BookApp() {
     setSelectedSlot(''); // reset selection on date/doctor change
     try {
       const res = await axios.get('http://localhost:3001/api/doctor/' + dId + '/available-slots', {
-        params: { date: ymd, slot: 30 }
+        params: { date: ymd, slot: 0 }
       });
       setAvailableSlots(res.data?.slots || []);
     } catch (e) {
@@ -146,7 +146,7 @@ export default function BookApp() {
     }
   }
 
-  return (
+   return (
     <div className={`doctor-layout ${sidebarOpen ? 'sidebar-open' : 'sidebar-collapsed'}`}>
       <PNavbar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <div className="dashboard-main">
@@ -156,7 +156,7 @@ export default function BookApp() {
           <p style={{ color: 'red' }}>{error}</p>
         ) : (
           <div className="dashboard-grid">
-            {/* Left Side */}
+            {/* Left Side: Doctor info mirrors Doctor Profile */}
             <section className="card" style={{ alignSelf: 'start' }}>
               <h3 style={{ marginTop: 0 }}>Doctor Profile</h3>
               <div style={{ display: 'flex', gap: 16 }}>
@@ -167,24 +167,43 @@ export default function BookApp() {
                 />
                 <div style={{ flex: 1 }}>
                   <h4 style={{ margin: '4px 0 8px', fontSize: '1.25rem' }}>{displayName}</h4>
-                  <p style={{ margin: '4px 0' }}>{doctor.role}</p>
-                  <p style={{ margin: '4px 0' }}>₱ {doctor.fees}/hr</p>
+                  <div style={{ margin: '4px 0', color: '#555' }}>{doctor.specialty}</div>
+                  <div style={{ margin: '4px 0' }}>₱ {doctor.fees}/hr</div>
                   <hr />
+
                   <div>
                     <h5 style={{ margin: '8px 0' }}>Experience</h5>
                     <p style={{ margin: 0 }}>{doctor.experience || '—'}</p>
                   </div>
+
                   <div style={{ marginTop: 8 }}>
-                    <h5 style={{ margin: '8px 0' }}>Specialty</h5>
-                    <ul style={{ margin: 0, paddingLeft: 18 }}>
-                      {doctor.education.slice(0, 2).map((e, i) => <li key={i}>{e}</li>)}
-                    </ul>
+                    <h5 style={{ margin: '8px 0' }}>About</h5>
+                    <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{doctor.about || '—'}</p>
+                  </div>
+
+                  <div style={{ marginTop: 8 }}>
+                    <h5 style={{ margin: '8px 0' }}>Education</h5>
+                    {doctor.education && doctor.education.length > 0 ? (
+                      <ul style={{ margin: 0, paddingLeft: 18 }}>
+                        {doctor.education.map((e, i) => <li key={i}>{e}</li>)}
+                      </ul>
+                    ) : (
+                      <p style={{ margin: 0 }}>—</p>
+                    )}
+                  </div>
+
+                  <div style={{ marginTop: 8 }}>
+                    <h5 style={{ margin: '8px 0' }}>Clinic Address</h5>
+                    <p style={{ margin: 0 }}>
+                      {doctor.address1 || '—'}
+                      {doctor.address2 ? <><br />{doctor.address2}</> : null}
+                    </p>
                   </div>
                 </div>
               </div>
             </section>
 
-            {/* Right Side */}
+            {/* Right Side: Booking */}
             <aside className="card grid-calendar" style={{ alignSelf: 'start' }}>
               <h3 style={{ marginTop: 0 }}>Booking Appointment</h3>
 

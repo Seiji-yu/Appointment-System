@@ -3,9 +3,11 @@ import axios from 'axios';
 import Navbar from '../../SideBar/Navbar.jsx';
 import CalendarC from '../../Calendar/CalendarC.jsx';
 import '../../Styles/Ddashboard.css';
+import { useNavigate } from 'react-router-dom';
 
 export default function Ddashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const navigate = useNavigate();
 
   // doctor-scoped metrics
   const [totalPatients, setTotalPatients] = useState(0);
@@ -33,6 +35,7 @@ export default function Ddashboard() {
           return;
         }
 
+        // Get doctor profile -> id
         const prof = await axios.post('http://localhost:3001/doctor/get-profile', { email });
         const doctor = prof.data?.doctor;
         if (!doctor?._id) {
@@ -63,7 +66,8 @@ export default function Ddashboard() {
         if (recentRes.data?.status === 'success' && Array.isArray(recentRes.data.patients)) {
           const mapped = recentRes.data.patients.map(p => ({
             id: p.patientId,
-            name: `${p.firstName || ''} ${p.lastName || ''}`.trim() || p.email || 'Patient'
+            name: `${p.firstName || ''} ${p.lastName || ''}`.trim() || p.email || 'Patient',
+            email: p.email || ''
           }));
           setRecentPatients(mapped);
         } else {
@@ -131,7 +135,13 @@ export default function Ddashboard() {
                         <h5 className="patient-name">{p.name}</h5>
                         <div className="patient-actions">
                           <button className="btn btn-secondary" onClick={() => alert('History (placeholder)')}>History</button>
-                          <button className="btn btn-primary" onClick={() => alert('Patient Details (placeholder)')}>Patient Details</button>
+                          <button
+                            className="btn btn-primary"
+                            onClick={() => navigate(`/Doctor/Patient/${encodeURIComponent(p.email)}`)}
+                            disabled={!p.email}
+                          >
+                            Patient Details
+                          </button>
                         </div>
                       </div>
                     </div>
