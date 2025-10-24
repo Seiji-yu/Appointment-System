@@ -107,7 +107,7 @@ function Login() {
           <div className="tabs-bg">
             <div className="indicator" style={{ transform: 'translateX(100%)' }} />
             <button type="button" className="tab" onClick={() => navigate('/register')}>Sign up</button>
-            <button type="button" className="tab active-tab">Sign in</button>
+            <button type="button" className="tab active-tab">Log in</button>
           </div>
         </div>
 

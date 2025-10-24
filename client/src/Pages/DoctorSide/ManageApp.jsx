@@ -58,6 +58,7 @@ export default function ManageApp() {
       const res = await axios.patch(`http://localhost:3001/api/appointments/${id}`, payload);
       const updated = res.data?.appointment;
       if (updated.status === 'completed' || updated.status === 'cancelled') {
+        // remove from active list correctly
         setAppointments(appts => appts.filter(a => a._id === id !== id));
       } else {
         setAppointments(appts => appts.map(a => a._id === id ? updated : a));
