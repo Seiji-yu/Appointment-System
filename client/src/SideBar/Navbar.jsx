@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import * as FaIcons from 'react-icons/fa';
 import * as IoIcons from 'react-icons/io';
 import { Link } from 'react-router-dom';
-import '../Styles/Navbar.css';
+import '../Styles/DNavbar.css';
 import { SidebarData } from './Sidebar.jsx';
 import LogoutButton from './LogoutButton.jsx';
 

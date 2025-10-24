@@ -15,6 +15,7 @@ import BookApp from './Pages/PatientSide/BookApp'
 import DoctorLists from './Pages/PatientSide/DoctorLists'
 import AppHistory from './Pages/PatientSide/AppHistory'
 import DoctorProfile from './Pages/DoctorSide/DoctorProfile'
+import Admin from './Pages/Admin/Admin'
 
 function App() {
 
@@ -37,6 +38,7 @@ function App() {
         <Route path='/BookApp/:email' element={<BookApp />} /> 
         <Route path='/AppHistory' element={<AppHistory />} />
         <Route path='/DoctorProfile' element={<DoctorProfile />} />
+        <Route path='/Admin' element={<Admin />} />
       </Routes>
     </BrowserRouter>
   )

@@ -14,7 +14,7 @@ const PsychiatristSchema = new mongoose.Schema({
   about: { type: String, default: '' },
   address1: { type: String, default: '' },
   address2: { type: String, default: '' },
-  profileImage: { type: String, default: '' } 
+  profileImage: { type: String, default: '' }
 });
 
 module.exports = mongoose.model("Psychiatrist", PsychiatristSchema);

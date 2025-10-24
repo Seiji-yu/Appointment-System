@@ -66,10 +66,19 @@
   min-width: 0;
 }
 
+.calendar-section .react-calendar,
+.grid-calendar .react-calendar {
+  width: 100% !important;
+  max-width: 100%;
+  display: block;
+}
+
+
 /* Two-column grid: left content + right calendar */
 .dashboard-grid {
   display: grid;
-  grid-template-columns: 1fr 340px;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  /* allow left column to shrink */
   /* left grows, right fixed */
   grid-template-areas:
     "cards calendar"
@@ -91,11 +100,22 @@
   grid-area: recent;
 }
 
+/* Prevent calendar from overlapping when the viewport narrows */
+.grid-cards,
+.grid-recent,
+.grid-calendar {
+  min-width: 0;
+  /* allow grid children to shrink instead of overflow */
+}
+
 /* Keep calendar visible while scrolling */
 .grid-calendar {
   position: sticky;
   top: 84px;
   /* adjust to your navbar height */
+  align-self: start;
+  overflow: hidden;
+  /* avoid content spill */
 }
 
 /* Cards layout stays as you have */
@@ -131,8 +151,14 @@
     grid-template-columns: 1fr;
     grid-template-areas:
       "cards"
-      "calendar"
-      "recent";
+      "recent"
+      "calendar";
+    row-gap: 16px;
+  }
+
+  .grid-calendar {
+    position: static;
+    top: auto;
   }
 }
 
@@ -449,7 +475,7 @@
   border: 1px solid #e5e7eb;
   border-radius: 16px;
   padding: 18px 20px;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
   min-height: 120px;
   display: flex;
   flex-direction: column;
@@ -458,7 +484,7 @@
 }
 
 .card:hover {
-  box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
   transform: translateY(-1px);
 }
 

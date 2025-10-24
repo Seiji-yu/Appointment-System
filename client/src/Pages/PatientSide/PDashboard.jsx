@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PNavbar from "../../SideBar/PNavbar";
-import "../../Styles/Navbar.css";
+import "../../Styles/PNavbar.css";
 import "../../Styles/PDashboard.css";
 import PDashboardCalendar from "../../Calendar/PatientCalendar/PDashboardCalendar";
 

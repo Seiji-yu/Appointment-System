@@ -3,7 +3,7 @@ import * as FaIcons from 'react-icons/fa';
 import * as IoIcons from 'react-icons/io';
 import { Link } from 'react-router-dom';
 import { PSidebar } from './PSidebar';
-import '../Styles/Navbar.css';
+import '../Styles/PNavbar.css';
 import LogoutButton from './LogoutButton.jsx';
 
 export default function PNavbar(props) {
@@ -39,16 +39,15 @@ export default function PNavbar(props) {
       </div>
 
       {/* Sidebar */}
-      <nav className={`sidebar ${open ? '' : 'collapsed'}`}>
-        <div className="sidebar-header">
+<nav className={`patient-sidebar ${open ? '' : 'collapsed'}`}>
+        <div className="patient-sidebar-header">
           <h3>Patient Menu</h3>
-          {/* Close button */}
           <IoIcons.IoMdClose onClick={toggle} />
         </div>
 
-        <ul className="sidebar-list">
+        <ul className="patient-sidebar-list">
           {PSidebar.slice(0, PSidebar.length - 2).map((item, index) => (
-            <li key={index} className="sidebar-item">
+            <li key={index} className="patient-sidebar-item">
               <Link to={item.path}>
                 {item.icon}
                 <span>{item.title}</span>
@@ -57,9 +56,9 @@ export default function PNavbar(props) {
           ))}
         </ul>
 
-        <ul className="sidebar-list sidebar-bottom">
+        <ul className="patient-sidebar-list patient-sidebar-bottom">
           {PSidebar.slice(-2).map((item, index) => (
-            <li key={index} className="sidebar-item">
+            <li key={index} className="patient-sidebar-item">
               <Link to={item.path}>
                 {item.icon}
                 <span>{item.title}</span>
