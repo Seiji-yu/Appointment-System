@@ -18,16 +18,13 @@ function DoctorLists() {
       .catch((err) => console.error('Error fetching doctors:', err))
   }, [])
 
-  // load patient favorites from backend (if logged in). fall back to localStorage when missing
   useEffect(() => {
     const email = localStorage.getItem('email')
     if (!email) {
-      // fallback to localStorage favorites for unauthenticated users
       try {
         const raw = localStorage.getItem('favDocs')
         if (raw) setFavorites(JSON.parse(raw).map((id) => String(id)))
       } catch (e) {
-        /* ignore */
       }
       return
     }
@@ -40,17 +37,15 @@ function DoctorLists() {
       .then((res) => res.json())
       .then((data) => {
         const favs = (data.patient && data.patient.favorites) || []
-        // normalize to string ids
         setFavorites(favs.map((id) => id.toString()))
       })
       .catch((err) => {
         console.error('Error fetching patient profile for favorites:', err)
-        // fallback to localStorage if server request fails
         try {
           const raw = localStorage.getItem('favDocs')
           if (raw) setFavorites(JSON.parse(raw).map((id) => String(id)))
         } catch (e) {
-          /* ignore */
+
         }
       })
   }, [])
@@ -66,7 +61,7 @@ function DoctorLists() {
     const wasFav = favorites.includes(idStr)
     const action = wasFav ? 'remove' : 'add'
 
-    // pessimistic update: mark pending and wait for server response before changing UI
+    // wait for server response before changing the frontend
     setPendingFavs((p) => (p.includes(idStr) ? p : [...p, idStr]))
 
     try {
@@ -102,8 +97,8 @@ function DoctorLists() {
 
         {doctors.length > 0 ? (
           <>
-            {/* Favorites section */}
-            <h3 className="doctor-subtitle">Favorites</h3>
+            {/* my favorites section */}
+            <h3 className="doctor-subtitle">My Favorites</h3>
             <div className="doctor-grid">
               {doctors
                 .filter((d) => favorites.includes(String(d._id)))
@@ -132,19 +127,21 @@ function DoctorLists() {
                         </button>
                       </div>
 
-                      {/* show Unfavorite in the Favorites section */}
+                      {/* show star in the My Favorites section */}
                       <div className="card-action card-action-right">
                         {(() => {
                           const id = String(doc._id)
                           const isPending = pendingFavs.includes(id)
                           return (
-                            <button
-                              className="fav-btn"
-                              onClick={() => toggleFavorite(doc._id)}
-                              disabled={isPending}
-                            >
-                              {isPending ? '...' : 'Unfavorite'}
-                            </button>
+                              <button
+                                className={`fav-btn ${favorites.includes(id) ? 'filled' : 'hollow'}`}
+                                onClick={() => toggleFavorite(doc._id)}
+                                disabled={isPending}
+                                aria-pressed={favorites.includes(id)}
+                                title={favorites.includes(id) ? 'Remove favorite' : 'Add favorite'}
+                              >
+                                {isPending ? '...' : (favorites.includes(id) ? '★' : '☆')}
+                              </button>
                           )
                         })()}
                       </div>
@@ -153,7 +150,7 @@ function DoctorLists() {
                 ))}
             </div>
 
-            {/* Other doctors section */}
+            {/* other doctors section */}
             <h3 className="doctor-subtitle">Other Doctors</h3>
             <div className="doctor-grid">
               {doctors.map((doc) => (
@@ -186,13 +183,15 @@ function DoctorLists() {
                         const id = String(doc._id)
                         const isPending = pendingFavs.includes(id)
                         return (
-                          <button
-                            className="fav-btn"
-                            onClick={() => toggleFavorite(doc._id)}
-                            disabled={isPending}
-                          >
-                            {isPending ? '...' : (favorites.includes(id) ? 'Unfavorite' : 'Favorite')}
-                          </button>
+                              <button
+                                className={`fav-btn ${favorites.includes(id) ? 'filled' : 'hollow'}`}
+                                onClick={() => toggleFavorite(doc._id)}
+                                disabled={isPending}
+                                aria-pressed={favorites.includes(id)}
+                                title={favorites.includes(id) ? 'Remove favorite' : 'Add favorite'}
+                              >
+                                {isPending ? '...' : (favorites.includes(id) ? '★' : '☆')}
+                              </button>
                         )
                       })()}
                     </div>

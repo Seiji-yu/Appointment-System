@@ -11,6 +11,26 @@
   font-weight: 600;
 }
 
+/* My Favorites / Other Doctors */
+.doctor-subtitle {
+  font-size: 20px;
+  color: #223344;
+  font-weight: 700;
+  margin: 18px 0 10px 0;
+  text-align: left; 
+}
+
+.doctor-subtitle:first-of-type + .doctor-grid {
+  justify-content: center;
+  justify-items: start;
+  grid-auto-flow: row;
+  grid-template-columns: repeat(auto-fill, 300px);
+}
+
+.doctor-subtitle:first-of-type + .doctor-grid .doctor-card {
+  margin: 0 !important;
+}
+
 .doctor-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -135,3 +155,20 @@
 }
 
 .fav-btn:hover { background: #f3f4f6; }
+
+/* star button */
+.fav-btn.filled {
+  color: #f5b301; 
+  background: transparent;
+  border: none;
+  font-size: 30px;
+  padding: 6px 10px;
+}
+.fav-btn.hollow {
+  color: #9aa0a6;
+  background: transparent;
+  border: none;
+  font-size: 30px;
+  padding: 6px 10px;
+}
+.fav-btn[disabled] { opacity: 0.6; cursor: default; }
