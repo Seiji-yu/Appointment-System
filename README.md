@@ -18,3 +18,5 @@ It allows **Patients** and **Psychiatrists** to register, log in, and manage app
 
 ---
 ## Project Ongoing
+
+# 30% Done
