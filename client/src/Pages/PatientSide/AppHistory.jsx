@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { useEffect, useState } from 'react';
 import PNavbar from '../../SideBar/PNavbar.jsx';
 import '../../Styles/AppHistory.css';
@@ -7,11 +8,25 @@ export default function AppHistory() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [appointments, setAppointments] = useState([]);
   const [activeTab, setActiveTab] = useState('completed');
+=======
+import React, { useState, useEffect } from 'react'
+import PNavbar from '../../SideBar/PNavbar'
+import CalendarC from '../../Calendar/CalendarC.jsx';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import '../../Styles/AppHistory.css'
+
+function AppHistory() {
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [activeTab, setActiveTab] = useState('upcoming');
+
+  const [appointments, setAppointments] = useState([]);
+>>>>>>> bcfee7c35907e5e2bc1d756ae7057c31302733e3
 
   useEffect(() => {
     const patientId = localStorage.getItem('patientId');
     if (!patientId) return;
 
+<<<<<<< HEAD
     const fetchHistory = async () => {
       try {
         const res = await fetch(`http://localhost:3001/api/appointments/history?patientId=${patientId}`);
@@ -80,9 +95,101 @@ export default function AppHistory() {
                 </>
               )}
             </div>
+=======
+    const fetchAppointments = () => {
+      fetch(`http://localhost:3001/api/appointments?patientId=${patientId}`)
+        .then(res => res.json())
+        .then(data => setAppointments(data));
+    };
+
+    fetchAppointments();
+    const interval = setInterval(fetchAppointments, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className={`dashboard patient-history ${sidebarOpen ? 'sidebar-open' : 'sidebar-collapsed'}`}>
+      <PNavbar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+     <div className="dashboard-main container-fluid py-4">
+        <div className="ph-container">
+          <h2 className="text-center mb-4">Appointment History</h2>
+
+          <ul className="nav nav-tabs justify-content-center mb-3">
+            <li className="nav-item">
+              <button className={`nav-link ${activeTab === 'upcoming' ? 'active' : ''}`} onClick={() => setActiveTab('upcoming')}>Upcoming</button>
+            </li>
+            <li className="nav-item">
+              <button className={`nav-link ${activeTab === 'completed' ? 'active' : ''}`} onClick={() => setActiveTab('completed')}>Completed</button>
+            </li>
+            <li className="nav-item">
+              <button className={`nav-link ${activeTab === 'cancelled' ? 'active' : ''}`} onClick={() => setActiveTab('cancelled')}>Cancelled/Rejected</button>
+            </li>
+          </ul>
+
+          <div className="tab-content">
+            {activeTab === 'upcoming' && (
+              <div className="row justify-content-center g-4">
+                {/* Left column: list */}
+                <div className="col-12 col-lg-7">
+                  <h5 className="mb-3">Your Appointment Requests</h5>
+                  {appointments.map(app => (
+                    <div key={app.id || app._id} className="card appointment-card mb-3">
+                      <div className="card-body">
+                        <h5 className="card-title">{app.name}</h5>
+                        <p className="card-text">{app.date}</p>
+                        <p className="status">Status: {app.status}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Right column: calendar */}
+                <div className="col-12 col-lg-5">
+                  <aside className="calendar-section ph-calendar">
+                    <CalendarC />
+                  </aside>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'completed' && (
+              <div>
+                <h5 className="mb-3">Completed Appointments</h5>
+                {appointments.filter(a => a.status === 'Completed').map(c => (
+                  <div key={c.id || c._id} className="card appointment-card mb-3">
+                    <div className="card-body">
+                      <h5 className="card-title">{c.name}</h5>
+                      <p className="card-text">{c.date}</p>
+                      <p className="status">Status: {c.status}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {activeTab === 'cancelled' && (
+              <div>
+                <h5 className="mb-3">Cancelled/Rejected Appointments</h5>
+                {appointments.filter(a => a.status === 'Rejected' || a.status === 'Cancelled').map(c => (
+                  <div key={c.id || c._id} className="card appointment-card mb-3">
+                    <div className="card-body">
+                      <h5 className="card-title">{c.name}</h5>
+                      <p className="card-text">{c.date}</p>
+                      <p className="status">Status: {c.status}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+>>>>>>> bcfee7c35907e5e2bc1d756ae7057c31302733e3
           </div>
         </div>
       </div>
     </div>
   );
 }
+<<<<<<< HEAD
+=======
+
+export default AppHistory;
+>>>>>>> bcfee7c35907e5e2bc1d756ae7057c31302733e3
