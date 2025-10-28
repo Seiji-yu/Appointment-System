@@ -107,9 +107,3 @@ body.with-sidebar-collapsed {
   margin-bottom: 20px;
 }
 
-.dashboard,
-.patient-dashboard,
-.dashboard-main {
-  font-family: 'Poppins', sans-serif;
-  color: #333;
-}

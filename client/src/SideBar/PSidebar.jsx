@@ -4,6 +4,7 @@ import React from 'react'
 import * as FaIcons from 'react-icons/fa'
 import * as AiIcons from 'react-icons/ai'
 import { IoInformationOutline } from "react-icons/io5";
+import { IoLogOutOutline } from "react-icons/io5";
 
 export const PSidebar = [
 
@@ -43,6 +44,12 @@ export const PSidebar = [
         title: 'About',
         path: '/About',
         icon: <IoInformationOutline />,
+        cName: 'nav-text'
+    },
+    {
+        title: 'Logout',
+        path: '/Login',
+        icon: <IoLogOutOutline />,
         cName: 'nav-text'
     },
 

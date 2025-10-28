@@ -5,7 +5,6 @@ import * as IoIcons from 'react-icons/io';
 import { Link } from 'react-router-dom';
 import '../Styles/DNavbar.css';
 import { SidebarData } from './Sidebar.jsx';
-import LogoutButton from './LogoutButton.jsx';
 
 export default function Navbar(props) {
 
@@ -58,9 +57,6 @@ export default function Navbar(props) {
           ))}
         </ul>
       </nav>
-      <div className="navbar-right">
-        <LogoutButton className="logout-btn" />
-      </div>
     </>
   );
 }

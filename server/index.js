@@ -477,7 +477,7 @@ app.post('/doctor/availability/bulk', async (req, res) => {
 app.get('/api/doctor/:doctorId/available-slots', async (req, res) => {
   try {
     const { doctorId } = req.params;
-    const { date, slot } = req.query;
+    const { date, slot, as } = req.query;
 
     if (!mongoose.Types.ObjectId.isValid(doctorId)) {
       return res.status(400).json({ status: 'bad_request', message: 'Invalid doctorId' });
@@ -491,41 +491,19 @@ app.get('/api/doctor/:doctorId/available-slots', async (req, res) => {
       return res.status(400).json({ status: 'bad_request', message: 'Invalid date format' });
     }
 
-    const slotLen = Math.min(Math.max(parseInt(slot, 10) || 60, 5), 240);
-
     const availability = await AvailabilityModel.findOne({
       doctor: new mongoose.Types.ObjectId(doctorId),
       date: day
     });
 
     if (!availability || !Array.isArray(availability.ranges) || availability.ranges.length === 0) {
-      return res.json({ status: 'success', slots: [] });
+      // return empty for both modes
+      return res.json({ status: 'success', slots: [], ranges: [] });
     }
 
-    // Build candidate slots from ranges
-    const candidates = [];
-    for (const r of availability.ranges) {
-      if (!isValidRange(r)) continue;
-      let startM = toMinutes(r.start);
-      const endM = toMinutes(r.end);
-      while (startM + slotLen <= endM) {
-        candidates.push(fromMinutes(startM));
-        startM += slotLen;
-      }
-    }
-
-    // Filter out past times if querying today
-    const startToday = todayStartLocal();
-    let filtered = candidates;
-    if (day.getTime() === startToday.getTime()) {
-      const now = nowHHMMLocal();
-      filtered = candidates.filter(t => t > now);
-    }
-
-    // Exclude already booked (pending/approved)
+    // Find already booked starts for that day (pending/approved)
     const nextDay = new Date(day);
     nextDay.setDate(nextDay.getDate() + 1);
-
     const booked = await AppointmentModel.find({
       doctor: new mongoose.Types.ObjectId(doctorId),
       status: { $in: ['pending', 'approved'] },
@@ -541,6 +519,41 @@ app.get('/api/doctor/:doctorId/available-slots', async (req, res) => {
       })
     );
 
+    // If the client asks for ranges, return only the unbooked ranges (by start time)
+    if (String(as) === 'ranges') {
+      const startToday = todayStartLocal();
+      const now = nowHHMMLocal();
+
+      const ranges = availability.ranges
+        .filter(r => isValidRange(r))
+        // hide past for "today": require range start > now
+        .filter(r => (day.getTime() === startToday.getTime() ? r.start > now : true))
+        // exclude ranges whose start is already booked
+        .filter(r => !bookedSet.has(r.start));
+
+      return res.json({ status: 'success', ranges });
+    }
+
+    // Default behavior (legacy): generate split slots
+    const slotLen = Math.min(Math.max(parseInt(slot, 10) || 60, 5), 240);
+    const candidates = [];
+    for (const r of availability.ranges) {
+      if (!isValidRange(r)) continue;
+      let startM = toMinutes(r.start);
+      const endM = toMinutes(r.end);
+      while (startM + slotLen <= endM) {
+        candidates.push(fromMinutes(startM));
+        startM += slotLen;
+      }
+    }
+
+    const startToday = todayStartLocal();
+    let filtered = candidates;
+    if (day.getTime() === startToday.getTime()) {
+      const now = nowHHMMLocal();
+      filtered = candidates.filter(t => t > now);
+    }
+
     const slots = filtered.filter(t => !bookedSet.has(t));
     return res.json({ status: 'success', slots });
   } catch (err) {
@@ -553,15 +566,19 @@ app.get('/api/doctor/:doctorId/available-slots', async (req, res) => {
 // Create an appointment (Patient books an appointment with a doctor)
 app.post('/api/appointments', async (req, res) => {
   try {
-    const { doctorId,
+    const {
+      doctorId,
       patientEmail,
-      date,
-      notes } = req.body;
+      date,        // optional legacy ISO
+      notes,
+      localYMD,    // NEW preferred: 'YYYY-MM-DD'
+      timeHHMM     // NEW preferred: 'HH:mm'
+    } = req.body;
 
-    if (!doctorId || !patientEmail || !date) {
+    if (!doctorId || !patientEmail || (!date && !(localYMD && timeHHMM))) {
       return res.status(400).json({
         status: 'bad_request',
-        message: 'doctorId, patientEmail and date are required'
+        message: 'doctorId, patientEmail and appointment date/time are required'
       });
     }
 
@@ -577,13 +594,25 @@ app.post('/api/appointments', async (req, res) => {
     if (!doctor) return res.status(404).json({ status: 'not_found', message: 'Doctor not found' });
     if (!patient) return res.status(404).json({ status: 'not_found', message: 'Patient not found' });
 
-    // Better date handling
-    const appointmentDate = new Date(date);
-    if (isNaN(appointmentDate.getTime())) {
-      return res.status(400).json({ status: 'bad_request', message: 'Invalid appointment date' });
+    // Build appointment Date in LOCAL time (no unintended offsets)
+    let appointmentDate = null;
+    if (localYMD && timeHHMM) {
+      const base = parseYMDToLocalDate(localYMD);
+      const [h, m] = String(timeHHMM).split(':').map(Number);
+      if (!base || Number.isNaN(h) || Number.isNaN(m)) {
+        return res.status(400).json({ status: 'bad_request', message: 'Invalid local date/time' });
+      }
+      base.setHours(h, m, 0, 0);
+      appointmentDate = base;
+    } else {
+      // fallback to legacy ISO string if still used by any client
+      const iso = new Date(date);
+      if (isNaN(iso)) {
+        return res.status(400).json({ status: 'bad_request', message: 'Invalid appointment date' });
+      }
+      appointmentDate = iso;
     }
 
-    // Do not allow booking in the past (includes earlier times today)
     const now = new Date();
     if (appointmentDate < now) {
       return res.status(400).json({
@@ -592,13 +621,12 @@ app.post('/api/appointments', async (req, res) => {
       });
     }
 
-    // Limit to 5 active (pending/approved) bookings PER ACCOUNT (ALL DOCTORS AND DATES)
+    // Limit active bookings with this doctor
     const activeWithThisDoctor = await AppointmentModel.countDocuments({
       doctor: doctor._id,
       patient: patient._id,
       status: { $in: ['pending', 'approved'] }
     });
-
     if (activeWithThisDoctor >= 5) {
       return res.status(409).json({
         status: 'limit_reached',
@@ -606,20 +634,16 @@ app.post('/api/appointments', async (req, res) => {
       });
     }
 
-    // prevent booking the exact same slot already pending/approved
+    // Prevent booking an already taken 30-min start slot
     const slotTaken = await AppointmentModel.exists({
       doctor: doctor._id,
       date: appointmentDate,
       status: { $in: ['pending', 'approved'] }
     });
     if (slotTaken) {
-      return res.status(409).json({
-        status: 'conflict',
-        message: 'This time slot is not available.'
-      });
+      return res.status(409).json({ status: 'conflict', message: 'This time slot is not available.' });
     }
 
-    // Create appointment
     const appt = await AppointmentModel.create({
       doctor: doctor._id,
       patient: patient._id,

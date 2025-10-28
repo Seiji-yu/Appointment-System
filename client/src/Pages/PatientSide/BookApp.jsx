@@ -24,10 +24,10 @@ export default function BookApp() {
     () => ['08:00 AM', '09:00 AM', '10:00 AM', '11:00 AM', '01:00 PM', '02:00 PM', '03:00 PM', '04:00 PM'],
     []
   )
-  const [selectedSlot, setSelectedSlot] = useState('')
-  const [concerns, setConcerns] = useState('')
-  const [availableSlots, setAvailableSlots] = useState([]) // 'HH:mm' list
+  const [selectedSlot, setSelectedSlot] = useState('')     // will hold range start 'HH:mm'
+  const [availableSlots, setAvailableSlots] = useState([]) // now holds [{start,end}] ranges
   const [slotsLoading, setSlotsLoading] = useState(false)
+  const [concerns, setConcerns] = useState('') 
 
   // Add here (before any use of `date`)
   const toYMD = (d) => {
@@ -83,18 +83,19 @@ export default function BookApp() {
     const [h, m] = hhmm.split(':').map(Number);
     const ampm = h >= 12 ? 'PM' : 'AM';
     const h12 = h % 12 || 12;
-    return `${h12.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')} ${ampm}`;
+    return `${h12}:${m.toString().padStart(2, '0')} ${ampm}`;
   }
 
   const fetchSlots = async (dId, ymd) => {
     if (!dId || !ymd) return;
     setSlotsLoading(true);
-    setSelectedSlot(''); // reset selection on date/doctor change
+    setSelectedSlot('');
     try {
-      const res = await axios.get('http://localhost:3001/api/doctor/' + dId + '/available-slots', {
-        params: { date: ymd, slot: 0 }
+      // Ask for ranges instead of split slots
+      const res = await axios.get(`http://localhost:3001/api/doctor/${dId}/available-slots`, {
+        params: { date: ymd, as: 'ranges' }
       });
-      setAvailableSlots(res.data?.slots || []);
+      setAvailableSlots(res.data?.ranges || []);
     } catch (e) {
       setAvailableSlots([]);
     } finally {
@@ -109,7 +110,7 @@ export default function BookApp() {
   }, [doctor, date]);
 
   const handleBookNow = async () => {
-    if (isSubmitting) return; // prevent double-click
+    if (isSubmitting) return;
     setSubmitNotice('');
     setIsSubmitting(true);
     try {
@@ -117,21 +118,24 @@ export default function BookApp() {
         setSubmitNotice('Please select a time.');
         return;
       }
-      const iso = new Date(`${date}T${selectedSlot}:00`).toISOString();
 
-      const patientEmail = localStorage.getItem('patientEmail') || localStorage.getItem('email')
+      const patientEmail = localStorage.getItem('patientEmail') || localStorage.getItem('email');
       if (!patientEmail) { setError('Missing patient email in localStorage. Please login again.'); return }
 
-      const payload = { doctorId: doctor.id, patientEmail, date: iso, notes: concerns }
-      await axios.post('http://localhost:3001/api/appointments', payload);
+      const payload = {
+        doctorId: doctor.id,
+        patientEmail,
+        localYMD: date,        // 'YYYY-MM-DD'
+        timeHHMM: selectedSlot, // book at range START
+        notes: concerns
+      };
 
+      await axios.post('http://localhost:3001/api/appointments', payload);
       setSubmitNotice('Booked successfully. You will receive updates once approved.');
     } catch (err) {
       const r = err?.response;
       const msg = r?.status === 409
-        ? (r?.data?.message || (r?.data?.status === 'conflict'
-            ? 'This time slot is not available.'
-            : 'Booking cannot be created.'))
+        ? (r?.data?.message || 'This time slot is not available.')
         : (r?.data?.message || 'Booking failed. Please try again.');
       setSubmitNotice(msg);
     } finally {
@@ -227,21 +231,25 @@ export default function BookApp() {
               <div className="mb-2">
                 <label style={{ display: 'block', marginBottom: 6 }}>Select Time</label>
                 {slotsLoading ? (
-                  <p>Loading slots...</p>
+                  <p>Loading availability...</p>
                 ) : availableSlots.length === 0 ? (
                   <p>No availability for this date.</p>
                 ) : (
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                    {availableSlots.map(s => (
-                      <button
-                        type="button"
-                        key={s}
-                        className={`btn ${selectedSlot === s ? 'btn-primary' : 'btn-secondary'}`}
-                        onClick={() => setSelectedSlot(s)}
-                      >
-                        {hhmmTo12(s)}
-                      </button>
-                    ))}
+                    {availableSlots.map(r => {
+                      const key = `${r.start}-${r.end}`;
+                      const label = `${hhmmTo12(r.start)} - ${hhmmTo12(r.end)}`;
+                      return (
+                        <button
+                          type="button"
+                          key={key}
+                          className={`btn ${selectedSlot === r.start ? 'btn-primary' : 'btn-secondary'}`}
+                          onClick={() => setSelectedSlot(r.start)}
+                        >
+                          {label}
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
               </div>

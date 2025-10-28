@@ -4,7 +4,6 @@ import * as IoIcons from 'react-icons/io';
 import { Link } from 'react-router-dom';
 import { PSidebar } from './PSidebar';
 import '../Styles/PNavbar.css';
-import LogoutButton from './LogoutButton.jsx';
 
 export default function PNavbar(props) {
   const [internalOpen, setInternalOpen] = useState(true);
@@ -69,9 +68,6 @@ export default function PNavbar(props) {
       </nav>
 
       <nav className="navbar">
-        <div className="navbar-right">
-          <LogoutButton className="logout-btn" />
-        </div>
       </nav>
     </>
   );

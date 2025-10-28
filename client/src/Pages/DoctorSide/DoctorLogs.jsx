@@ -9,7 +9,7 @@ export default function DoctorLogs() {
   const [error, setError] = useState('');
   const [logs, setLogs] = useState([]);
 
-  // NEW: status filter
+  // status filter
   const [statusFilter, setStatusFilter] = useState('all'); // all | completed | cancelled
 
   const loadLogs = async () => {
@@ -46,7 +46,7 @@ export default function DoctorLogs() {
     loadLogs();
   }, []);
 
-  // NEW: derived list based on status filter
+  // Derived list based on status filter
   const filteredLogs = useMemo(() => {
     if (statusFilter === 'all') return logs;
     return logs.filter(a => (a.status || '').toLowerCase() === statusFilter);
