@@ -1006,3 +1006,40 @@ app.post('/patient/favorites', async (req, res) => {
     return res.status(500).json({ status: 'error', message: 'Server error', details: err.message });
   }
 });
+
+// List appointments in PDashboard
+app.get('/api/appointments', async (req, res) => {
+  try {
+    const { patientId, patientEmail, status } = req.query;
+    const query = {};
+
+    if (patientId) {
+      if (!mongoose.Types.ObjectId.isValid(patientId)) {
+        return res.status(400).json({ status: 'bad_request', message: 'Invalid patientId' });
+      }
+      query.patient = new mongoose.Types.ObjectId(patientId);
+    } else if (patientEmail) {
+      const patient = await PatientModel.findOne({ email: patientEmail });
+      if (!patient) return res.status(404).json({ status: 'not_found', message: 'Patient not found' });
+      query.patient = patient._id;
+    }
+
+    if (status) {
+      const statuses = String(status).split(',').map(s => s.trim()).filter(Boolean);
+      if (statuses.length) query.status = { $in: statuses };
+    } else {
+      // default to active bookings
+      query.status = { $in: ['pending', 'approved'] };
+    }
+
+    const items = await AppointmentModel.find(query)
+      .populate('doctor', 'firstName lastName profileImage')
+      .populate('patient', 'firstName lastName name email profileImage')
+      .sort({ date: -1, updatedAt: -1 });
+
+    return res.json({ status: 'success', appointments: items });
+  } catch (err) {
+    console.error('List appointments error:', err);
+    return res.status(500).json({ status: 'error', message: 'Server error', details: err.message });
+  }
+});

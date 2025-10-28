@@ -1,9 +1,9 @@
 .pad-dashboard-grid {
   display: grid;
   grid-template-columns: 1fr 1fr; /* doctor profile and appointment summary */
-  gap: 24px;
+  gap: 10px;
   align-items: start;
-  justify-items: stretch;
+  justify-items: center;
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
@@ -24,6 +24,8 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  padding: 15px;
+  width: 100%;
 }
 
 .doctor-profile-title {
@@ -38,6 +40,19 @@
   display: flex;
   gap: 16px;
   align-items: flex-start;
+}
+
+.doctor-profile-top {
+  /* contains the profile pic + primary info row */
+  display: block;
+  width: 100%;
+}
+
+.doctor-profile-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 8px;
 }
 
 .doctor-avatar {
@@ -106,20 +121,23 @@
 
 .two-col {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* keep labels and values aligned */
+  grid-template-columns: max-content minmax(0, 1fr);
   gap: 12px;
   align-items: start;
+  justify-content: stretch;
 }
-
 .two-col .left {
   text-align: left;
   color: #374151;
+  padding-right: 8px; 
 }
 
 .two-col .right {
   text-align: right;
   color: #111827;
   font-weight: 600;
+  overflow-wrap: anywhere; /
 }
 
 .patient-info .hmo-card {
@@ -150,7 +168,7 @@
 }
 
 /* responsive design */
-@media (max-width: 900px) {
+@media (max-width: 350px) {
   .pad-dashboard-grid {
     grid-template-columns: 1fr; 
   }
@@ -166,16 +184,28 @@
     height: 180px;
   }
 
-  .two-col {
-    grid-template-columns: 1fr;
-  }
-
-  .two-col .right {
-    text-align: left;
-  }
+  /* reduce gap to keep column aligned */
+  .two-col { gap: 8px; }
 
   .action-buttons {
     flex-direction: column;
     align-items: stretch;
   }
+}
+
+@media (max-width: 1000px) {
+  .pad-dashboard-grid {
+    grid-template-columns: 1fr !important;
+    grid-auto-rows: auto;
+  }
+  
+  .pad-dashboard-grid .pad-details-right {
+    position: static !important;
+    top: auto !important;
+    align-self: stretch !important;
+    width: 100% !important;
+  }
+
+  .pad-section { width: 100%; }
+  .two-col { grid-template-columns: max-content minmax(0, 1fr) !important; gap: 8px !important; }
 }

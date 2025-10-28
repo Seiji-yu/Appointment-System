@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'  
 import PNavbar from '../../SideBar/PNavbar'
-import '../../Styles/Ddashboard.css'
 import '../../Styles/DoctorList.css'
 
 function DoctorLists() {

@@ -113,24 +113,30 @@ export default function PatientAppDetails() {
           {/* left side doctor profile */}
           <section className="card doctor-profile">
             <h3 className="doctor-profile-title">Doctor Profile</h3>
-            <div className="doctor-profile-row">
-              <img
-                className="doctor-avatar"
-                src={doc.profileImage || 'https://via.placeholder.com/180'}
-                alt="Doctor"
-              />
-              <div className="doctor-info">
-                <h4 className="doctor-name">
-                  {(doc.firstName || '') + ' ' + (doc.lastName || '')}
-                </h4>
-                <p className="doctor-role">{doc.role || 'Psychiatrist'}</p>
-                <p className="doctor-fees">₱ {doc.fees ?? '—'} / session</p>
-                <div className="doctor-experience">
-                  <h5>Experience</h5>
-                  <p className="doctor-experience-text">
-                    {doc.experience || 'No experience listed.'}
-                  </p>
+
+            <div className="doctor-profile-top">
+              <div className="doctor-profile-row">
+                <img
+                  className="doctor-avatar"
+                  src={doc.profileImage || 'https://via.placeholder.com/180'}
+                  alt="Doctor"
+                />
+                <div className="doctor-info">
+                  <h4 className="doctor-name">{(doc.firstName || '') + ' ' + (doc.lastName || '')}</h4>
+                  <p className="doctor-role">{doc.role || 'Psychiatrist'}</p>
+                  <p className="doctor-fees">₱ {doc.fees ?? '—'} / session</p>
                 </div>
+              </div>
+            </div>
+
+            <div className="doctor-profile-bottom">
+              <div className="doctor-experience">
+                <h5>Experience</h5>
+                <p className="doctor-experience-text">{doc.experience || '—'}</p>
+              </div>
+              <div className="doctor-specialty">
+                <h5>Specialization</h5>
+                <p className="doctor-specialty-text">{(Array.isArray(doc.education) && doc.education.join(', ')) || doc.specialty || '—'}</p>
               </div>
             </div>
           </section>
