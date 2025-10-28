@@ -21,8 +21,8 @@
 }
 
 .sidebar-open .dashboard-main {
-  margin-left: 250px;
-  width: calc(100% - 250px);
+  margin-left: 0px;
+  width: calc(100% - 0px);
 }
 
 /* Search */

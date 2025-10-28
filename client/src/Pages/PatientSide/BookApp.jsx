@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { useParams, useLocation } from 'react-router-dom'
+import { useParams, useLocation, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import PNavbar from '../../SideBar/PNavbar'
 import CalendarC from '../../Calendar/CalendarC.jsx'
@@ -11,6 +11,7 @@ export default function BookApp() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitNotice, setSubmitNotice] = useState('');
+  const navigate = useNavigate();
 
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [doctor, setDoctor] = useState(null)
@@ -122,16 +123,19 @@ export default function BookApp() {
       const patientEmail = localStorage.getItem('patientEmail') || localStorage.getItem('email');
       if (!patientEmail) { setError('Missing patient email in localStorage. Please login again.'); return }
 
-      const payload = {
-        doctorId: doctor.id,
-        patientEmail,
-        localYMD: date,        // 'YYYY-MM-DD'
-        timeHHMM: selectedSlot, // book at range START
-        notes: concerns
-      };
-
-      await axios.post('http://localhost:3001/api/appointments', payload);
+      const payload = { 
+        doctorId: doctor.id, 
+        patientEmail, date: iso, 
+        notes: concerns }
+      const res = await axios.post('http://localhost:3001/api/appointments', payload);
+      const created = res.data?.appointment;
       setSubmitNotice('Booked successfully. You will receive updates once approved.');
+
+      // Redirect to appointment details page and pass the appointment object
+      if (created) {
+        navigate('/PatientAppDetails', { state: { appointment: created } })
+        return
+      }
     } catch (err) {
       const r = err?.response;
       const msg = r?.status === 409

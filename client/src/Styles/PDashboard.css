@@ -6,7 +6,7 @@
     "welcome calendar"
     "appointments calendar";
   column-gap: 30px;
-  row-gap: 0px;
+  row-gap: 30px;
   max-width: 1100px;
   margin: 18px auto 0 auto;
   align-items: start;
@@ -21,8 +21,6 @@
   box-shadow: 0 4px 15px rgba(0,0,0,0.1);
   padding: 22px;
   box-sizing: border-box;
-  margin-top: 25px;
-  margin-bottom: 0px;
 }
 
 .patient-dashboard .calendar-section {
@@ -79,6 +77,74 @@
 }
 
 .patient-dashboard .book-btn:hover { background-color: #050b36; }
+
+/* Appointments list (PDashboard) */
+.patient-dashboard .my-appointments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.patient-dashboard .appt-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #f8f9fb;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.patient-dashboard .appt-item[role="button"] {
+  cursor: pointer;
+}
+.patient-dashboard .appt-item[role="button"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(8,16,71,0.08);
+}
+
+.patient-dashboard .appt-left { margin-right: 12px; }
+.patient-dashboard .appt-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 2px solid rgba(8,16,71,0.04);
+}
+
+.patient-dashboard .appt-center {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 auto;
+}
+.patient-dashboard .doctor-name { font-weight: 600; color: #081047; font-size: 20px; margin-top: 0px; margin-bottom: 0px; }
+.patient-dashboard .appt-datetime { font-size: 13px; color: #606f7b; }
+
+.patient-dashboard .appt-right { margin-left: 12px; display:flex; align-items:center; }
+.patient-dashboard .appt-status {
+  padding: 6px 10px;
+  border-radius: 14px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.patient-dashboard .status-pending { background:#fff4e5; color:#b36b00; }
+.patient-dashboard .status-approved { background:#e9f8ee; color:#1f7a3a; }
+.patient-dashboard .status-completed { background:#e8eefc; color:#1f3fa7; }
+
+/* row spacing for small screens */
+@media (max-width: 600px) {
+  .patient-dashboard .appt-item {
+    flex-direction: row;
+    gap: 8px;
+    padding: 8px;
+  }
+  .patient-dashboard .appt-avatar { width:44px; height:44px; }
+  .patient-dashboard .doctor-name { font-size: 20px; }
+  .patient-dashboard .appt-datetime { font-size: 12px; }
+}
+
 
 /* responsive design */
 @media (max-width: 992px) {

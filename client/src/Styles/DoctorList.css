@@ -21,8 +21,8 @@
 }
 
 .doctor-subtitle:first-of-type + .doctor-grid {
-  justify-content: center;
-  justify-items: start;
+  justify-content: space-evenly;
+  justify-items: center;
   grid-auto-flow: row;
   grid-template-columns: repeat(auto-fill, 300px);
 }
@@ -38,6 +38,9 @@
   gap: 25px;
 }
 
+/* Ensure grid items (cards) stretch to the same height so contents align */
+.doctor-grid { align-items: stretch; }
+
 .doctor-card {
   background-color: #FAF8F1;
   border-radius: 12px;
@@ -50,6 +53,9 @@
   margin: 0 auto;
 }
 
+/* Make each card a column flex container and occupy full grid cell height */
+.doctor-card { display: flex; flex-direction: column; height: 100%; }
+
 .doctor-card:hover {
   transform: translateY(-3px);
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
@@ -58,9 +64,11 @@
 .card-grid {
   display: grid;
   grid-template-columns: 140px 1fr;
-  grid-template-rows: auto 56px;
+  /* make the main content row take remaining space so actions stay aligned at bottom */
+  grid-template-rows: 1fr auto;
   gap: 12px 18px;
   align-items: center;
+  height: 100%;
 }
 
 .card-image {

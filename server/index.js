@@ -663,6 +663,27 @@ app.post('/api/appointments', async (req, res) => {
   }
 });
 
+// Get appointment by id (populated)
+app.get('/api/appointments/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ status: 'bad_request', message: 'Invalid appointment id' });
+    }
+
+    const appt = await AppointmentModel.findById(id)
+      .populate('patient', 'firstName lastName name email age gender contact hmoNumber hmoCardImage')
+      .populate('doctor', 'firstName lastName email contact fees role profileImage');
+
+    if (!appt) return res.status(404).json({ status: 'not_found', message: 'Appointment not found' });
+
+    return res.json({ status: 'success', appointment: appt });
+  } catch (err) {
+    console.error('Get appointment error:', err);
+    return res.status(500).json({ status: 'error', message: 'Server error', details: err.message });
+  }
+});
+
 // Update appointment status or notes
 app.patch('/api/appointments/:id', async (req, res) => {
   try {
@@ -1006,6 +1027,43 @@ app.post('/patient/favorites', async (req, res) => {
     return res.json({ status: 'success', favorites: patient.favorites });
   } catch (err) {
     console.error('Favorites update error:', err);
+    return res.status(500).json({ status: 'error', message: 'Server error', details: err.message });
+  }
+});
+
+// List appointments in PDashboard
+app.get('/api/appointments', async (req, res) => {
+  try {
+    const { patientId, patientEmail, status } = req.query;
+    const query = {};
+
+    if (patientId) {
+      if (!mongoose.Types.ObjectId.isValid(patientId)) {
+        return res.status(400).json({ status: 'bad_request', message: 'Invalid patientId' });
+      }
+      query.patient = new mongoose.Types.ObjectId(patientId);
+    } else if (patientEmail) {
+      const patient = await PatientModel.findOne({ email: patientEmail });
+      if (!patient) return res.status(404).json({ status: 'not_found', message: 'Patient not found' });
+      query.patient = patient._id;
+    }
+
+    if (status) {
+      const statuses = String(status).split(',').map(s => s.trim()).filter(Boolean);
+      if (statuses.length) query.status = { $in: statuses };
+    } else {
+      // default to active bookings
+      query.status = { $in: ['pending', 'approved'] };
+    }
+
+    const items = await AppointmentModel.find(query)
+      .populate('doctor', 'firstName lastName profileImage')
+      .populate('patient', 'firstName lastName name email profileImage')
+      .sort({ date: -1, updatedAt: -1 });
+
+    return res.json({ status: 'success', appointments: items });
+  } catch (err) {
+    console.error('List appointments error:', err);
     return res.status(500).json({ status: 'error', message: 'Server error', details: err.message });
   }
 });
