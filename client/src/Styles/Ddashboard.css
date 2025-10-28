@@ -1,0 +1,502 @@
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #ffffff;
+  font-family: 'Poppins', sans-serif;
+  color: #7a6767;
+  overflow-x: hidden;
+}
+
+.dashboard-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 40px 2rem 2rem 2rem;
+  overflow-y: auto;
+  width: 100%;
+  box-sizing: border-box;
+  transition: margin-left 0.3s ease;
+}
+
+.sidebar-open .dashboard-main {
+  margin-left: 0px;
+  width: calc(100% - 0px);
+}
+
+.search-bar {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.search-bar input {
+  width: 80%;
+  max-width: 600px;
+  padding: 0.75rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  outline: none;
+  font-size: 1rem;
+  color: black;
+  background-color: #fff;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.04);
+  transition: 0.2s ease;
+}
+
+.search-bar input:focus {
+  border-color: #0b0b0c;
+  box-shadow: 0 3px 8px rgba(0, 123, 255, 0.2);
+}
+
+
+.dashboard-content {
+  display: flex;
+  gap: 1.5rem;
+  width: 100%;
+  align-items: flex-start;
+  box-sizing: border-box;
+  flex-wrap: wrap;
+}
+
+
+.cards-section {
+  flex: 2;
+  min-width: 0;
+}
+
+.calendar-section .react-calendar,
+.grid-calendar .react-calendar {
+  width: 100% !important;
+  max-width: 100%;
+  display: block;
+}
+
+
+/* Two-column grid: left content + right calendar */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  /* allow left column to shrink */
+  /* left grows, right fixed */
+  grid-template-areas:
+    "cards calendar"
+    "recent calendar";
+  gap: 16px 20px;
+  align-items: start;
+}
+
+/* Place items in grid areas */
+.grid-cards {
+  grid-area: cards;
+}
+
+.grid-calendar {
+  grid-area: calendar;
+}
+
+.grid-recent {
+  grid-area: recent;
+}
+
+/* Prevent calendar from overlapping when the viewport narrows */
+.grid-cards,
+.grid-recent,
+.grid-calendar {
+  min-width: 0;
+  /* allow grid children to shrink instead of overflow */
+}
+
+/* Keep calendar visible while scrolling */
+.grid-calendar {
+  position: sticky;
+  top: 84px;
+  /* adjust to your navbar height */
+  align-self: start;
+  overflow: hidden;
+  /* avoid content spill */
+}
+
+/* Cards layout stays as you have */
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+
+.recent-patients-section .section-header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.section-subtitle {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.patient-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  /* two cards per row under cards */
+  gap: 14px;
+}
+
+/* Responsive: stack columns on narrow screens */
+@media (max-width: 1100px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "cards"
+      "recent"
+      "calendar";
+    row-gap: 16px;
+  }
+
+  .grid-calendar {
+    position: static;
+    top: auto;
+  }
+}
+
+/* Patient card styles */
+.patient-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.avatar-skeleton {
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  background: #e5e7eb;
+}
+
+.patient-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.patient-name {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.patient-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 6px 10px;
+  font-size: .9rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: #3b3dbf;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: #2f31a3;
+}
+
+.btn-secondary {
+  background: #f3f4f6;
+  color: #111827;
+  border-color: #e5e7eb;
+}
+
+.btn-secondary:hover {
+  background: #e5e7eb;
+}
+
+
+.calendar-section {
+  flex: 1;
+  max-width: 320px;
+  background: linear-gradient(120deg, #cce1f8, #faf1f1 100%);
+  border-radius: 16px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+  padding: 1.25rem;
+  height: fit-content;
+  box-sizing: border-box;
+  margin-top: 0;
+}
+
+
+.calendar-container {
+  width: 100%;
+}
+
+.calendar-container h3 {
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  color: #333;
+  text-align: center;
+}
+
+.react-calendar {
+  border: none;
+  width: 100%;
+  border-radius: 10px;
+  box-shadow: none;
+}
+
+/* Can be removed */
+@media (max-width: 1200px) {
+  .dashboard-content {
+    flex-direction: row;
+    /* Keep side-by-side longer */
+    gap: 1.5rem;
+  }
+
+  .calendar-section {
+    max-width: 300px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .dashboard-content {
+    flex-direction: column;
+  }
+
+  .sidebar-open .dashboard-main {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .calendar-section {
+    max-width: 400px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .dashboard-cards {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-main {
+    padding: 40px 1rem 1rem 1rem;
+  }
+
+  .dashboard-content {
+    gap: 1rem;
+  }
+
+  .card {
+    min-height: 100px;
+    padding: 1.25rem 1rem;
+  }
+
+  .card p {
+    font-size: 1.75rem;
+  }
+
+  .calendar-section {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-cards {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .search-bar input {
+    width: 100%;
+  }
+}
+
+/* Inaadjust yung sa sidebar ng doctor */
+:root {
+  --doctor-sidebar-open: 260px;
+  --doctor-sidebar-closed: 0px;
+}
+
+.doctor-layout {
+  min-height: 100vh;
+}
+
+.doctor-main {
+  min-height: 100vh;
+  padding: 16px;
+  transition: margin-left 0.2s ease;
+}
+
+.doctor-layout.sidebar-open .doctor-main {
+  margin-left: var(--doctor-sidebar-open);
+}
+
+.doctor-layout.sidebar-collapsed .doctor-main {
+  margin-left: var(--doctor-sidebar-closed);
+}
+
+.doctor-layout .sidebar {
+  z-index: 1000;
+}
+
+.doctor-layout .sidebar~.sidebar {
+  display: none !important;
+}
+
+/* Previous Patients (Placeholder) */
+.recent-patients-section {
+  margin-top: 16px;
+}
+
+.recent-patients-section .section-header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.recent-patients-section h3 {
+  margin: 0;
+}
+
+.section-subtitle {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.recent-patients-full {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.recent-patients-full .section-header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.section-subtitle {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+/* Grid layout: rows and columns */
+.patient-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+@media (max-width: 1100px) {
+  .patient-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .patient-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.patient-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+/* Patient profile HMO card styles */
+.hmo-card-section {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.hmo-card-title {
+  font-weight: 600;
+  color: #374151;
+}
+
+.hmo-card-img {
+  width: 160px;
+  height: 110px;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #f5f5f5;
+  border: 1px solid #e5e7eb;
+}
+
+.hmo-card-placeholder {
+  width: 160px;
+  height: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px dashed #d1d5db;
+  color: #6b7280;
+}
+
+@media (max-width: 700px) {
+  .hmo-card-img,
+  .hmo-card-placeholder {
+    width: 120px;
+    height: 86px;
+  }
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 18px 20px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: box-shadow .15s ease, transform .15s ease;
+}
+
+.card:hover {
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+.card h4 {
+  margin: 0 0 8px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.card p {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #111827;
+}

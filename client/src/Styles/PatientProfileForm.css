@@ -1,0 +1,161 @@
+.container {
+  max-width: 600px;
+  margin: 40px auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  padding: 32px 24px;
+}
+
+h1, h2 {
+  color: #000000;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+form {
+  width: 100%;
+}
+
+.form-label {
+  font-weight: 600;
+  color: #34495e;
+}
+
+.form-control, .form-select, textarea {
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.form-control:focus, .form-select:focus, textarea:focus {
+  border-color: #4f8cff;
+  outline: none;
+}
+
+.btn-primary {
+  background: #4f8cff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 24px;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.btn-primary:hover {
+  background: #2563eb;
+}
+
+.btn-secondary {
+  background: #e5e7eb;
+  color: #222;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 18px;
+  font-weight: 500;
+  margin-right: 8px;
+}
+
+.btn-secondary:hover {
+  background: #d1d5db;
+}
+
+.btn-outline-danger {
+  border: 1px solid #e74c3c;
+  color: #e74c3c;
+  background: transparent;
+  border-radius: 6px;
+  padding: 6px 14px;
+  margin-left: 8px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.btn-outline-danger:hover {
+  background: #e74c3c;
+  color: #fff;
+}
+
+.alert {
+  margin-top: 24px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+/* HMO upload box */
+.hmo-upload-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.hmo-upload-box {
+  width: 160px;
+  height: 110px;
+  border: 2px dashed #b0b0b0;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fafbfc;
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.2s;
+  overflow: hidden;
+}
+
+.hmo-upload-box:hover {
+  border-color: #4f8cff;
+}
+
+.hmo-plus {
+  font-size: 2.5rem;
+  color: #b0b0b0;
+  font-weight: bold;
+  user-select: none;
+}
+
+.hmo-has-image {
+  background-size: cover;
+  background-position: center;
+  border: 2px solid #4f8cff;
+}
+
+.hmo-options {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 10px;
+  z-index: 2;
+}
+
+.hmo-option-btn {
+  background: #fff;
+  color: #222;
+  border: none;
+  border-radius: 5px;
+  padding: 6px 18px;
+  font-size: 1rem;
+  cursor: pointer;
+  opacity: 0.95;
+  transition: background 0.2s, color 0.2s;
+}
+
+.hmo-option-btn:hover {
+  background: #4f8cff;
+  color: #fff;
+}
+
+@media (max-width: 700px) {
+  .container {
+    padding: 16px 4px;
+  }
+}

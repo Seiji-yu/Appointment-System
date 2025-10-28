@@ -1,0 +1,115 @@
+.top-navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 60px;
+  padding: 0 20px;
+  background-color: #fff !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.menu-icon {
+  cursor: pointer;
+}
+
+.nav-icons {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-right: 10px;
+}
+
+:root {
+  --sidebar-open-width: 260px;
+  --sidebar-collapsed-width: 0px;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: var(--sidebar-open-width) !important;
+  background-color: #081047 !important;
+  color: #fff !important;
+  z-index: 1000;
+  transition: transform 0.3s ease, width 0.3s ease;
+  padding-top: 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow: hidden;
+  transform: translateX(0);
+}
+
+.sidebar.collapsed {
+  width: 0;
+  transform: translateX(-100%);
+  pointer-events: none;
+  opacity: 0;
+}
+
+body.with-sidebar-open {
+  padding-left: var(--sidebar-open-width);
+  transition: padding-left 0.3s ease;
+}
+
+body.with-sidebar-collapsed {
+  padding-left: 0;
+  transition: padding-left 0.3s ease;
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  font-weight: 600;
+}
+
+.sidebar-list {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar-item {
+  padding: 15px 20px;
+}
+
+.sidebar-item a {
+  text-decoration: none;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sidebar-item a:hover {
+  background-color: #292a33;
+  border-radius: 8px;
+}
+
+.sidebar-header svg {
+  cursor: pointer;
+  font-size: 2rem;
+  transition: transform 0.2s;
+  align-self: center;
+}
+
+.sidebar-header svg:hover {
+  transform: scale(1.2);
+  color: #929dda;
+}
+
+.sidebar-bottom {
+  margin-top: auto;
+  margin-bottom: 20px;
+}
+
+.dashboard,
+.patient-dashboard,
+.dashboard-main {
+  font-family: 'Poppins', sans-serif;
+  color: #333;
+}

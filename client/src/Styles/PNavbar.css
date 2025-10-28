@@ -1,0 +1,72 @@
+/* Patient Navbar */
+.patient-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: var(--sidebar-open-width);
+  background-color: #081047 !important;
+  color: #fff !important;
+  z-index: 1000;
+  transition: transform 0.3s ease, width 0.3s ease;
+  padding-top: 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow: hidden;
+  transform: translateX(0);
+}
+
+.patient-sidebar.collapsed {
+  width: 0;
+  transform: translateX(-100%);
+  pointer-events: none;
+  opacity: 0;
+}
+
+.patient-sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  font-weight: 600;
+}
+
+.patient-sidebar-list {
+  list-style: none;
+  padding: 0;
+}
+
+.patient-sidebar-item {
+  padding: 15px 20px;
+}
+
+.patient-sidebar-item a {
+  text-decoration: none;
+  color: #fff !important;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.patient-sidebar-item a:hover {
+  background-color: #292a33 !important;
+  border-radius: 8px;
+}
+
+.patient-sidebar-header svg {
+  cursor: pointer;
+  font-size: 2rem;
+  transition: transform 0.2s;
+  align-self: center;
+}
+
+.patient-sidebar-header svg:hover {
+  transform: scale(1.2);
+  color: #929dda;
+}
+
+.patient-sidebar-bottom {
+  margin-top: auto;
+  margin-bottom: 20px;
+}

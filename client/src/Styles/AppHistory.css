@@ -1,0 +1,108 @@
+/* Full-width layout fix */
+.patient-history.dashboard {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.patient-history .dashboard-main {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Centered container */
+.patient-history .ph-container {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Tab buttons */
+.patient-history .tab-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.patient-history .tab {
+  padding: 0.5rem 1.5rem;
+  background-color: #eee;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.patient-history .tab:hover {
+  background-color: #ddd;
+}
+
+.patient-history .tab.active {
+  background-color: #bcc4d0;
+  color: white;
+}
+
+/* Tab content */
+.patient-history .tab-content {
+  width: 100%;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Appointment cards */
+.patient-history .appointment-card {
+  width: 100%;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.patient-history .card.empty {
+  width: 100%;
+  text-align: center;
+  padding: 1rem;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  border: 1px dashed #ccc;
+}
+
+.patient-history .status {
+  font-weight: bold;
+  color: #374151;
+}
+
+.patient-history .appointment-card {
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.patient-history .status {
+  font-weight: bold;
+  color: #374151;
+}
+
+.patient-history .nav-tabs .nav-link {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.patient-history .card.text-center {
+  background-color: #f9f9f9;
+  border: 1px dashed #ccc;
+  border-radius: 12px;
+  font-weight: 500;
+  color: #555;
+}
