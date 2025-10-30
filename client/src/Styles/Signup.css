@@ -174,8 +174,8 @@ form {
   gap: 0.5rem;
 }
 
-input,
-select {
+.signup-page input,
+.signup-page select {
   width: 100%;
   padding: 0.8rem;
   background: #FAEAB1; 
@@ -184,16 +184,13 @@ select {
   color: #334443; /* text inside inputs */
   font-size: 0.95rem;
 }
-
-input::placeholder {
+.signup-page input::placeholder {
   color: rgba(51,68,67,0.6);
 }
-
-select {
+.signup-page select {
   color: #ccc;
 }
-
-select option {
+.signup-page select option {
   background: #1a1a1a;
   color: #fff;
 }

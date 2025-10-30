@@ -33,7 +33,7 @@ export default function Navbar(props) {
 
       <nav className={`sidebar ${open ? '' : 'collapsed'}`}>
         <div className="sidebar-header">
-          <h3>Menu</h3>
+          <h3>Doctor Menu</h3>
           <IoIcons.IoMdClose onClick={toggle} />
         </div>
         <ul className="sidebar-list">

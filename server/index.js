@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -7,6 +8,9 @@ const PatientModel = require('./Models/Patient');
 const AppointmentModel = require('./Models/Appointment');
 const LicenseRequestModel = require('./Models/License'); // unify model usage
 const AvailabilityModel = require('./Models/Availability');
+const crypto = require('crypto');
+let nodemailer;
+try { nodemailer = require('nodemailer'); } catch { nodemailer = null; }
 
 const app = express();
 app.use(express.json({ limit: '10mb' }));
@@ -82,21 +86,28 @@ app.post('/login', async (req, res) => {
           message: 'Your License Number is Pending'
         });
       } else {
-        // No record yet: create a pending request
-        try {
-          await LicenseRequestModel.create({
-            doctorEmail: user.email,
-            licenseNumber: supplied,
-            status: 'pending'
-          });
-        } catch (e) {
-          if (e.code !== 11000) console.error('Create license request error:', e);
-        }
-        return res.json({
-          status: 'invalid_license',
-          message: 'Your License Number is Pending'
+      // No record yet: create a pending request
+      try {
+        const newReq = await LicenseRequestModel.create({
+          doctorEmail: user.email,
+          licenseNumber: supplied,
+          status: 'pending'
         });
+        // Notify connected admin clients
+        sseBroadcast('license_request_pending', {
+          id: newReq._id,
+          doctorEmail: user.email,
+          licenseNumber: supplied,
+          createdAt: newReq.createdAt
+        });
+      } catch (e) {
+        if (e.code !== 11000) console.error('Create license request error:', e);
       }
+      return res.json({
+        status: 'invalid_license',
+        message: 'Your License Number is Pending'
+      });
+    }
     }
 
     const safeUser = user.toObject();
@@ -364,6 +375,19 @@ function nowHHMMLocal() {
   return `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
 }
 
+// Round up an HH:mm string to the next step minute (default: 5 mins)
+function roundUpHHMM(hhmm, step = 5) {
+  try {
+    const mins = toMinutes(hhmm);
+    const rounded = Math.ceil(mins / step) * step;
+    // clamp to 23:59 max to keep within the day
+    const capped = Math.min(rounded, (24 * 60) - 1);
+    return fromMinutes(capped);
+  } catch {
+    return hhmm;
+  }
+}
+
 app.get('/doctor/availability', async (req, res) => {
   try {
     const { email, date } = req.query;
@@ -523,11 +547,21 @@ app.get('/api/doctor/:doctorId/available-slots', async (req, res) => {
     if (String(as) === 'ranges') {
       const startToday = todayStartLocal();
       const now = nowHHMMLocal();
+      const nowRounded = roundUpHHMM(now, 5);
 
       const ranges = availability.ranges
         .filter(r => isValidRange(r))
-        // hide past for "today": require range start > now
-        .filter(r => (day.getTime() === startToday.getTime() ? r.start > now : true))
+        .map(r => {
+          // For today, trim partially past ranges so they start at the next rounded minute
+          if (day.getTime() === startToday.getTime()) {
+            if (r.end <= nowRounded) return null; // fully past
+            if (r.start < nowRounded) {
+              return { ...r, start: nowRounded };
+            }
+          }
+          return r;
+        })
+        .filter(Boolean)
         // exclude ranges whose start is already booked
         .filter(r => !bookedSet.has(r.start));
 
@@ -558,6 +592,44 @@ app.get('/api/doctor/:doctorId/available-slots', async (req, res) => {
     return res.json({ status: 'success', slots });
   } catch (err) {
     console.error('available-slots error:', err);
+    return res.status(500).json({ status: 'error', message: 'Server error', details: err.message });
+  }
+});
+
+// List appointments in PDashboard
+app.get('/api/appointments', async (req, res) => {
+  try {
+    const { patientId, patientEmail, status } = req.query;
+    const query = {};
+
+    if (patientId) {
+      if (!mongoose.Types.ObjectId.isValid(patientId)) {
+        return res.status(400).json({ status: 'bad_request', message: 'Invalid patientId' });
+      }
+      query.patient = new mongoose.Types.ObjectId(patientId);
+    } else if (patientEmail) {
+      const patient = await PatientModel.findOne({ email: patientEmail });
+      if (!patient) return res.status(404).json({ status: 'not_found', message: 'Patient not found' });
+      query.patient = patient._id;
+    }
+
+    if (status) {
+      const statuses = String(status).split(',').map(s => s.trim()).filter(Boolean);
+      if (statuses.length) query.status = { $in: statuses };
+    } else {
+      // default to active bookings
+      query.status = { $in: ['pending', 'approved'] };
+    }
+
+    const items = await AppointmentModel.find(query)
+      // include essential doctor fields so patient details can render immediately without extra fetches
+      .populate('doctor', 'firstName lastName email contact fees role profileImage specialty experience')
+      .populate('patient', 'firstName lastName name email profileImage')
+      .sort({ date: -1, updatedAt: -1 });
+
+    return res.json({ status: 'success', appointments: items });
+  } catch (err) {
+    console.error('List appointments error:', err);
     return res.status(500).json({ status: 'error', message: 'Server error', details: err.message });
   }
 });
@@ -654,7 +726,8 @@ app.post('/api/appointments', async (req, res) => {
 
     const populated = await AppointmentModel.findById(appt._id)
       .populate('patient', 'firstName lastName name email age gender contact')
-      .populate('doctor', 'firstName lastName email');
+      // include contact/fees/specialty/experience so PatientAppDetails has full info on redirect
+      .populate('doctor', 'firstName lastName email contact fees role profileImage specialty experience');
 
     return res.json({ status: 'success', appointment: populated });
   } catch (err) {
@@ -673,7 +746,7 @@ app.get('/api/appointments/:id', async (req, res) => {
 
     const appt = await AppointmentModel.findById(id)
       .populate('patient', 'firstName lastName name email age gender contact hmoNumber hmoCardImage')
-      .populate('doctor', 'firstName lastName email contact fees role profileImage');
+      .populate('doctor', 'firstName lastName email contact fees role profileImage specialty experience');
 
     if (!appt) return res.status(404).json({ status: 'not_found', message: 'Appointment not found' });
 
@@ -824,6 +897,10 @@ app.post('/doctor/get-profile', async (req, res) => {
     if (!email) return res.status(400).json({ error: 'Email required' });
 
     const doctor = await PsychiatristModel.findOne({ email });
+    // Optional: ensure response contact is numeric-only
+    if (doctor && doctor.contact) {
+      doctor.contact = String(doctor.contact).replace(/\D/g, '');
+    }
     res.json({ doctor: doctor || null });
   } catch (err) {
     console.error('Get doctor profile error:', err);
@@ -840,16 +917,21 @@ app.post('/doctor/profile', async (req, res) => {
       lastName,
       fees,
       experience,
+      specialty,
       education,
       about,
       address1,
-      address2,
+      contact,
       profileImage
     } = req.body;
 
     if (!email) {
       return res.status(400).json({ status: 'error', message: 'Email required to update profile' });
     }
+
+    // Normalize contact to digits-only
+    const normalizedContact = String(contact ?? '')
+      .replace(/\D/g, '');
 
     const updatedDoctor = await PsychiatristModel.findOneAndUpdate(
       { email },
@@ -858,10 +940,12 @@ app.post('/doctor/profile', async (req, res) => {
         lastName,
         fees,
         experience,
+        specialty,
         education,
         about,
         address1,
-        address2,
+        // Persist new 'contact' field only
+        contact: normalizedContact,
         profileImage
       },
       { new: true, upsert: true }
@@ -898,9 +982,19 @@ app.get('/api/patients/recent', async (req, res) => {
     const lim = Math.min(Math.max(parseInt(limit, 10) || 6, 1), 24);
 
     const items = await AppointmentModel.aggregate([
-      { $match: { doctor: new mongoose.Types.ObjectId(doctorId), status: { $in: ['completed', 'Completed'] } } },
+      { 
+        $match: { 
+          doctor: new mongoose.Types.ObjectId(doctorId), 
+          status: { $in: ['completed', 'Completed'] } 
+        } 
+      },
       { $sort: { date: -1, updatedAt: -1 } },
-      { $group: { _id: '$patient', lastAppointmentDate: { $first: '$date' } } },
+      { 
+        $group: { 
+          _id: '$patient', 
+          lastAppointmentDate: { $first: '$date' } 
+        } 
+      },
       { $sort: { lastAppointmentDate: -1 } },
       { $limit: lim },
       {
@@ -963,6 +1057,27 @@ app.patch('/api/license-requests/:id', async (req, res) => {
       return res.status(400).json({ status: 'bad_request', message: 'Invalid status value' });
     }
 
+    // Load the request we are updating first to know the doctor context
+    const reqDoc = await LicenseRequestModel.findById(id);
+    if (!reqDoc) {
+      return res.status(404).json({ status: 'not_found', message: 'License request not found' });
+    }
+
+    let autoRevoked = 0;
+    if (status === 'approved') {
+      // Ensure only ONE approved license per doctorEmail at any time
+      const revokeNote = `Auto-revoked on ${new Date().toISOString()} in favor of ${reqDoc.licenseNumber}`;
+      const revokeRes = await LicenseRequestModel.updateMany(
+        {
+          doctorEmail: reqDoc.doctorEmail,
+          status: 'approved',
+          _id: { $ne: reqDoc._id }
+        },
+        { $set: { status: 'rejected', note: revokeNote } }
+      );
+      autoRevoked = revokeRes?.modifiedCount || 0;
+    }
+
     const updated = await LicenseRequestModel.findByIdAndUpdate(
       id,
       { status, ...(note !== undefined ? { note } : {}) },
@@ -978,7 +1093,8 @@ app.patch('/api/license-requests/:id', async (req, res) => {
 
     return res.json({
       status: 'success',
-      request: updated
+      request: updated,
+      autoRevoked
     });
   } catch (err) {
     console.error('Update license request error:', err);
@@ -990,10 +1106,6 @@ app.patch('/api/license-requests/:id', async (req, res) => {
   }
 });
 
-// Prints in terminal that server is Running
-app.listen(3001, () => {
-  console.log('Server is running');
-});
 
 // add or remove a doctor from patient's favorites
 app.post('/patient/favorites', async (req, res) => {
@@ -1031,39 +1143,168 @@ app.post('/patient/favorites', async (req, res) => {
   }
 });
 
-// List appointments in PDashboard
-app.get('/api/appointments', async (req, res) => {
-  try {
-    const { patientId, patientEmail, status } = req.query;
-    const query = {};
+// -------- Password reset (forgot password) --------
+function buildAppBaseUrl(req) {
+  const origin = req.headers.origin || '';
+  if (origin) return origin; // e.g., http://localhost:5173
+  // fallback to localhost client default
+  return 'http://localhost:5173';
+}
 
-    if (patientId) {
-      if (!mongoose.Types.ObjectId.isValid(patientId)) {
-        return res.status(400).json({ status: 'bad_request', message: 'Invalid patientId' });
+function buildAppBaseUrl(req) {
+  return process.env.FRONTEND_URL || req.headers.origin || 'http://localhost:5173';
+}
+
+async function getMailerTransport() {
+  if (!nodemailer) throw new Error('nodemailer not installed');
+  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS } = process.env;
+  if (SMTP_HOST && SMTP_USER && SMTP_PASS) {
+    const port = Number(SMTP_PORT) || 587;
+    const secure = port === 465;
+    const user = String(SMTP_USER).trim();
+    const pass = String(SMTP_PASS).replace(/\s+/g, '').trim();
+    const transport = nodemailer.createTransport({
+      host: SMTP_HOST,
+      port,
+      secure,
+      auth: {
+        user,
+        // strip any spaces pasted from Google’s UI and trim
+        pass
+      },
+      tls: {
+        rejectUnauthorized: false
       }
-      query.patient = new mongoose.Types.ObjectId(patientId);
-    } else if (patientEmail) {
-      const patient = await PatientModel.findOne({ email: patientEmail });
-      if (!patient) return res.status(404).json({ status: 'not_found', message: 'Patient not found' });
-      query.patient = patient._id;
+    });
+    try {
+      await transport.verify();
+      const masked = user.replace(/(.{2}).+(@.*)/, '$1***$2');
+      console.log('[mailer] Using SMTP transport:', SMTP_HOST, 'port', port, 'secure', secure, 'user', masked);
+    } catch (e) {
+      console.error('[mailer] SMTP verify failed:', e.response || e.message);
     }
-
-    if (status) {
-      const statuses = String(status).split(',').map(s => s.trim()).filter(Boolean);
-      if (statuses.length) query.status = { $in: statuses };
-    } else {
-      // default to active bookings
-      query.status = { $in: ['pending', 'approved'] };
-    }
-
-    const items = await AppointmentModel.find(query)
-      .populate('doctor', 'firstName lastName profileImage')
-      .populate('patient', 'firstName lastName name email profileImage')
-      .sort({ date: -1, updatedAt: -1 });
-
-    return res.json({ status: 'success', appointments: items });
-  } catch (err) {
-    console.error('List appointments error:', err);
-    return res.status(500).json({ status: 'error', message: 'Server error', details: err.message });
+    return transport;
   }
+  // Dev fallback: Ethereal
+  const test = await nodemailer.createTestAccount();
+  console.log('[mailer] Using Ethereal dev inbox');
+  return nodemailer.createTransport({
+    host: 'smtp.ethereal.email',
+    port: 587,
+    secure: false,
+    auth: { user: test.user, pass: test.pass }
+  });
+}
+
+function escapeRegex(s) {
+  return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// Request password reset (always respond success to avoid account enumeration)
+app.post('/auth/forgot-password', async (req, res) => {
+  try {
+    const emailRaw = (req.body?.email || '').trim();
+    if (!emailRaw) return res.json({ status: 'success' });
+
+    // Find user in either collection
+    const ci = new RegExp(`^${escapeRegex(emailRaw)}$`, 'i');
+    let user = await PsychiatristModel.findOne({ email: ci });
+    let userType = 'psych';
+    if (!user) { user = await PatientModel.findOne({ email: ci }); userType = 'patient'; }
+    if (!user) return res.json({ status: 'success' });
+
+    // Generate token
+    const token = crypto.randomBytes(32).toString('hex');
+    const hash = crypto.createHash('sha256').update(token).digest('hex');
+    const expires = new Date(Date.now() + 15 * 60 * 1000); // 15 min
+
+    user.resetTokenHash = hash;
+    user.resetTokenExpires = expires;
+    await user.save();
+
+    // Send email
+    try {
+      const transport = await getMailerTransport();
+      const base = buildAppBaseUrl(req);
+      const link = `${base}/reset-password?token=${token}`;
+      const info = await transport.sendMail({
+        from: process.env.MAIL_FROM || process.env.SMTP_USER || 'no-reply@telepsychiatrist.local',
+        to: emailRaw,
+        subject: 'Password reset instructions',
+        text: `You requested a password reset. Use the link below within 15 minutes.\n\n${link}\n\nIf you did not request this, ignore this message.`,
+        html: `<p>You requested a password reset.</p><p><a href="${link}">Reset your password</a> (valid for 15 minutes)</p><p>If you didn't request this, you can ignore this email.</p>`
+      });
+      const preview = nodemailer.getTestMessageUrl ? nodemailer.getTestMessageUrl(info) : null;
+      return res.json({ status: 'success', preview });
+    } catch (e) {
+      console.error('Mailer error:', e.message);
+      // Still return success to client to avoid enumeration
+      return res.json({ status: 'success' });
+    }
+  } catch (err) {
+    console.error('forgot-password error:', err);
+    return res.status(500).json({ status: 'error', message: 'Server error' });
+  }
+});
+
+// Reset password using token
+app.post('/auth/reset-password', async (req, res) => {
+  try {
+    const { token, password } = req.body || {};
+    if (!token || !password) {
+      return res.status(400).json({ status: 'bad_request', message: 'Missing token or password' });
+    }
+    const hash = crypto.createHash('sha256').update(token).digest('hex');
+    const now = new Date();
+    // look in both collections
+    let user = await PsychiatristModel.findOne({ resetTokenHash: hash, resetTokenExpires: { $gt: now } });
+    let userModel = 'psych';
+    if (!user) { user = await PatientModel.findOne({ resetTokenHash: hash, resetTokenExpires: { $gt: now } }); userModel = 'patient'; }
+    if (!user) return res.status(400).json({ status: 'invalid_token', message: 'Invalid or expired token' });
+
+    const hashed = await bcrypt.hash(String(password), 10);
+    user.password = hashed;
+    user.resetTokenHash = null;
+    user.resetTokenExpires = null;
+    await user.save();
+
+    return res.json({ status: 'success' });
+  } catch (err) {
+    console.error('reset-password error:', err);
+    return res.status(500).json({ status: 'error', message: 'Server error' });
+  }
+});
+
+const sseClients = new Set();
+
+function sseBroadcast(event, payload) {
+  const line = `event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`;
+  for (const res of sseClients) {
+    try { res.write(line); } catch {}
+  }
+}
+
+app.get('/api/license-requests/stream', (req, res) => {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache, no-transform',
+    'Connection': 'keep-alive'
+  });
+  res.write('retry: 10000\n\n'); // client auto-reconnect
+  sseClients.add(res);
+
+  // heartbeat to keep connection alive
+  const timer = setInterval(() => {
+    try { res.write('event: ping\ndata: {}\n\n'); } catch {}
+  }, 25000);
+
+  req.on('close', () => {
+    clearInterval(timer);
+    sseClients.delete(res);
+  });
+});
+
+// Prints in terminal that server is Running
+app.listen(3001, () => {
+  console.log('Server is running');
 });

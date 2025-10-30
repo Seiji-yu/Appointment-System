@@ -27,13 +27,28 @@ function DoctorProfile() {
     specialty: 'Mental Health',
     education: [''],
     address1: '',
-    address2: '',
+    contact: '',
     about: ''
   });
 
   // snapshots to restore on cancel
   const [origForm, setOrigForm] = useState(null);
   const [origPreview, setOrigPreview] = useState(null);
+
+  // Specialty options
+  const SPECIALTIES = [
+    'Mental Health',
+    'General Psychiatry',
+    'Child and Adolescent Psychiatry',
+    'Geriatric Psychiatry',
+    'Addiction Psychiatry',
+    'Consultation-Liaison Psychiatry',
+    'Forensic Psychiatry',
+    'Community Psychiatry',
+    'Psychotherapy',
+  ];
+  const OTHER_VALUE = '__OTHER__';
+  const specialtySelectValue = SPECIALTIES.includes(form.specialty) ? form.specialty : OTHER_VALUE;
 
   const toYMD = (d) => {
     const y = d.getFullYear();
@@ -54,6 +69,22 @@ function DoctorProfile() {
   const nowHHMM = () => {
     const n = new Date();
     return `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
+  };
+
+  // Round up an HH:mm string to the next step minute (default: 5 mins)
+  const roundUpHHMM = (hhmm, step = 5) => {
+    try {
+      const [h, m] = hhmm.split(':').map(Number);
+      if (Number.isNaN(h) || Number.isNaN(m)) return hhmm;
+      const mins = h * 60 + m;
+      const rounded = Math.ceil(mins / step) * step;
+      const capped = Math.min(rounded, (24 * 60) - 1);
+      const hh = String(Math.floor(capped / 60)).padStart(2, '0');
+      const mm = String(capped % 60).padStart(2, '0');
+      return `${hh}:${mm}`;
+    } catch {
+      return hhmm;
+    }
   };
 
   // Fetch doctor info
@@ -80,7 +111,7 @@ function DoctorProfile() {
             specialty: doctor.specialty || 'Mental Health',
             education: Array.isArray(doctor.education) ? doctor.education : [''],
             address1: doctor.address1 || '',
-            address2: doctor.address2 || '',
+            contact: doctor.contact || '',
             about: doctor.about || ''
           };
           setForm(next);
@@ -95,7 +126,8 @@ function DoctorProfile() {
         console.error('Error fetching doctor profile:', err);
         setMessage('Error loading profile data.');
       });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+
+      
   }, []);
 
   // Image upload handlers
@@ -115,7 +147,20 @@ function DoctorProfile() {
   // Form change handlers
   const handleChange = (e) => {
     if (!editMode) return;
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    // Enforce numeric-only input for contact number (keep leading zeros by using text input)
+    const nextVal = name === 'contact' ? value.replace(/\D/g, '') : value;
+    setForm({ ...form, [name]: nextVal });
+  };
+  const handleSpecialtySelect = (e) => {
+    if (!editMode) return;
+    const v = e.target.value;
+    if (v === OTHER_VALUE) {
+      // keep existing custom value; if empty, set placeholder text
+      setForm({ ...form, specialty: form.specialty || '' });
+    } else {
+      setForm({ ...form, specialty: v });
+    }
   };
   const handleEducationChange = (index, value) => {
     if (!editMode) return;
@@ -169,7 +214,7 @@ function DoctorProfile() {
         education: form.education,
         about: form.about,
         address1: form.address1,
-        address2: form.address2,
+        contact: form.contact,
         profileImage: profilePreview // save new/removed image
       };
 
@@ -208,7 +253,7 @@ function DoctorProfile() {
     }
   };
 
-  const addRange = () => setRanges(prev => [...prev, { start: '09:00', end: '10:00' }]);
+  const addRange = () => setRanges(prev => [...prev, { start: '09:00 ', end: '10:00' }]);
   const updateRange = (i, key, val) => {
     setRanges(prev => prev.map((r, idx) => idx === i ? { ...r, [key]: val } : r));
   };
@@ -231,9 +276,12 @@ function DoctorProfile() {
         return;
       }
       let payloadRanges = ranges;
+      let partialToday = false;
       if (picked.getTime() === todayStart.getTime()) {
         const now = nowHHMM();
         payloadRanges = ranges.filter(r => r.end > now);
+        // if any kept range overlaps now, mark partial
+        partialToday = payloadRanges.some(r => r.start < now && r.end > now);
         if (payloadRanges.length === 0) {
           setMessage('All time ranges are in the past for today.');
           return;
@@ -241,7 +289,16 @@ function DoctorProfile() {
       }
       const payload = { email: form.email, date: availDate, ranges: payloadRanges };
       const res = await axios.post('http://localhost:3001/doctor/availability', payload);
-      setMessage(res.data?.status === 'success' ? 'Availability saved.' : 'Error saving availability.');
+      if (res.data?.status === 'success') {
+        if (partialToday) {
+          const from = roundUpHHMM(nowHHMM());
+          setMessage(`For today, patients will only see times from ${from} onward.`);
+        } else {
+          setMessage('Availability saved.');
+        }
+      } else {
+        setMessage('Error saving availability.');
+      }
     } catch (e) {
       setMessage(e?.response?.data?.message || 'Error saving availability.');
     }
@@ -393,13 +450,25 @@ function DoctorProfile() {
                   <label className="form-label">Specialty</label>
                   <select
                     className="form-select"
-                    name="specialty"
-                    value={form.specialty}
-                    onChange={handleChange}
+                    name="specialtySelect"
+                    value={specialtySelectValue}
+                    onChange={handleSpecialtySelect}
                     disabled={!editMode}
                   >
-                    <option value="Mental Health">Mental Health</option>
+                    {SPECIALTIES.map((s) => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                    <option value={OTHER_VALUE}>Other…</option>
                   </select>
+                  {editMode && specialtySelectValue === OTHER_VALUE && (
+                    <input
+                      type="text"
+                      className="form-control mt-2"
+                      placeholder="Enter specialty"
+                      value={form.specialty}
+                      onChange={(e) => setForm({ ...form, specialty: e.target.value })}
+                    />
+                  )}
                 </div>
 
                 <div className="mb-3">
@@ -432,7 +501,7 @@ function DoctorProfile() {
                 </div>
 
                 <div className="mb-3">
-                  <label className="form-label">Primary Address</label>
+                  <label className="form-label">Clinic Address</label>
                   <input
                     type="text"
                     className="form-control"
@@ -444,14 +513,17 @@ function DoctorProfile() {
                 </div>
 
                 <div className="mb-3">
-                  <label className="form-label">Secondary Address</label>
+                  <label className="form-label">Contact Number</label>
                   <input
                     type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     className="form-control"
-                    name="address2"
-                    value={form.address2}
+                    name="contact"
+                    value={form.contact}
                     onChange={handleChange}
                     readOnly={!editMode}
+                    placeholder="e.g., 09171234567"
                   />
                 </div>
 

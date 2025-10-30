@@ -82,7 +82,12 @@ export default function ManageApp() {
             <h1>Manage Appointments</h1>
             <div>
               <label style={{ marginRight: 8 }}>Filter:</label>
-              <select value={filter} onChange={e => setFilter(e.target.value)}>
+              <select
+                className="form-select form-select-sm"
+                style={{ display: 'inline-block', width: 140 }}
+                value={filter}
+                onChange={e => setFilter(e.target.value)}
+              >
                 <option value="all">All</option>
                 <option value="pending">Pending</option>
                 <option value="approved">Approved</option>
@@ -130,11 +135,11 @@ export default function ManageApp() {
                         <td>
                           <input
                             type="text"
+                            className="form-control"
                             value={appt.notes || ''}
                             onChange={(e) => setAppointments(appts => appts.map(a => a._id === appt._id ? { ...a, notes: e.target.value } : a))}
                             onBlur={(e) => updateAppt(appt._id, { notes: e.target.value })}
                             placeholder="Add note..."
-                            style={{ width: '100%' }}
                           />
                         </td>
                         <td style={{ textTransform: 'capitalize' }}>{appt.status}</td>

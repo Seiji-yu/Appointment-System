@@ -6,7 +6,8 @@ import Login from './Auth/Login'
 import Dashboard from './Pages/DoctorSide/Ddashboard'
 import DoctorLogs from './Pages/DoctorSide/DoctorLogs'
 import ManageApp from './Pages/DoctorSide/ManageApp'
-import Settings from './Pages/Others/Settings'
+import PSettings from './Pages/Others/PSettings'
+import DSettings from './Pages/Others/DSettings'
 import About from './Pages/Others/About'
 import PatientProfileForm from './Pages/PatientSide/PatientProfileForm'
 import PDashboard from './Pages/PatientSide/PDashboard'
@@ -18,6 +19,8 @@ import DoctorProfile from './Pages/DoctorSide/DoctorProfile'
 import Admin from './Pages/Admin/Admin'
 import PatientAppDetails from './Pages/PatientSide/PatientAppDetails'
 import AdminLog from './Auth/AdminLog'
+import ForgotPassword from './Auth/ForgotPassword'
+import ResetPassword from './Auth/ResetPassword'
 import DoctorPatientDetails from './Pages/DoctorSide/DoctorPatientDetails'
 
 function App() {
@@ -29,10 +32,13 @@ function App() {
         <Route path='/' element={<Signup />} />
         <Route path='/register' element={<Signup />} />
         <Route path='/login' element={<Login />} />
+  <Route path='/forgot-password' element={<ForgotPassword />} />
+  <Route path='/reset-password' element={<ResetPassword />} />
         <Route path='/dashboard' element={<Dashboard />} />
         <Route path='/DoctorLogs' element={<DoctorLogs />} />
         <Route path='/Appointments' element={<ManageApp />} />
-        <Route path='/Settings' element={<Settings />} />
+        <Route path='/PSettings' element={<PSettings />} />
+        <Route path='/DSettings' element={<DSettings />} />
         <Route path='/About' element={<About />} />
         <Route path='/PatientForm' element={< PatientProfileForm />} />
         <Route path='/PatientDashboard' element={<PDashboard />} />

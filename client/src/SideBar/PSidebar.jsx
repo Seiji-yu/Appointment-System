@@ -36,7 +36,7 @@ export const PSidebar = [
 
     {
         title: 'Settings',
-        path: '/Settings',
+        path: '/PSettings',
         icon: <AiIcons.AiFillSetting />,
         cName: 'nav-text'
     },

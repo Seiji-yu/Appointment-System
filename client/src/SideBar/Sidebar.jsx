@@ -29,8 +29,8 @@ export const SidebarData = [
         icon: <FaIcons.FaCalendarPlus />,
         cName: 'nav-text'
     },
-    
-        {
+
+    {
         title: 'Account Profile',
         path: '/DoctorProfile',
         icon: <FaIcons.FaWpforms />,
@@ -39,7 +39,7 @@ export const SidebarData = [
 
     {
         title: 'Settings',
-        path: '/Settings',
+        path: '/DSettings',
         icon: <IoIcons.IoMdSettings />,
         cName: 'nav-text'
     },
@@ -51,12 +51,12 @@ export const SidebarData = [
         cName: 'nav-text'
     },
     {
-            title: 'Logout',
-            path: '/Login',
-            icon: <IoLogOutOutline />,
-            cName: 'nav-text'
-        },
-    
+        title: 'Logout',
+        path: '/Login',
+        icon: <IoLogOutOutline />,
+        cName: 'nav-text'
+    },
+
 
 ]
 

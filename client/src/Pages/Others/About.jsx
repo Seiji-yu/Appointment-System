@@ -45,17 +45,17 @@ const About = () => {
         <div className="team-members">
           <div className="team-card">
             <img src="/images/member1.jpg" alt="Team Member 1" />
-            <h4>John Doe</h4>
+            <h4>Member 1</h4>
             <p>Lead Developer</p>
           </div>
           <div className="team-card">
             <img src="/images/member2.jpg" alt="Team Member 2" />
-            <h4>Jane Smith</h4>
+            <h4>Member 2</h4>
             <p>UI/UX Designer</p>
           </div>
           <div className="team-card">
             <img src="/images/member3.jpg" alt="Team Member 3" />
-            <h4>Mark Johnson</h4>
+            <h4>Member 3</h4>
             <p>Backend Engineer</p>
           </div>
         </div>
@@ -73,7 +73,6 @@ const About = () => {
             <h4>Quick Links</h4>
             <a href="/">Home</a>
             <a href="/About">About</a>
-            <a href="/Settings">Settings</a>
           </div>
 
           <div className="footer-contact">

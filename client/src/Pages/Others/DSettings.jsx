@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Navbar from '../../SideBar/Navbar.jsx';
 import '../../Styles/Ddashboard.css';
 
-function Settings() {
+function DSettings() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   return (
@@ -14,4 +14,4 @@ function Settings() {
     </div>
   );
 }
-export default Settings;
+export default DSettings;

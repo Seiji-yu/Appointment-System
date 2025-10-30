@@ -87,9 +87,9 @@ export default function PatientAppDetails() {
 
   if (!appointment) {
     return (
-      <div className="doctor-layout sidebar-open">
+      <div className="patient-layout">
         <PNavbar />
-        <div className="dashboard-main">
+        <div className="pad-main">
           <p style={{ color: 'crimson' }}>{error || 'No appointment data available.'}</p>
           <button className="btn btn-secondary" onClick={() => navigate('/PatientDashboard')}>Back to Home</button>
         </div>
@@ -106,9 +106,9 @@ export default function PatientAppDetails() {
   console.log('Doctor data:', doc)
 
     return (
-    <div className="doctor-layout sidebar-open">
+    <div className="patient-layout">
       <PNavbar />
-      <div className="dashboard-main">
+      <div className="pad-main">
         <div className="pad-dashboard-grid">
           {/* left side doctor profile */}
           <section className="card doctor-profile">

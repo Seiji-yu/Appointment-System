@@ -192,6 +192,15 @@ function Login() {
             <button type="submit" className="submit-btn" disabled={loading}>
               Sign in
             </button>
+            <div style={{ marginTop: 8, textAlign: 'center' }}>
+              <button
+                type="button"
+                onClick={() => navigate('/forgot-password')}
+                style={{ background: 'transparent', border: 'none', color: '#FAF8F1', textDecoration: 'underline', cursor: 'pointer' }}
+              >
+                Forgot password?
+              </button>
+            </div>
           </form>
         </div>
       </div>

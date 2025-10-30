@@ -19,7 +19,9 @@ const PatientSchema = new mongoose.Schema({
     role: { type: String, enum: ['Patient'], required: true },
     profileImage: { type: String, default: '' },
     hmoCardImage: { type: String, default: '' },
-    favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Psychiatrist' }]
+    favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Psychiatrist' }],
+    resetTokenHash: { type: String, default: null },
+    resetTokenExpires: { type: Date, default: null }
 });
 
 const PatientModel = mongoose.model("Patient", PatientSchema);
