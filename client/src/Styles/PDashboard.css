@@ -119,19 +119,45 @@
   gap: 4px;
   flex: 1 1 auto;
 }
-.patient-dashboard .doctor-name { font-weight: 600; color: #081047; font-size: 20px; margin-top: 0px; margin-bottom: 0px; }
-.patient-dashboard .appt-datetime { font-size: 13px; color: #606f7b; }
+.patient-dashboard .doctor-name { 
+  font-weight: 600; 
+  color: #081047; 
+  font-size: 20px; 
+  margin-top: 0px; 
+  margin-bottom: 0px; 
+}
 
-.patient-dashboard .appt-right { margin-left: 12px; display:flex; align-items:center; }
+.patient-dashboard .appt-datetime { 
+  font-size: 13px; 
+  color: #606f7b; 
+}
+
+.patient-dashboard .appt-right { 
+  margin-left: 12px; 
+  display:flex; 
+  align-items:center; 
+}
+
 .patient-dashboard .appt-status {
   padding: 6px 10px;
   border-radius: 14px;
   font-size: 12px;
   font-weight: 700;
 }
-.patient-dashboard .status-pending { background:#fff4e5; color:#b36b00; }
-.patient-dashboard .status-approved { background:#e9f8ee; color:#1f7a3a; }
-.patient-dashboard .status-completed { background:#e8eefc; color:#1f3fa7; }
+.patient-dashboard .status-pending { 
+  background:#fff4e5; 
+  color:#b36b00; 
+}
+
+.patient-dashboard .status-approved { 
+  background:#e9f8ee; 
+  color:#1f7a3a; 
+}
+
+  .patient-dashboard .status-completed { 
+    background:#e8eefc; 
+    color:#1f3fa7; 
+  }
 
 /* row spacing for small screens */
 @media (max-width: 600px) {

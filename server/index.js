@@ -862,6 +862,32 @@ app.get('/api/doctors', async (req, res) => {
   }
 });
 
+// doctors list with average rating and count (computed from Appointment documents)
+app.get('/api/doctors/with-ratings', async (req, res) => {
+  try {
+    const agg = await AppointmentModel.aggregate([
+      { $match: { rating: { $exists: true, $ne: null } } },
+      { $group: { _id: '$doctor', avgRating: { $avg: '$rating' }, ratingCount: { $sum: 1 } } }
+    ]);
+
+    const ratingMap = {};
+    for (const a of agg) {
+      ratingMap[String(a._id)] = { avgRating: Number(a.avgRating.toFixed(2)), ratingCount: a.ratingCount };
+    }
+
+    const doctors = await PsychiatristModel.find({}, { password: 0 }).lean();
+    const result = doctors.map(d => {
+      const meta = ratingMap[String(d._id)] || { avgRating: null, ratingCount: 0 };
+      return Object.assign({}, d, { avgRating: meta.avgRating, ratingCount: meta.ratingCount });
+    });
+
+    return res.json({ status: 'success', doctors: result });
+  } catch (err) {
+    console.error('Error fetching doctors with ratings:', err);
+    return res.status(500).json({ status: 'error', message: 'Server error', details: err.message });
+  }
+});
+
 // Recent patients for a doctor (from completed appointments)
 app.get('/api/patients/recent', async (req, res) => {
   try {
@@ -1081,7 +1107,7 @@ app.post('/api/appointments/:id/review', async (req, res) => {
       if (updateErr && updateErr.name === 'ValidationError') {
         return res.status(400).json({ status: 'bad_request', message: 'Validation error', details: updateErr.errors });
       }
-      
+
       try {
         const raw = await AppointmentModel.collection.updateOne({ _id: new mongoose.Types.ObjectId(id) }, { $set: update });
         if (raw.matchedCount === 0) return res.status(404).json({ status: 'not_found', message: 'Appointment not found' });

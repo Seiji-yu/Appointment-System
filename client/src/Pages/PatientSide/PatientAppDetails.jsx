@@ -158,6 +158,12 @@ export default function PatientAppDetails() {
   const apptDateStr = apptDate ? apptDate.toLocaleDateString() : '—'
   const apptTimeStr = apptDate ? apptDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—'
 
+  const prettyStatus = (s) => {
+    if (!s) return '—'
+    const st = String(s).toLowerCase()
+    return st.charAt(0).toUpperCase() + st.slice(1)
+  }
+
   console.log('Doctor data:', doc)
 
     return (
@@ -226,7 +232,11 @@ export default function PatientAppDetails() {
                 <div>Doctor Contact</div>
               </div>
               <div className="right">
-                <div>{String(appointment.status || '—').toUpperCase()}</div>
+                <div>
+                  <span className={`appt-status status-${String(appointment.status || '').toLowerCase()}`}>
+                    {prettyStatus(appointment.status)}
+                  </span>
+                </div>
                 <div>{(doc.firstName || '') + ' ' + (doc.lastName || '')}</div>
                 <div>{apptDateStr}</div>
                 <div>{apptTimeStr}</div>
