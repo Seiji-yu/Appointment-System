@@ -10,7 +10,7 @@ import {
 } from 'recharts';
 
 export default function Ddashboard() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const navigate = useNavigate();
 
   // doctor-scoped metrics

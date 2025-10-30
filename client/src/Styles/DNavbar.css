@@ -30,7 +30,7 @@
   top: 0;
   left: 0;
   height: 100vh;
-  width: var(--sidebar-open-width) !important;
+  width: var(--sidebar-open-width);
   background-color: #081047 !important;
   color: #fff !important;
   z-index: 1000;
@@ -106,4 +106,24 @@ body.with-sidebar-collapsed {
   margin-top: auto;
   margin-bottom: 20px;
 }
+
+/* User card at bottom for doctor sidebar */
+.doctor-user-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  margin: 0 12px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: #fff;
+  background: rgba(255,255,255,0.06);
+  transition: background .2s ease, transform .2s ease;
+}
+.doctor-user-card:hover { background: rgba(255,255,255,0.12); transform: translateY(-1px); }
+.doctor-user-avatar { width: 36px; height: 36px; border-radius: 8px; background: rgba(255,255,255,0.12); display: grid; place-items: center; }
+.doctor-user-meta { display: flex; flex-direction: column; min-width: 0; }
+.doctor-user-name { font-weight: 600; font-size: .95rem; line-height: 1.1; }
+.doctor-user-email { font-size: .75rem; opacity: .85; color: #dbeafe; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
+.doctor-user-cta { margin-left: auto; font-size: .8rem; opacity: .9; background: rgba(255,255,255,0.16); padding: 4px 8px; border-radius: 8px; }
 

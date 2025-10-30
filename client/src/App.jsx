@@ -1,6 +1,6 @@
-import { useState } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import 'bootstrap/dist/css/bootstrap.min.css'
+import './Styles/App.css'
 import Signup from './Auth/Signup'
 import Login from './Auth/Login'
 import Dashboard from './Pages/DoctorSide/Ddashboard'
@@ -32,8 +32,8 @@ function App() {
         <Route path='/' element={<Signup />} />
         <Route path='/register' element={<Signup />} />
         <Route path='/login' element={<Login />} />
-  <Route path='/forgot-password' element={<ForgotPassword />} />
-  <Route path='/reset-password' element={<ResetPassword />} />
+        <Route path='/forgot-password' element={<ForgotPassword />} />
+        <Route path='/reset-password' element={<ResetPassword />} />
         <Route path='/dashboard' element={<Dashboard />} />
         <Route path='/DoctorLogs' element={<DoctorLogs />} />
         <Route path='/Appointments' element={<ManageApp />} />
@@ -44,7 +44,7 @@ function App() {
         <Route path='/PatientDashboard' element={<PDashboard />} />
         <Route path='/DoctorLists' element={<DoctorLists />} />
         <Route path='/PatientProfile' element={<PatientProfile />} />
-        <Route path='/BookApp/:email' element={<BookApp />} /> 
+        <Route path='/BookApp/:email' element={<BookApp />} />
         <Route path='/PatientAppDetails' element={<PatientAppDetails />} />
         <Route path='/AppHistory' element={<AppHistory />} />
         <Route path='/DoctorProfile' element={<DoctorProfile />} />

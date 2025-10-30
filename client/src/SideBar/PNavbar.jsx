@@ -4,6 +4,7 @@ import * as IoIcons from 'react-icons/io';
 import { Link } from 'react-router-dom';
 import { PSidebar } from './PSidebar';
 import '../Styles/PNavbar.css';
+import { RiExpandUpDownFill } from "react-icons/ri";
 
 export default function PNavbar(props) {
   const [internalOpen, setInternalOpen] = useState(true);
@@ -45,7 +46,9 @@ export default function PNavbar(props) {
         </div>
 
         <ul className="patient-sidebar-list">
-          {PSidebar.slice(0, PSidebar.length - 2).map((item, index) => (
+          {PSidebar
+            .filter((i) => !['About', 'Logout', 'Settings', 'Account Profile'].includes(i.title))
+            .map((item, index) => (
             <li key={index} className="patient-sidebar-item">
               <Link to={item.path}>
                 {item.icon}
@@ -55,16 +58,21 @@ export default function PNavbar(props) {
           ))}
         </ul>
 
-        <ul className="patient-sidebar-list patient-sidebar-bottom">
-          {PSidebar.slice(-2).map((item, index) => (
-            <li key={index} className="patient-sidebar-item">
-              <Link to={item.path}>
-                {item.icon}
-                <span>{item.title}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        {/* Bottom user card -> routes to Settings */}
+        <div className="patient-sidebar-bottom">
+          <Link to="/PSettings" className="patient-user-card" title="User settings">
+            <div className="patient-user-avatar" aria-hidden>
+              <FaIcons.FaUser />
+            </div>
+            <div className="patient-user-meta">
+              <div className="patient-user-name">{localStorage.getItem('name') || 'Your Account'}</div>
+              <div className="patient-user-email">{localStorage.getItem('email') || ''}</div>
+            </div>
+            <div className="patient-user-cta">
+  <RiExpandUpDownFill />
+</div>
+          </Link>
+        </div>
       </nav>
 
       <nav className="navbar">

@@ -4,6 +4,7 @@ import * as FaIcons from 'react-icons/fa';
 import * as IoIcons from 'react-icons/io';
 import { Link } from 'react-router-dom';
 import '../Styles/DNavbar.css';
+import { RiExpandUpDownFill } from "react-icons/ri";
 import { SidebarData } from './Sidebar.jsx';
 
 export default function Navbar(props) {
@@ -37,25 +38,43 @@ export default function Navbar(props) {
           <IoIcons.IoMdClose onClick={toggle} />
         </div>
         <ul className="sidebar-list">
-          {SidebarData.slice(0, SidebarData.length - 2).map((item, index) => (
-            <li key={index} className="sidebar-item">
-              <Link to={item.path} onClick={() => !open && toggle()}>
-                {item.icon}
-                <span>{item.title}</span>
-              </Link>
-            </li>
-          ))}
+          {SidebarData
+ 
+            .filter(i => !['About', 'Logout', 'Settings', 'Account Profile'].includes(i.title))
+            .map((item, index) => (
+              <li key={index} className="sidebar-item">
+                <Link to={item.path} onClick={() => !open && toggle()}>
+                  {item.icon}
+                  <span>{item.title}</span>
+                </Link>
+              </li>
+            ))}
         </ul>
-        <ul className="sidebar-list sidebar-bottom">
-          {SidebarData.slice(-2).map((item, index) => (
-            <li key={index} className="sidebar-item">
-              <Link to={item.path} onClick={() => !open && toggle()}>
-                {item.icon}
-                <span>{item.title}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+
+        {/* Bottom user settings card */}
+        <div className="sidebar-bottom">
+          <Link
+            to="/DSettings"
+            className="doctor-user-card"
+            title="User settings"
+            onClick={() => !open && toggle()}
+          >
+            <div className="doctor-user-avatar" aria-hidden>
+              <FaIcons.FaUser />
+            </div>
+            <div className="doctor-user-meta">
+              <div className="doctor-user-name">
+                {localStorage.getItem('name') || 'Your Account'}
+              </div>
+              <div className="doctor-user-email">
+                {localStorage.getItem('doctorEmail') || localStorage.getItem('email') || ''}
+              </div>
+            </div>
+            <div className="doctor-user-cta">
+              <RiExpandUpDownFill />
+            </div>
+          </Link>
+        </div>
       </nav>
     </>
   );

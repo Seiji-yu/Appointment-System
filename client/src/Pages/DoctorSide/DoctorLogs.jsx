@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import Navbar from '../../SideBar/Navbar.jsx';
-import '../../Styles/Ddashboard.css';
 
 export default function DoctorLogs() {
   const [sidebarOpen, setSidebarOpen] = useState(true);

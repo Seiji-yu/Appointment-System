@@ -19,7 +19,7 @@
   transition: margin-left 0.3s ease;
 }
 
-.sidebar-open .dashboard-main {
+.dashboard.sidebar-open .dashboard-main {
   margin-left: var(--doctor-sidebar-open); 
   width: calc(100% - var(--doctor-sidebar-open));
 }
@@ -286,7 +286,7 @@
     flex-direction: column;
   }
 
-  .sidebar-open .dashboard-main {
+  .dashboard.sidebar-open .dashboard-main {
     margin-left: 0;
     width: 100%;
   }

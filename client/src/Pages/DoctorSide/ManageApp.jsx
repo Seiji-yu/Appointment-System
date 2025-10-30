@@ -1,10 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import Navbar from '../../SideBar/Navbar.jsx';
-import '../../Styles/Ddashboard.css';
-import CalendarC from '../../Calendar/CalendarC.jsx';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 export default function ManageApp() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
