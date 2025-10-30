@@ -99,12 +99,12 @@ function PSettings() {
       <Navbar isOpen={sidebarOpen} onToggle={setSidebarOpen} />
       <div className="dashboard-main">
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'space-between' }}>
-          <h1 style={{ marginBottom: 12 }}>Settings</h1>
+          <h2 style={{ marginBottom: 25 }}>Settings</h2>
           <button className="btn btn-secondary" onClick={doLogout}>Log out</button>
         </div>
 
         {/* Tabs */}
-        <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 40 }}>
           {['profile','appearance','password'].map((t) => (
             <button key={t}
               className={`btn ${tab===t? 'btn-primary':'btn-secondary'}`}
@@ -185,7 +185,7 @@ function PSettings() {
           <section className="card" style={{ padding: 16 }}>
             <h3 style={{ marginTop: 0 }}>Appearance</h3>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <label htmlFor="theme-toggle" style={{ fontWeight: 600 }}>Dark mode</label>
+              <label htmlFor="theme-toggle" style={{ fontWeight: 600 }}>Dark mode, testing palang, ayusin kapag maganda na UI</label>
               <input id="theme-toggle" type="checkbox" checked={theme==='dark'} onChange={(e)=> setTheme(e.target.checked?'dark':'light')} />
             </div>
             <p style={{ marginTop: 8, color: '#6b7280' }}>Your theme preference is saved on this device.</p>

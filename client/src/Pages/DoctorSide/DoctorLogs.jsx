@@ -69,7 +69,7 @@ export default function DoctorLogs() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
             <h1>Booking Logs</h1>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              {/* NEW: Filter buttons */}
+              {/* Filter buttons */}
               <div className="btn-group" role="group" aria-label="Filter by status">
                 <button
                   type="button"

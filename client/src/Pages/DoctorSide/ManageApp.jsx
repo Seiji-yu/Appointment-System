@@ -9,17 +9,18 @@ export default function ManageApp() {
   const [error, setError] = useState('');
 
   const [appointments, setAppointments] = useState([]);
-  const [filter, setFilter] = useState('all'); // all / pending / approved / completed / cancelled
+  const [filter, setFilter] = useState('active'); // show pending + approved
 
   // derive filtered list
   const filtered = useMemo(() => {
-    if (filter === 'all') return appointments;
-    return appointments.filter(a => (a.status || '').toLowerCase() === filter); // ManageApp Filter Case Sensitive
+    if (filter === 'all' || filter === 'active') return appointments;
+    return appointments.filter(a => (a.status || '').toLowerCase() === filter);
   }, [appointments, filter]);
 
   useEffect(() => {
+    // Load doctor profile and appointments whenever the filter changes
     let cancelled = false;
-    async function load() {
+  async function load() {
       try {
         setLoading(true);
         setError('');
@@ -32,7 +33,16 @@ export default function ManageApp() {
         if (cancelled) return;
         setDoctor(d);
 
-        const url = `http://localhost:3001/api/doctor/${d._id}/appointments/active`;
+        // Load active appointments (pending + approved) or by status
+        let url;
+        if (filter === 'active') {
+          url = `http://localhost:3001/api/doctor/${d._id}/appointments/active`;
+        } else if (filter) {
+          url = `http://localhost:3001/api/doctor/${d._id}/appointments?status=${encodeURIComponent(filter)}`;
+        } else {
+          url = `http://localhost:3001/api/doctor/${d._id}/appointments`;
+        }
+
         const list = await axios.get(url);
         if (cancelled) return;
         setAppointments(list.data?.appointments || []);
@@ -44,7 +54,7 @@ export default function ManageApp() {
     }
     load();
     return () => { cancelled = true; };
-  }, []);
+  }, [filter]);
 
   const updateAppt = async (id, payload) => {
     const prev = [...appointments];
@@ -53,9 +63,9 @@ export default function ManageApp() {
       setAppointments(appts => appts.map(a => a._id === id ? { ...a, ...payload } : a));
       const res = await axios.patch(`http://localhost:3001/api/appointments/${id}`, payload);
       const updated = res.data?.appointment;
+      // In Manage App, keep approved items; only remove when completed or cancelled
       if (updated.status === 'completed' || updated.status === 'cancelled') {
-        // remove from active list correctly
-        setAppointments(appts => appts.filter(a => a._id === id !== id));
+        setAppointments(appts => appts.filter(a => a._id !== id));
       } else {
         setAppointments(appts => appts.map(a => a._id === id ? updated : a));
       }
@@ -76,21 +86,6 @@ export default function ManageApp() {
         <div className="dashboard-main">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h1>Manage Appointments</h1>
-            <div>
-              <label style={{ marginRight: 8 }}>Filter:</label>
-              <select
-                className="form-select form-select-sm"
-                style={{ display: 'inline-block', width: 140 }}
-                value={filter}
-                onChange={e => setFilter(e.target.value)}
-              >
-                <option value="all">All</option>
-                <option value="pending">Pending</option>
-                <option value="approved">Approved</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-            </div>
           </div>
 
           {loading ? (

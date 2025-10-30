@@ -31,6 +31,14 @@ function DoctorProfile() {
     about: ''
   });
 
+  // phone input pieces (country code + local digits)
+  const COUNTRY_CODES = [
+    { code: '+63', label: '🇵🇭 Philippines (+63)' }
+  ];
+  const [countryCode, setCountryCode] = useState('+63');
+  const [localNumber, setLocalNumber] = useState('');
+  const LOCAL_MAX = 10; // limit local digits length
+
   // snapshots to restore on cancel
   const [origForm, setOrigForm] = useState(null);
   const [origPreview, setOrigPreview] = useState(null);
@@ -114,6 +122,20 @@ function DoctorProfile() {
             contact: doctor.contact || '',
             about: doctor.about || ''
           };
+          // derive phone parts from contact, e.g. +64 221234567
+          try {
+            const m = String(next.contact || '').match(/^(\+\d{1,4})\s*(.*)$/);
+            if (m) {
+              setCountryCode(m[1]);
+              setLocalNumber(((m[2] || '').replace(/\D/g, '')).slice(0, LOCAL_MAX));
+            } else {
+              setCountryCode('+63');
+              setLocalNumber(String(next.contact || '').replace(/\D/g, '').slice(0, LOCAL_MAX));
+            }
+          } catch {
+            setCountryCode('+63');
+            setLocalNumber('');
+          }
           setForm(next);
           setOrigForm(next);
           setProfilePreview(doctor.profileImage || null);
@@ -155,12 +177,8 @@ function DoctorProfile() {
   const handleSpecialtySelect = (e) => {
     if (!editMode) return;
     const v = e.target.value;
-    if (v === OTHER_VALUE) {
-      // keep existing custom value; if empty, set placeholder text
-      setForm({ ...form, specialty: form.specialty || '' });
-    } else {
-      setForm({ ...form, specialty: v });
-    }
+    // When choosing Other, switch to custom input by clearing stored specialty
+    setForm({ ...form, specialty: v === OTHER_VALUE ? '' : v });
   };
   const handleEducationChange = (index, value) => {
     if (!editMode) return;
@@ -204,6 +222,8 @@ function DoctorProfile() {
         return;
       }
 
+      // Compose contact in international format
+      const fullContact = `${countryCode} ${localNumber}`.trim();
       const dataToSend = {
         email: doctorEmail,
         firstName: form.firstName,
@@ -214,7 +234,7 @@ function DoctorProfile() {
         education: form.education,
         about: form.about,
         address1: form.address1,
-        contact: form.contact,
+        contact: fullContact,
         profileImage: profilePreview // save new/removed image
       };
 
@@ -222,7 +242,10 @@ function DoctorProfile() {
       if (res.data?.status === 'success') {
         setMessage('Profile saved successfully!');
         // commit snapshots and exit edit mode
-        setOrigForm(form);
+        // keep submitted contact in form state
+        const committed = { ...form, contact: fullContact };
+        setOrigForm(committed);
+        setForm(committed);
         setOrigPreview(profilePreview);
         setEditMode(false);
       } else {
@@ -514,17 +537,47 @@ function DoctorProfile() {
 
                 <div className="mb-3">
                   <label className="form-label">Contact Number</label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    className="form-control"
-                    name="contact"
-                    value={form.contact}
-                    onChange={handleChange}
-                    readOnly={!editMode}
-                    placeholder="e.g., 09171234567"
-                  />
+                  {!editMode ? (
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="contact"
+                      value={`${countryCode} ${localNumber}`.trim()}
+                      readOnly
+                    />
+                  ) : (
+                    <div className="d-flex gap-2">
+                      <select
+                        className="form-select"
+                        style={{ maxWidth: 210 }}
+                        value={countryCode}
+                        onChange={(e) => {
+                          const code = e.target.value;
+                          setCountryCode(code);
+                          setForm({ ...form, contact: `${code} ${localNumber}`.trim() });
+                        }}
+                      >
+                        {COUNTRY_CODES.map(c => (
+                          <option key={c.code} value={c.code}>{c.label}</option>
+                        ))}
+                      </select>
+                      <input
+                        type="tel"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        className="form-control"
+                        placeholder="e.g., 9123456789"
+                        maxLength={LOCAL_MAX}
+                        value={localNumber}
+                        onChange={(e) => {
+                          const digits = e.target.value.replace(/\D/g, '').slice(0, LOCAL_MAX);
+                          setLocalNumber(digits);
+                          setForm({ ...form, contact: `${countryCode} ${digits}`.trim() });
+                        }}
+                      />
+                    </div>
+                  )}
+                  <div className="form-text">Stores in international format (e.g., +64 221234567). Max {LOCAL_MAX} digits for the local number.</div>
                 </div>
 
                 <div className="mb-3">

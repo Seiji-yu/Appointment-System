@@ -11,10 +11,22 @@ function DoctorLists() {
   const navigate = useNavigate()               
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/doctors')
+    fetch('http://localhost:3001/api/doctors/with-ratings')
       .then((res) => res.json())
-      .then((data) => setDoctors(data))
-      .catch((err) => console.error('Error fetching doctors:', err))
+      .then((data) => {
+        if (!data) return setDoctors([])
+        if (Array.isArray(data)) return setDoctors(data)
+        if (data.doctors) return setDoctors(data.doctors)
+        return setDoctors([])
+      })
+      .catch((err) => {
+        console.error('Error fetching doctors (with-ratings), falling back to /api/doctors:', err)
+        // fallback to plain doctors endpoint
+        fetch('http://localhost:3001/api/doctors')
+          .then((r) => r.json())
+          .then((d) => setDoctors(d))
+          .catch((e) => console.error('Fallback fetch failed:', e))
+      })
   }, [])
 
   useEffect(() => {
@@ -115,6 +127,7 @@ function DoctorLists() {
                         <h3 className="doctor-name">{(doc.firstName || '') + ' ' + (doc.lastName || '')}</h3>
                         <p className="doctor-role">{doc.role || 'Psychiatrist'}</p>
                         <p className="doctor-price">₱ {doc.fees ?? '—'} / session</p>
+                        <p className="doctor-rating">{doc.avgRating ? `${doc.avgRating} ★ (${doc.ratingCount})` : 'No reviews yet'}</p>
                       </div>
 
                       <div className="card-action card-action-left">
@@ -166,6 +179,7 @@ function DoctorLists() {
                       <h3 className="doctor-name">{(doc.firstName || '') + ' ' + (doc.lastName || '')}</h3>
                       <p className="doctor-role">{doc.role || 'Psychiatrist'}</p>
                       <p className="doctor-price">₱ {doc.fees ?? '—'} / session</p>
+                      <p className="doctor-rating">{doc.avgRating ? `${doc.avgRating} ★ (${doc.ratingCount})` : 'No reviews yet'}</p>
                     </div>
 
                     <div className="card-action card-action-left">

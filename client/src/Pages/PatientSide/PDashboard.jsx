@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import PNavbar from "../../SideBar/PNavbar";
 import "../../Styles/PNavbar.css";
@@ -39,6 +39,29 @@ function PDashboard() {
     return () => clearInterval(iv);
   }, []);
 
+  // Mark dates for approved appointments only
+  const approvedMarkedDates = useMemo(() => {
+    try {
+      const ymdSet = new Set();
+      const out = [];
+      for (const a of appointments) {
+        if (String(a.status).toLowerCase() !== 'approved') continue;
+        if (!a.date) continue;
+        const d = new Date(a.date);
+        if (isNaN(d)) continue;
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        const key = `${y}-${m}-${day}`;
+        if (!ymdSet.has(key)) {
+          ymdSet.add(key);
+          out.push(new Date(d));
+        }
+      }
+      return out;
+    } catch { return []; }
+  }, [appointments]);
+
   return (
     <div className="patient-dashboard">
       <PNavbar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
@@ -52,7 +75,7 @@ function PDashboard() {
           </div>
 
           <div className="calendar-section">
-            <PDashboardCalendar onDateChange={() => {}} />
+            <PDashboardCalendar onDateChange={() => {}} markedDates={approvedMarkedDates} />
           </div>
 
           <div className="appointments-section">

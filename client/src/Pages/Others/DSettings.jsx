@@ -87,15 +87,15 @@ function DSettings() {
   };
 
   return (
-    <div className="dashboard">
+    <div className={`dashboard ${sidebarOpen ? 'sidebar-open' : ''}`}>
       <Navbar isOpen={sidebarOpen} onToggle={setSidebarOpen} />
       <div className="dashboard-main">
-        <div className="settings-container" style={{ display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'space-between' }}>
-          <h1 style={{ marginBottom: 12 }}>Settings</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'space-between' }}>
+          <h2 style={{ marginBottom: 25 }}>Settings</h2>
           <button className="btn btn-secondary" onClick={doLogout}>Log out</button>
         </div>
 
-        <div className="settings-container" style={{ display: 'flex', gap: 8, margin: '8px auto 16px' }}>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
           {['profile','appearance','password'].map((t) => (
             <button key={t} className={`btn ${tab===t? 'btn-primary':'btn-secondary'}`} onClick={() => setTab(t)}>
               {t.charAt(0).toUpperCase()+t.slice(1)}
@@ -107,7 +107,10 @@ function DSettings() {
           <>
             <div className="settings-container"><hr className="settings-divider" /></div>
             <section style={{ padding: 0 }}>
-              <div className="patient-profile-container" style={{ marginTop: 8 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: 1080, margin: '0 auto' }}>
+                <a href="/DoctorProfile" className="btn btn-primary">Open Doctor Profile</a>
+              </div>
+              <div className="patient-profile-container" style={{ marginTop: 16 }}>
                 <div className="profile-hero">
                   <img src={preview || '/default-avatar.png'} alt="Profile" className="profile-img" />
                 </div>
@@ -123,22 +126,16 @@ function DSettings() {
                     <div className="label">Address</div><div className="value">{doctor?.address1 || ''}</div>
                   </div>
                 </div>
-                <div className="profile-box">
-                  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                    <h3 style={{ margin: 0 }}>Edit</h3>
-                    <a href="/DoctorProfile" className="btn btn-primary">Open Doctor Profile</a>
-                  </div>
-                </div>
               </div>
             </section>
           </>
         )}
 
         {tab === 'appearance' && (
-          <section className="settings-container card" style={{ padding: 16 }}>
+          <section className="card" style={{ padding: 16 }}>
             <h3 style={{ marginTop: 0 }}>Appearance</h3>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <label htmlFor="theme-toggle-d" style={{ fontWeight: 600 }}>Dark mode</label>
+              <label htmlFor="theme-toggle-d" style={{ fontWeight: 600 }}>Dark mode, testing palang, ayusin kapag maganda na UI</label>
               <input id="theme-toggle-d" type="checkbox" checked={theme==='dark'} onChange={(e)=> setTheme(e.target.checked?'dark':'light')} />
             </div>
             <p style={{ marginTop: 8, color: '#6b7280' }}>Your theme preference is saved on this device.</p>
@@ -146,7 +143,7 @@ function DSettings() {
         )}
 
         {tab === 'password' && (
-          <section className="settings-container card" style={{ padding: 16, maxWidth: 520 }}>
+          <section className="card" style={{ padding: 16, maxWidth: 520 }}>
             <h3 style={{ marginTop: 0 }}>Change Password</h3>
             {pwdErr && <div style={{ color: 'red', marginBottom: 8 }}>{pwdErr}</div>}
             {pwdMsg && <div style={{ color: 'green', marginBottom: 8 }}>{pwdMsg}</div>}

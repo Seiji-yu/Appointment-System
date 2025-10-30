@@ -30,7 +30,7 @@ export const PSidebar = [
     {
         title: 'Account Profile',
         path: '/PatientProfile',
-        icon: <FaIcons.FaUser /> ,
+        icon: <FaIcons.FaUser />,
         cName: 'nav-text'
     },
 

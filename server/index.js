@@ -7,6 +7,7 @@ const PsychiatristModel = require('./Models/Psychiatrist');
 const PatientModel = require('./Models/Patient');
 const AppointmentModel = require('./Models/Appointment');
 const LicenseRequestModel = require('./Models/License'); // unify model usage
+const NotificationModel = require('./Models/Notification');
 const AvailabilityModel = require('./Models/Availability');
 const crypto = require('crypto');
 let nodemailer;
@@ -86,28 +87,28 @@ app.post('/login', async (req, res) => {
           message: 'Your License Number is Pending'
         });
       } else {
-      // No record yet: create a pending request
-      try {
-        const newReq = await LicenseRequestModel.create({
-          doctorEmail: user.email,
-          licenseNumber: supplied,
-          status: 'pending'
+        // No record yet: create a pending request
+        try {
+          const newReq = await LicenseRequestModel.create({
+            doctorEmail: user.email,
+            licenseNumber: supplied,
+            status: 'pending'
+          });
+          // Notify connected admin clients
+          sseBroadcast('license_request_pending', {
+            id: newReq._id,
+            doctorEmail: user.email,
+            licenseNumber: supplied,
+            createdAt: newReq.createdAt
+          });
+        } catch (e) {
+          if (e.code !== 11000) console.error('Create license request error:', e);
+        }
+        return res.json({
+          status: 'invalid_license',
+          message: 'Your License Number is Pending'
         });
-        // Notify connected admin clients
-        sseBroadcast('license_request_pending', {
-          id: newReq._id,
-          doctorEmail: user.email,
-          licenseNumber: supplied,
-          createdAt: newReq.createdAt
-        });
-      } catch (e) {
-        if (e.code !== 11000) console.error('Create license request error:', e);
       }
-      return res.json({
-        status: 'invalid_license',
-        message: 'Your License Number is Pending'
-      });
-    }
     }
 
     const safeUser = user.toObject();
@@ -367,12 +368,12 @@ function parseYMDToLocalDate(ymd) {
 
 function todayStartLocal() {
   const d = new Date();
-  d.setHours(0,0,0,0);
+  d.setHours(0, 0, 0, 0);
   return d;
 }
 function nowHHMMLocal() {
   const n = new Date();
-  return `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
+  return `${String(n.getHours()).padStart(2, '0')}:${String(n.getMinutes()).padStart(2, '0')}`;
 }
 
 // Round up an HH:mm string to the next step minute (default: 5 mins)
@@ -641,10 +642,10 @@ app.post('/api/appointments', async (req, res) => {
     const {
       doctorId,
       patientEmail,
-      date,        // optional legacy ISO
+      date,       
       notes,
-      localYMD,    // NEW preferred: 'YYYY-MM-DD'
-      timeHHMM     // NEW preferred: 'HH:mm'
+      localYMD,    // 'YYYY-MM-DD'
+      timeHHMM     // 'HH:mm'
     } = req.body;
 
     if (!doctorId || !patientEmail || (!date && !(localYMD && timeHHMM))) {
@@ -729,12 +730,59 @@ app.post('/api/appointments', async (req, res) => {
       // include contact/fees/specialty/experience so PatientAppDetails has full info on redirect
       .populate('doctor', 'firstName lastName email contact fees role profileImage specialty experience');
 
+    // Save and broadcast SSE notification for doctors
+    try {
+      const patientName = populated?.patient?.name || `${populated?.patient?.firstName || ''} ${populated?.patient?.lastName || ''}`.trim();
+      const text = `New appointment from ${patientName || populated?.patient?.email || 'a patient'}`;
+      const notif = await NotificationModel.create({
+        userType: 'doctor',
+        userId: doctor._id,
+        type: 'appointment_booked',
+        apptId: appt._id,
+        doctorId: doctor._id,
+        patientId: patient._id,
+        text,
+        read: false,
+        hidden: false,
+        meta: { date: populated?.date }
+      });
+      sseBroadcast('appointment_booked', {
+        notifId: String(notif._id),
+        apptId: String(appt._id),
+        doctorId: String(doctor._id),
+        patient: { name: patientName, email: populated?.patient?.email },
+        date: populated?.date,
+        status: populated?.status || 'pending'
+      });
+    } catch {}
+
     return res.json({ status: 'success', appointment: populated });
   } catch (err) {
     console.error('Create appointment error:', err);
     return res.status(500).json({ status: 'error', message: 'Server error', details: err.message });
   }
 });
+
+app.get('/api/appointments/stream', (req, res) => {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache, no-transform',
+    'Connection': 'keep-alive'
+  });
+  res.write('retry: 10000\n\n');
+  sseClients.add(res);
+
+  const timer = setInterval(() => {
+    try { res.write('event: ping\ndata: {}\n\n'); } catch {}
+  }, 25000);
+
+  req.on('close', () => {
+    clearInterval(timer);
+    sseClients.delete(res);
+  });
+});
+
+
 
 // Get appointment by id (populated)
 app.get('/api/appointments/:id', async (req, res) => {
@@ -746,7 +794,8 @@ app.get('/api/appointments/:id', async (req, res) => {
 
     const appt = await AppointmentModel.findById(id)
       .populate('patient', 'firstName lastName name email age gender contact hmoNumber hmoCardImage')
-      .populate('doctor', 'firstName lastName email contact fees role profileImage specialty experience');
+      // include about/experience/education so clients can show full profile
+      .populate('doctor', 'firstName lastName email contact fees role profileImage experience education about address1 address2');
 
     if (!appt) return res.status(404).json({ status: 'not_found', message: 'Appointment not found' });
 
@@ -783,9 +832,45 @@ app.patch('/api/appointments/:id', async (req, res) => {
     }
 
     const updated = await AppointmentModel.findByIdAndUpdate(id, update, { new: true })
-      .populate('patient', 'firstName lastName name email');
+      .populate('patient', 'firstName lastName name email')
+      .populate('doctor', 'firstName lastName email');
 
     if (!updated) return res.status(404).json({ status: 'not_found', message: 'Appointment not found' });
+
+    // Save and broadcast status change to patient
+    try {
+      const doctorName = `${updated.doctor?.firstName || ''} ${updated.doctor?.lastName || ''}`.trim();
+      let text = 'Appointment update';
+      if (updated.status === 'approved') text = `Doctor ${doctorName} approved your appointment`;
+      else if (updated.status === 'cancelled') text = `Doctor ${doctorName} declined your appointment`;
+      else if (updated.status === 'pending') text = `Your appointment is pending`;
+      else if (updated.status === 'completed') text = `Your appointment was completed`;
+
+      const notif = await NotificationModel.create({
+        userType: 'patient',
+        userId: updated.patient?._id,
+        email: updated.patient?.email,
+        type: 'appointment_status',
+        apptId: updated._id,
+        doctorId: updated.doctor?._id,
+        patientId: updated.patient?._id,
+        text,
+        read: false,
+        hidden: false,
+        meta: { status: updated.status }
+      });
+
+      sseBroadcast('appointment_status', {
+        notifId: String(notif._id),
+        apptId: String(updated._id),
+        status: updated.status,
+        doctorId: String(updated.doctor?._id || ''),
+        doctorName,
+        patientId: String(updated.patient?._id || ''),
+        patientEmail: updated.patient?.email || '',
+        at: new Date().toISOString()
+      });
+    } catch {}
 
     return res.json({ status: 'success', appointment: updated });
   } catch (err) {
@@ -812,7 +897,7 @@ app.post('/patient/profile', async (req, res) => {
       emergencyContact,
       emergencyAddress,
       hmoCardImage,
-      profileImage 
+      profileImage
     } = req.body;
 
     if (!email) {
@@ -869,8 +954,8 @@ app.post('/patient/check-profile', async (req, res) => {
       return res.json({ complete: false });
     }
     // check if all required details are filled
-    const isComplete = patient.name && patient.age && patient.gender && patient.contact && patient.address 
-    && patient.emergencyName && patient.emergencyContact && patient.emergencyAddress;
+    const isComplete = patient.name && patient.age && patient.gender && patient.contact && patient.address
+      && patient.emergencyName && patient.emergencyContact && patient.emergencyAddress;
     res.json({ complete: !!isComplete });
   } catch (err) {
     res.status(500).json({ complete: false, error: err.message });
@@ -897,10 +982,7 @@ app.post('/doctor/get-profile', async (req, res) => {
     if (!email) return res.status(400).json({ error: 'Email required' });
 
     const doctor = await PsychiatristModel.findOne({ email });
-    // Optional: ensure response contact is numeric-only
-    if (doctor && doctor.contact) {
-      doctor.contact = String(doctor.contact).replace(/\D/g, '');
-    }
+    // return contact as stored (may include country code like +64 22xxxxxxx)
     res.json({ doctor: doctor || null });
   } catch (err) {
     console.error('Get doctor profile error:', err);
@@ -929,9 +1011,11 @@ app.post('/doctor/profile', async (req, res) => {
       return res.status(400).json({ status: 'error', message: 'Email required to update profile' });
     }
 
-    // Normalize contact to digits-only
+    // Normalize contact to keep "+", digits and spaces only, and collapse multiple spaces
     const normalizedContact = String(contact ?? '')
-      .replace(/\D/g, '');
+      .replace(/[^\d+ ]+/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
 
     const updatedDoctor = await PsychiatristModel.findOneAndUpdate(
       { email },
@@ -944,7 +1028,7 @@ app.post('/doctor/profile', async (req, res) => {
         education,
         about,
         address1,
-        // Persist new 'contact' field only
+        // Persist in international format, e.g., "+64 221234567"
         contact: normalizedContact,
         profileImage
       },
@@ -969,6 +1053,32 @@ app.get('/api/doctors', async (req, res) => {
   }
 });
 
+// doctors list with average rating and count (computed from Appointment documents)
+app.get('/api/doctors/with-ratings', async (req, res) => {
+  try {
+    const agg = await AppointmentModel.aggregate([
+      { $match: { rating: { $exists: true, $ne: null } } },
+      { $group: { _id: '$doctor', avgRating: { $avg: '$rating' }, ratingCount: { $sum: 1 } } }
+    ]);
+
+    const ratingMap = {};
+    for (const a of agg) {
+      ratingMap[String(a._id)] = { avgRating: Number(a.avgRating.toFixed(2)), ratingCount: a.ratingCount };
+    }
+
+    const doctors = await PsychiatristModel.find({}, { password: 0 }).lean();
+    const result = doctors.map(d => {
+      const meta = ratingMap[String(d._id)] || { avgRating: null, ratingCount: 0 };
+      return Object.assign({}, d, { avgRating: meta.avgRating, ratingCount: meta.ratingCount });
+    });
+
+    return res.json({ status: 'success', doctors: result });
+  } catch (err) {
+    console.error('Error fetching doctors with ratings:', err);
+    return res.status(500).json({ status: 'error', message: 'Server error', details: err.message });
+  }
+});
+
 // Recent patients for a doctor (from completed appointments)
 app.get('/api/patients/recent', async (req, res) => {
   try {
@@ -982,18 +1092,18 @@ app.get('/api/patients/recent', async (req, res) => {
     const lim = Math.min(Math.max(parseInt(limit, 10) || 6, 1), 24);
 
     const items = await AppointmentModel.aggregate([
-      { 
-        $match: { 
-          doctor: new mongoose.Types.ObjectId(doctorId), 
-          status: { $in: ['completed', 'Completed'] } 
-        } 
+      {
+        $match: {
+          doctor: new mongoose.Types.ObjectId(doctorId),
+          status: { $in: ['completed', 'Completed'] }
+        }
       },
       { $sort: { date: -1, updatedAt: -1 } },
-      { 
-        $group: { 
-          _id: '$patient', 
-          lastAppointmentDate: { $first: '$date' } 
-        } 
+      {
+        $group: {
+          _id: '$patient',
+          lastAppointmentDate: { $first: '$date' }
+        }
       },
       { $sort: { lastAppointmentDate: -1 } },
       { $limit: lim },
@@ -1280,7 +1390,7 @@ const sseClients = new Set();
 function sseBroadcast(event, payload) {
   const line = `event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`;
   for (const res of sseClients) {
-    try { res.write(line); } catch {}
+    try { res.write(line); } catch { }
   }
 }
 
@@ -1295,13 +1405,150 @@ app.get('/api/license-requests/stream', (req, res) => {
 
   // heartbeat to keep connection alive
   const timer = setInterval(() => {
-    try { res.write('event: ping\ndata: {}\n\n'); } catch {}
+    try { res.write('event: ping\ndata: {}\n\n'); } catch { }
   }, 25000);
 
   req.on('close', () => {
     clearInterval(timer);
     sseClients.delete(res);
   });
+});
+
+// Notifications API
+app.get('/api/notifications', async (req, res) => {
+  try {
+    const { userType, userId, email, limit = '50', view = 'visible' } = req.query;
+    if (!userType || !['doctor','patient'].includes(String(userType))) {
+      return res.status(400).json({ status: 'bad_request', message: 'userType required (doctor|patient)' });
+    }
+    let uid = userId;
+    if (!uid && userType === 'patient' && email) {
+      const pat = await PatientModel.findOne({ email: String(email) }).select('_id');
+      if (pat) uid = String(pat._id);
+    }
+    if (!uid) return res.json({ status: 'success', notifications: [] });
+
+    const lim = Math.min(Math.max(parseInt(limit,10)||50, 1), 200);
+    const findQuery = { userType, userId: uid };
+    if (String(view) === 'hidden') findQuery.hidden = true;
+    else if (String(view) === 'visible') findQuery.hidden = false; // default
+    // view === 'all' -> no hidden filter
+
+    const items = await NotificationModel.find(findQuery)
+      .sort({ createdAt: -1 })
+      .limit(lim)
+      .lean();
+    return res.json({ status: 'success', notifications: items });
+  } catch (err) {
+    console.error('List notifications error:', err);
+    return res.status(500).json({ status: 'error', message: 'Server error', details: err.message });
+  }
+});
+
+app.patch('/api/notifications/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ status: 'bad_request', message: 'Invalid notification id' });
+    const { read, hidden } = req.body || {};
+    const update = {};
+    if (typeof read === 'boolean') update.read = read;
+    if (typeof hidden === 'boolean') update.hidden = hidden;
+    if (!Object.keys(update).length) return res.status(400).json({ status: 'bad_request', message: 'Nothing to update' });
+    const updated = await NotificationModel.findByIdAndUpdate(id, { $set: update }, { new: true });
+    if (!updated) return res.status(404).json({ status: 'not_found' });
+    return res.json({ status: 'success', notification: updated });
+  } catch (err) {
+    console.error('Update notification error:', err);
+    return res.status(500).json({ status: 'error', message: 'Server error', details: err.message });
+  }
+});
+
+app.delete('/api/notifications/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ status: 'bad_request', message: 'Invalid notification id' });
+    const del = await NotificationModel.findByIdAndDelete(id);
+    if (!del) return res.status(404).json({ status: 'not_found' });
+    return res.json({ status: 'success' });
+  } catch (err) {
+    console.error('Delete notification error:', err);
+    return res.status(500).json({ status: 'error', message: 'Server error', details: err.message });
+  }
+});
+
+app.post('/api/notifications/mark-all-read', async (req, res) => {
+  try {
+    const { userType, userId, email } = req.body || {};
+    if (!userType || !['doctor','patient'].includes(String(userType))) {
+      return res.status(400).json({ status: 'bad_request', message: 'userType required (doctor|patient)' });
+    }
+    let uid = userId;
+    if (!uid && userType === 'patient' && email) {
+      const pat = await PatientModel.findOne({ email: String(email) }).select('_id');
+      if (pat) uid = String(pat._id);
+    }
+    if (!uid) return res.json({ status: 'success', updated: 0 });
+    const r = await NotificationModel.updateMany({ userType, userId: uid, hidden: false, read: false }, { $set: { read: true } });
+    return res.json({ status: 'success', updated: r.modifiedCount || 0 });
+  } catch (err) {
+    console.error('Mark all read error:', err);
+    return res.status(500).json({ status: 'error', message: 'Server error', details: err.message });
+  }
+});
+// submit a review for an appointment (rating + optional review text)
+app.post('/api/appointments/:id/review', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rating, review } = req.body;
+    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ status: 'bad_request', message: 'Invalid appointment id' });
+    // validate rating 
+    const numericRating = Number(rating);
+    if (!Number.isFinite(numericRating) || numericRating < 1 || numericRating > 5) {
+      return res.status(400).json({ status: 'bad_request', message: 'Rating must be a number between 1 and 5' });
+    }
+
+    console.log('Review incoming', { appointmentId: id, rating: numericRating, reviewLength: review ? String(review).length : 0, ip: req.ip });
+
+    // atomically update the appointment 
+    const update = { rating: numericRating };
+    if (review !== undefined) update.review = String(review);
+
+    try {
+      const updated = await AppointmentModel.findByIdAndUpdate(
+        id,
+        { $set: update },
+        { new: true, runValidators: true }
+      )
+        .populate('patient', 'firstName lastName name email')
+        .populate('doctor', 'firstName lastName email');
+
+      if (!updated) return res.status(404).json({ status: 'not_found', message: 'Appointment not found' });
+
+      console.log('Review saved (findByIdAndUpdate)', { appointmentId: id });
+      return res.json({ status: 'success', appointment: updated });
+    } catch (updateErr) {
+      console.error('Review update error', updateErr);
+      if (updateErr && updateErr.name === 'ValidationError') {
+        return res.status(400).json({ status: 'bad_request', message: 'Validation error', details: updateErr.errors });
+      }
+
+      try {
+        const raw = await AppointmentModel.collection.updateOne({ _id: new mongoose.Types.ObjectId(id) }, { $set: update });
+        if (raw.matchedCount === 0) return res.status(404).json({ status: 'not_found', message: 'Appointment not found' });
+        console.log('Review saved (raw collection update)', { appointmentId: id, result: raw.result || raw });
+        const reloaded = await AppointmentModel.findById(id)
+          .populate('patient', 'firstName lastName name email')
+          .populate('doctor', 'firstName lastName email');
+        return res.json({ status: 'success', appointment: reloaded });
+      } catch (rawErr) {
+        console.error('Raw update failed', rawErr);
+        return res.status(500).json({ status: 'error', message: 'Server error', details: rawErr.message || rawErr });
+      }
+    }
+  } catch (err) {
+    console.error('Submit review error:', err);
+    return res.status(500).json({ status: 'error', message: 'Server error', details: err.message });
+  }
 });
 
 // Prints in terminal that server is Running

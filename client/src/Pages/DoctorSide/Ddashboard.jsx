@@ -265,6 +265,20 @@ export default function Ddashboard() {
       .map(([date, items]) => ({ date, items }));
   }, [upcomingActive, selectedDate]);
 
+  // Dates to highlight in the calendar: only upcoming/active (pending/approved),
+  // completed/cancelled will NOT be highlighted so dots disappear once done.
+  const markedDates = useMemo(() => {
+    const set = new Set();
+    const add = (d) => {
+      try {
+        const ymd = toYMD(d);
+        if (ymd) set.add(ymd);
+      } catch {}
+    };
+    (activeAppts || []).forEach(a => add(a.date || extractStart(a) || a.createdAt));
+    return Array.from(set);
+  }, [activeAppts]);
+
   // Agenda for the selected day
   const agenda = useMemo(() => {
     const sameDay = (a) => toYMD(a.date || a.startTime || a.timeStart || a.createdAt) === selectedDate;
@@ -352,6 +366,7 @@ export default function Ddashboard() {
                   const dt = d instanceof Date ? d : new Date(d);
                   setSelectedDate(toYMD(dt));
                 }}
+                markedDates={markedDates}
               />
               {/*  Upcoming-only schedule */}
               <div className="card" style={{ marginTop: 12, padding: 12 }}>

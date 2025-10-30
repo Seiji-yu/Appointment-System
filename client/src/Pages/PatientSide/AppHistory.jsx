@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import PNavbar from '../../SideBar/PNavbar'
-import CalendarC from '../../Calendar/CalendarC.jsx';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../../Styles/AppHistory.css'
 
@@ -11,16 +11,19 @@ export default function AppHistory() {
   const [appointments, setAppointments] = useState([]);
 
   useEffect(() => {
-    const patientId = localStorage.getItem('patientId');
-    if (!patientId) return;
+    const patientId = localStorage.getItem('patientId') || localStorage.getItem('userId') || null;
+    const email = localStorage.getItem('email') || null;
+    if (!patientId && !email) return;
 
     const fetchHistory = async () => {
       try {
-        const res = await fetch(`http://localhost:3001/api/appointments/history?patientId=${patientId}`);
+        const res = await fetch(buildUrl());
         const data = await res.json();
-        setAppointments(data);
+        if (data && data.appointments) setAppointments(data.appointments);
+        else setAppointments([]);
       } catch (err) {
-        console.error('Failed to fetch appointment history');
+        console.error('Failed to load appointments', err);
+        setAppointments([]);
       }
     };
 
