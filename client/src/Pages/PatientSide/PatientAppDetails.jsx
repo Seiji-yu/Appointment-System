@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { FaStar } from 'react-icons/fa'
 import { useLocation, useNavigate } from 'react-router-dom'
 import PNavbar from '../../SideBar/PNavbar'
 import axios from 'axios'
@@ -10,7 +11,24 @@ export default function PatientAppDetails() {
   const [appointment, setAppointment] = useState(location.state?.appointment || null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [message, setMessage] = useState('')
+  const [reviewMessage, setReviewMessage] = useState('')
+  const [reviewError, setReviewError] = useState('')
+  const [rating, setRating] = useState(0)
+  const [hoverRating, setHoverRating] = useState(0)
+  const [reviewText, setReviewText] = useState('')
+  const [submittingReview, setSubmittingReview] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
   const pollingRef = useRef(null)
+  const submittingReviewRef = useRef(false)
+
+  useEffect(() => {
+    if (appointment) {
+      setRating(appointment.rating || 0)
+      setReviewText(appointment.review || '')
+      setSubmitted(!!appointment.rating)
+    }
+  }, [appointment])
 
   const qs = new URLSearchParams(location.search)
   const appointmentId = appointment?._id || location.state?.appointmentId || qs.get('id') || null
@@ -74,14 +92,51 @@ export default function PatientAppDetails() {
     try {
       const res = await axios.patch(`http://localhost:3001/api/appointments/${appointment._id}`, { status: 'cancelled' })
       if (res.data?.appointment) {
+        // refetch full populated appointment and stay on details page
         const refetch = await axios.get(`http://localhost:3001/api/appointments/${appointment._id}`)
         if (refetch.data?.appointment) setAppointment(refetch.data.appointment)
+        // stop polling since status is no longer pending
+        if (pollingRef.current) {
+          clearInterval(pollingRef.current)
+          pollingRef.current = null
+        }
+        setMessage('Appointment cancelled')
       }
     } catch (err) {
       console.error('Cancel error', err)
       setError('Failed to cancel appointment. Please try again.')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const submitReview = async () => {
+    if (!appointment?._id) return
+    // prevent submitting if there's already a stored review
+    if (appointment.rating) {
+      setReviewMessage('You have already submitted a review for this appointment')
+      return
+    }
+    if (submittingReviewRef.current) return
+    submittingReviewRef.current = true
+    setSubmittingReview(true)
+    setReviewError('')
+    setReviewMessage('')
+    try {
+      const res = await axios.post(`http://localhost:3001/api/appointments/${appointment._id}/review`, { rating, review: reviewText })
+      if (res.data?.appointment) {
+        setAppointment(res.data.appointment)
+        setReviewMessage('Thank you for your review')
+        setSubmitted(true)
+      } else {
+        setReviewError('Failed to submit review')
+      }
+    } catch (err) {
+      console.error('Submit review error', err)
+      setReviewError('Failed to submit review')
+    } finally {
+      setSubmittingReview(false)
+      submittingReviewRef.current = false
     }
   }
 
@@ -122,7 +177,7 @@ export default function PatientAppDetails() {
                   alt="Doctor"
                 />
                 <div className="doctor-info">
-                  <h4 className="doctor-name">{(doc.firstName || '') + ' ' + (doc.lastName || '')}</h4>
+                  <h4 className="padDoctor-name">{(doc.firstName || '') + ' ' + (doc.lastName || '')}</h4>
                   <p className="doctor-role">{doc.role || 'Psychiatrist'}</p>
                   <p className="doctor-fees">₱ {doc.fees ?? '—'} / session</p>
                 </div>
@@ -130,13 +185,24 @@ export default function PatientAppDetails() {
             </div>
 
             <div className="doctor-profile-bottom">
+              <div className="doctor-about">
+                <h5>About</h5>
+                <p className="doctor-about-text">{doc.about || '—'}</p>
+              </div>
+
               <div className="doctor-experience">
                 <h5>Experience</h5>
                 <p className="doctor-experience-text">{doc.experience || '—'}</p>
               </div>
+
               <div className="doctor-specialty">
                 <h5>Specialization</h5>
-                <p className="doctor-specialty-text">{(Array.isArray(doc.education) && doc.education.join(', ')) || doc.specialty || '—'}</p>
+                <p className="doctor-specialty-text">{doc.specialty || '—'}</p>
+              </div>
+
+              <div className="doctor-clinicAddress">
+                <h5>Clinic Address</h5>
+                <p className="doctor-clinicAddress-text">{doc.address1 || '—'}</p>
               </div>
             </div>
           </section>
@@ -209,18 +275,57 @@ export default function PatientAppDetails() {
             <div>{appointment.notes || '—'}</div>
           </div>
 
+          {/* review / rating section (show when appointment completed and not yet reviewed) */}
+          {appointment.status === 'completed' && (
+            <div className="pad-section patient-review">
+              <h4>Rate Your Appointment</h4>
+              <div className="rating-stars">
+                {[1,2,3,4,5].map(i => {
+                  const filled = appointment?.rating ? appointment.rating >= i : (hoverRating || rating) >= i
+                  return (
+                    <span
+                      key={i}
+                      className={`rating-star ${filled ? 'filled' : ''} ${appointment?.rating ? 'readonly' : ''}`}
+                      onClick={appointment?.rating ? undefined : () => setRating(i)}
+                      onMouseEnter={appointment?.rating ? undefined : () => setHoverRating(i)}
+                      onMouseLeave={appointment?.rating ? undefined : () => setHoverRating(0)}
+                    >
+                      <FaStar />
+                    </span>
+                  )
+                })}
+              </div>
+              <div className="rating-textarea">
+                <textarea value={reviewText} onChange={(e) => setReviewText(e.target.value)} placeholder="Leave a comment (optional)" rows={4} className="form-control" />
+              </div>
+              <div className="rating-actions">
+                {!appointment?.rating ? (
+                  <button
+                    className="btn btn-primary"
+                    disabled={submittingReview || rating < 1 || submitted}
+                    onClick={submitReview}
+                  >
+                    {submittingReview ? 'Submitting…' : (submitted ? 'Submitted' : 'Submit Review')}
+                  </button>
+                ) : (
+                  <div className="text-muted">You rated this appointment {appointment.rating} / 5</div>
+                )}
+              </div>
+              {reviewMessage && <div className="alert alert-success mt-2">{reviewMessage}</div>}
+              {reviewError && <div className="alert alert-danger mt-2">{reviewError}</div>}
+            </div>
+          )}
+
           <div className="pad-section action-buttons">
-            <button
-              className="btn btn-primary"
-              onClick={cancelAppointment}
-              disabled={loading || appointment.status === 'cancelled'}
-            >
-              {loading
-                ? 'Cancelling…'
-                : appointment.status === 'cancelled'
-                ? 'Cancelled'
-                : 'Cancel Appointment'}
-            </button>
+            {(appointment.status || '').toLowerCase() !== 'cancelled' && (appointment.status || '').toLowerCase() !== 'completed' && (
+              <button
+                className="btn btn-primary"
+                onClick={cancelAppointment}
+                disabled={loading}
+              >
+                {loading ? 'Cancelling…' : 'Cancel Appointment'}
+              </button>
+            )}
             <button
               className="btn btn-secondary"
               onClick={() => navigate('/PatientDashboard')}

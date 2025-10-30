@@ -75,13 +75,14 @@
   grid-column: 1 / 2;
   grid-row: 1 / 2;
   display: flex;
-  align-items: center;
+  align-items: start;
   justify-content: center;
+  margin-top: 8px;
 }
 
 .card-image img {
   width: 120px;
-  height: 120px;
+  height: 110px;
   object-fit: cover;
   border-radius: 10px;
 }
@@ -111,9 +112,10 @@
 
 .doctor-name {
   margin: 0;
-  font-size: 18px;
+  font-size: 20px;
   color: #334443;
   font-weight: 600;
+  margin-top: 8px;
 }
 
 .doctor-role {

@@ -649,7 +649,8 @@ app.get('/api/appointments/:id', async (req, res) => {
 
     const appt = await AppointmentModel.findById(id)
       .populate('patient', 'firstName lastName name email age gender contact hmoNumber hmoCardImage')
-      .populate('doctor', 'firstName lastName email contact fees role profileImage');
+      // include about/experience/education so clients can show full profile
+      .populate('doctor', 'firstName lastName email contact fees role profileImage experience education about address1 address2');
 
     if (!appt) return res.status(404).json({ status: 'not_found', message: 'Appointment not found' });
 
@@ -1040,6 +1041,62 @@ app.get('/api/appointments', async (req, res) => {
     return res.json({ status: 'success', appointments: items });
   } catch (err) {
     console.error('List appointments error:', err);
+    return res.status(500).json({ status: 'error', message: 'Server error', details: err.message });
+  }
+});
+
+// submit a review for an appointment (rating + optional review text)
+app.post('/api/appointments/:id/review', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rating, review } = req.body;
+    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ status: 'bad_request', message: 'Invalid appointment id' });
+    // validate rating 
+    const numericRating = Number(rating);
+    if (!Number.isFinite(numericRating) || numericRating < 1 || numericRating > 5) {
+      return res.status(400).json({ status: 'bad_request', message: 'Rating must be a number between 1 and 5' });
+    }
+
+    console.log('Review incoming', { appointmentId: id, rating: numericRating, reviewLength: review ? String(review).length : 0, ip: req.ip });
+
+    // atomically update the appointment 
+    const update = { rating: numericRating };
+    if (review !== undefined) update.review = String(review);
+
+    try {
+      const updated = await AppointmentModel.findByIdAndUpdate(
+        id,
+        { $set: update },
+        { new: true, runValidators: true }
+      )
+        .populate('patient', 'firstName lastName name email')
+        .populate('doctor', 'firstName lastName email');
+
+      if (!updated) return res.status(404).json({ status: 'not_found', message: 'Appointment not found' });
+
+      console.log('Review saved (findByIdAndUpdate)', { appointmentId: id });
+      return res.json({ status: 'success', appointment: updated });
+    } catch (updateErr) {
+      console.error('Review update error', updateErr);
+      if (updateErr && updateErr.name === 'ValidationError') {
+        return res.status(400).json({ status: 'bad_request', message: 'Validation error', details: updateErr.errors });
+      }
+      
+      try {
+        const raw = await AppointmentModel.collection.updateOne({ _id: new mongoose.Types.ObjectId(id) }, { $set: update });
+        if (raw.matchedCount === 0) return res.status(404).json({ status: 'not_found', message: 'Appointment not found' });
+        console.log('Review saved (raw collection update)', { appointmentId: id, result: raw.result || raw });
+        const reloaded = await AppointmentModel.findById(id)
+          .populate('patient', 'firstName lastName name email')
+          .populate('doctor', 'firstName lastName email');
+        return res.json({ status: 'success', appointment: reloaded });
+      } catch (rawErr) {
+        console.error('Raw update failed', rawErr);
+        return res.status(500).json({ status: 'error', message: 'Server error', details: rawErr.message || rawErr });
+      }
+    }
+  } catch (err) {
+    console.error('Submit review error:', err);
     return res.status(500).json({ status: 'error', message: 'Server error', details: err.message });
   }
 });

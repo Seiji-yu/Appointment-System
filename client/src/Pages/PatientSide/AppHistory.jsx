@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import PNavbar from '../../SideBar/PNavbar'
 import CalendarC from '../../Calendar/CalendarC.jsx';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -9,21 +10,42 @@ function AppHistory() {
   const [activeTab, setActiveTab] = useState('upcoming');
 
   const [appointments, setAppointments] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const patientId = localStorage.getItem('patientId');
-    if (!patientId) return;
+    const patientId = localStorage.getItem('patientId') || localStorage.getItem('userId') || null;
+    const email = localStorage.getItem('email') || null;
+    if (!patientId && !email) return;
 
-    const fetchAppointments = () => {
-      fetch(`http://localhost:3001/api/appointments?patientId=${patientId}`)
-        .then(res => res.json())
-        .then(data => setAppointments(data));
+    const statusForTab = () => {
+      if (activeTab === 'upcoming') return 'pending,approved';
+      if (activeTab === 'completed') return 'completed';
+      if (activeTab === 'cancelled') return 'cancelled,rejected';
+      return '';
+    };
+
+    const buildUrl = () => {
+      const status = statusForTab();
+      const base = patientId ? `http://localhost:3001/api/appointments?patientId=${patientId}` : `http://localhost:3001/api/appointments?patientEmail=${encodeURIComponent(email)}`;
+      return status ? `${base}&status=${encodeURIComponent(status)}` : base;
+    };
+
+    const fetchAppointments = async () => {
+      try {
+        const res = await fetch(buildUrl());
+        const data = await res.json();
+        if (data && data.appointments) setAppointments(data.appointments);
+        else setAppointments([]);
+      } catch (err) {
+        console.error('Failed to load appointments', err);
+        setAppointments([]);
+      }
     };
 
     fetchAppointments();
-    const interval = setInterval(fetchAppointments, 5000);
-    return () => clearInterval(interval);
-  }, []);
+    const iv = setInterval(fetchAppointments, 5000);
+    return () => clearInterval(iv);
+  }, [activeTab]);
 
   return (
     <div className={`dashboard patient-history ${sidebarOpen ? 'sidebar-open' : 'sidebar-collapsed'}`}>
@@ -50,15 +72,24 @@ function AppHistory() {
                 {/* Left column: list */}
                 <div className="col-12 col-lg-7">
                   <h5 className="mb-3">Your Appointment Requests</h5>
-                  {appointments.map(app => (
-                    <div key={app.id || app._id} className="card appointment-card mb-3">
-                      <div className="card-body">
-                        <h5 className="card-title">{app.name}</h5>
-                        <p className="card-text">{app.date}</p>
-                        <p className="status">Status: {app.status}</p>
+                  {appointments.map(a => {
+                    const doc = a.doctor || {};
+                    const apptDate = a.date ? new Date(a.date) : null;
+                    const dateOnly = apptDate ? apptDate.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' }) : '—';
+                    const timeOnly = apptDate ? apptDate.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) : '—';
+                    const handleOpen = () => navigate('/PatientAppDetails', { state: { appointment: a, appointmentId: a._id } });
+                    const onKeyDown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleOpen(); } };
+                    return (
+                      <div key={a._id} className="appt-item appt-row-style card mb-2" role="button" tabIndex={0} onClick={handleOpen} onKeyDown={onKeyDown}>
+                        <div className="appt-left"><img className="appt-avatar" src={doc.profileImage || '/default-avatar.png'} alt="avatar" /></div>
+                        <div className="appt-center">
+                          <div className="doctor-name">{(doc.firstName||'') + (doc.lastName ? ' '+doc.lastName : '') || 'Doctor'}</div>
+                          <div className="appt-datetime">{dateOnly} / {timeOnly}</div>
+                        </div>
+                        <div className="appt-right"><div className={`appt-status status-${a.status||''}`}>{(a.status||'').toUpperCase()}</div></div>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
 
                 {/* Right column: calendar */}
@@ -73,30 +104,44 @@ function AppHistory() {
             {activeTab === 'completed' && (
               <div>
                 <h5 className="mb-3">Completed Appointments</h5>
-                {appointments.filter(a => a.status === 'Completed').map(c => (
-                  <div key={c.id || c._id} className="card appointment-card mb-3">
-                    <div className="card-body">
-                      <h5 className="card-title">{c.name}</h5>
-                      <p className="card-text">{c.date}</p>
-                      <p className="status">Status: {c.status}</p>
+                {appointments.map(a => {
+                  const doc = a.doctor || {};
+                  const apptDate = a.date ? new Date(a.date) : null;
+                  const dateOnly = apptDate ? apptDate.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' }) : '—';
+                  const timeOnly = apptDate ? apptDate.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) : '—';
+                  return (
+                    <div key={a._id} className="appt-item appt-row-style card mb-2" role="button" tabIndex={0} onClick={() => navigate('/PatientAppDetails', { state: { appointment: a, appointmentId: a._id } })}>
+                      <div className="appt-left"><img className="appt-avatar" src={doc.profileImage || '/default-avatar.png'} alt="avatar" /></div>
+                      <div className="appt-center">
+                        <div className="doctor-name">{(doc.firstName||'') + (doc.lastName ? ' '+doc.lastName : '') || 'Doctor'}</div>
+                        <div className="appt-datetime">{dateOnly} / {timeOnly}</div>
+                      </div>
+                      <div className="appt-right"><div className={`appt-status status-${a.status||''}`}>{(a.status||'').toUpperCase()}</div></div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             )}
 
             {activeTab === 'cancelled' && (
               <div>
                 <h5 className="mb-3">Cancelled/Rejected Appointments</h5>
-                {appointments.filter(a => a.status === 'Rejected' || a.status === 'Cancelled').map(c => (
-                  <div key={c.id || c._id} className="card appointment-card mb-3">
-                    <div className="card-body">
-                      <h5 className="card-title">{c.name}</h5>
-                      <p className="card-text">{c.date}</p>
-                      <p className="status">Status: {c.status}</p>
+                {appointments.map(a => {
+                  const doc = a.doctor || {};
+                  const apptDate = a.date ? new Date(a.date) : null;
+                  const dateOnly = apptDate ? apptDate.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' }) : '—';
+                  const timeOnly = apptDate ? apptDate.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) : '—';
+                  return (
+                    <div key={a._id} className="appt-item appt-row-style card mb-2" role="button" tabIndex={0} onClick={() => navigate('/PatientAppDetails', { state: { appointment: a, appointmentId: a._id } })}>
+                      <div className="appt-left"><img className="appt-avatar" src={doc.profileImage || '/default-avatar.png'} alt="avatar" /></div>
+                      <div className="appt-center">
+                        <div className="doctor-name">{(doc.firstName||'') + (doc.lastName ? ' '+doc.lastName : '') || 'Doctor'}</div>
+                        <div className="appt-datetime">{dateOnly} / {timeOnly}</div>
+                      </div>
+                      <div className="appt-right"><div className={`appt-status status-${a.status||''}`}>{(a.status||'').toUpperCase()}</div></div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             )}
           </div>

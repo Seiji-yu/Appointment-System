@@ -30,6 +30,17 @@ const AppointmentSchema = new mongoose.Schema({
         type: String,
     },
 
+    // patient review/rating after appointment
+    rating: {
+        type: Number,
+        min: 1,
+        max: 5,
+    },
+
+    review: {
+        type: String,
+    },
+
 }, { timestamps: true });
 
 // Helpful index for recent-patient queries

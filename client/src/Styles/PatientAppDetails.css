@@ -29,7 +29,7 @@
 }
 
 .doctor-profile-title {
-  font-size: 1.4rem;
+  font-size: 1.75rem;
   font-weight: 600;
   color: #2c3e50;
   margin-bottom: 8px;
@@ -38,7 +38,7 @@
 
 .doctor-profile-row {
   display: flex;
-  gap: 16px;
+  gap: 4px;
   align-items: flex-start;
 }
 
@@ -51,13 +51,14 @@
 .doctor-profile-bottom {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   padding-top: 8px;
 }
 
+/* doctor avatar sizing (smaller to fit layout) */
 .doctor-avatar {
-  width: 140px;
-  height: 140px;
+  width: 120px;
+  height: 120px;
   border-radius: 12px;
   object-fit: cover;
   background: #eee;
@@ -67,33 +68,75 @@
   flex: 1;
 }
 
-.doctor-name {
-  font-size: 1.25rem;
+.padDoctor-name {
+  font-size: 1.6rem;
   font-weight: 600;
   margin: 4px 0 8px;
   color: #34495e;
 }
 
-.doctor-role {
+.doctor-profile .doctor-info .doctor-role {
   color: #7f8c8d;
   margin: 4px 0;
+  font-size: 1rem; 
+  font-weight: 300; 
 }
 
-.doctor-fees {
+.doctor-profile .doctor-info .doctor-fees {
   color: #16a085;
-  font-weight: 500;
+  font-weight: 300; 
+  font-size: 1rem;
   margin: 4px 0;
 }
 
-.doctor-experience {
+.doctor-about {
   border-top: 1px solid rgba(0, 0, 0, 0.05);
   margin-top: 8px;
   padding-top: 8px;
 }
 
+.doctor-about h5 {
+  margin: 4px 0;
+  color: #2c3e50;
+  font-weight: 700; 
+}
+
+.doctor-about p {
+  font-size: 1.00rem;
+  font-weight: 300; 
+}
+
 .doctor-experience h5 {
   margin: 4px 0;
   color: #2c3e50;
+  font-weight: 700; 
+}
+
+.doctor-experience p {
+  font-size: 1.00rem;
+  font-weight: 300; 
+}
+
+.doctor-specialty h5 {
+  margin: 4px 0;
+  color: #2c3e50;
+  font-weight: 700; 
+}
+
+.doctor-specialty p {
+  font-size: 1.00rem;
+  font-weight: 300; 
+}
+
+.doctor-clinicAddress h5 {
+  margin: 4px 0;
+  color: #2c3e50;
+  font-weight: 700; 
+}
+
+.doctor-clinicAddress p {
+  font-size: 1.00rem;
+  font-weight: 300; 
 }
 
 /* appointment history */
@@ -137,7 +180,7 @@
   text-align: right;
   color: #111827;
   font-weight: 600;
-  overflow-wrap: anywhere; /
+  overflow-wrap: anywhere;
 }
 
 .patient-info .hmo-card {
@@ -165,6 +208,46 @@
   padding: 8px 14px;
   font-size: 0.95rem;
   border-radius: 6px;
+}
+
+/* Rating / review styling */
+.patient-review h4 {
+  margin-bottom: 8px;
+}
+.rating-stars {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.rating-star {
+  cursor: pointer;
+  color: #e5e7eb; 
+  font-size: 24px; /* star size */
+  display: inline-flex;
+  align-items: center;
+}
+.rating-star.filled {
+  color: #f59e0b; 
+}
+.rating-textarea { 
+  margin-top: 8px; 
+}
+
+.rating-actions { 
+  margin-top: 8px; 
+  display: flex; 
+  gap: 8px; 
+  justify-content: flex-start; 
+}
+
+.patient-review .alert { 
+  margin-top: 8px; 
+}
+
+/* make button unclickable after submitting the rating */
+.rating-actions .btn[disabled] {
+  pointer-events: none;
+  opacity: 0.6;
 }
 
 /* responsive design */

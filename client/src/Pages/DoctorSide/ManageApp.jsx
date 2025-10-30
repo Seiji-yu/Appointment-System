@@ -22,6 +22,7 @@ export default function ManageApp() {
   }, [appointments, filter]);
 
   useEffect(() => {
+    // Load doctor profile and appointments whenever the filter changes
     let cancelled = false;
     async function load() {
       try {
@@ -36,7 +37,10 @@ export default function ManageApp() {
         if (cancelled) return;
         setDoctor(d);
 
-        const url = `http://localhost:3001/api/doctor/${d._id}/appointments/active`;
+        // return cancelled appointments by the patient
+        let url = `http://localhost:3001/api/doctor/${d._id}/appointments`;
+        if (filter && filter !== 'all') url += `?status=${encodeURIComponent(filter)}`;
+
         const list = await axios.get(url);
         if (cancelled) return;
         setAppointments(list.data?.appointments || []);
@@ -48,7 +52,7 @@ export default function ManageApp() {
     }
     load();
     return () => { cancelled = true; };
-  }, []);
+  }, [filter]);
 
   const updateAppt = async (id, payload) => {
     const prev = [...appointments];
@@ -58,8 +62,8 @@ export default function ManageApp() {
       const res = await axios.patch(`http://localhost:3001/api/appointments/${id}`, payload);
       const updated = res.data?.appointment;
       if (updated.status === 'completed' || updated.status === 'cancelled') {
-        // remove from active list correctly
-        setAppointments(appts => appts.filter(a => a._id === id !== id));
+        // remove from current list if it no longer belongs (e.g., moved to cancelled/completed)
+        setAppointments(appts => appts.filter(a => a._id !== id));
       } else {
         setAppointments(appts => appts.map(a => a._id === id ? updated : a));
       }
