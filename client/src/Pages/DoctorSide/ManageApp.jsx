@@ -1,10 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import Navbar from '../../SideBar/Navbar.jsx';
-import '../../Styles/Ddashboard.css';
-import CalendarC from '../../Calendar/CalendarC.jsx';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 export default function ManageApp() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -13,18 +9,18 @@ export default function ManageApp() {
   const [error, setError] = useState('');
 
   const [appointments, setAppointments] = useState([]);
-  const [filter, setFilter] = useState('all'); // all / pending / approved / completed / cancelled
+  const [filter, setFilter] = useState('active'); // show pending + approved
 
   // derive filtered list
   const filtered = useMemo(() => {
-    if (filter === 'all') return appointments;
-    return appointments.filter(a => (a.status || '').toLowerCase() === filter); // ManageApp Filter Case Sensitive
+    if (filter === 'all' || filter === 'active') return appointments;
+    return appointments.filter(a => (a.status || '').toLowerCase() === filter);
   }, [appointments, filter]);
 
   useEffect(() => {
     // Load doctor profile and appointments whenever the filter changes
     let cancelled = false;
-    async function load() {
+  async function load() {
       try {
         setLoading(true);
         setError('');
@@ -37,9 +33,15 @@ export default function ManageApp() {
         if (cancelled) return;
         setDoctor(d);
 
-        // return cancelled appointments by the patient
-        let url = `http://localhost:3001/api/doctor/${d._id}/appointments`;
-        if (filter && filter !== 'all') url += `?status=${encodeURIComponent(filter)}`;
+        // Load active appointments (pending + approved) or by status
+        let url;
+        if (filter === 'active') {
+          url = `http://localhost:3001/api/doctor/${d._id}/appointments/active`;
+        } else if (filter) {
+          url = `http://localhost:3001/api/doctor/${d._id}/appointments?status=${encodeURIComponent(filter)}`;
+        } else {
+          url = `http://localhost:3001/api/doctor/${d._id}/appointments`;
+        }
 
         const list = await axios.get(url);
         if (cancelled) return;
@@ -61,8 +63,8 @@ export default function ManageApp() {
       setAppointments(appts => appts.map(a => a._id === id ? { ...a, ...payload } : a));
       const res = await axios.patch(`http://localhost:3001/api/appointments/${id}`, payload);
       const updated = res.data?.appointment;
+      // In Manage App, keep approved items; only remove when completed or cancelled
       if (updated.status === 'completed' || updated.status === 'cancelled') {
-        // remove from current list if it no longer belongs (e.g., moved to cancelled/completed)
         setAppointments(appts => appts.filter(a => a._id !== id));
       } else {
         setAppointments(appts => appts.map(a => a._id === id ? updated : a));
@@ -84,16 +86,6 @@ export default function ManageApp() {
         <div className="dashboard-main">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h1>Manage Appointments</h1>
-            <div>
-              <label style={{ marginRight: 8 }}>Filter:</label>
-              <select value={filter} onChange={e => setFilter(e.target.value)}>
-                <option value="all">All</option>
-                <option value="pending">Pending</option>
-                <option value="approved">Approved</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-            </div>
           </div>
 
           {loading ? (
@@ -134,11 +126,11 @@ export default function ManageApp() {
                         <td>
                           <input
                             type="text"
+                            className="form-control"
                             value={appt.notes || ''}
                             onChange={(e) => setAppointments(appts => appts.map(a => a._id === appt._id ? { ...a, notes: e.target.value } : a))}
                             onBlur={(e) => updateAppt(appt._id, { notes: e.target.value })}
                             placeholder="Add note..."
-                            style={{ width: '100%' }}
                           />
                         </td>
                         <td style={{ textTransform: 'capitalize' }}>{appt.status}</td>

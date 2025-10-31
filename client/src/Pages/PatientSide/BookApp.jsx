@@ -25,10 +25,10 @@ export default function BookApp() {
     () => ['08:00 AM', '09:00 AM', '10:00 AM', '11:00 AM', '01:00 PM', '02:00 PM', '03:00 PM', '04:00 PM'],
     []
   )
-  const [selectedSlot, setSelectedSlot] = useState('')
-  const [concerns, setConcerns] = useState('')
-  const [availableSlots, setAvailableSlots] = useState([]) // 'HH:mm' list
+  const [selectedSlot, setSelectedSlot] = useState('')     // holds slot start 'HH:mm'
+  const [availableSlots, setAvailableSlots] = useState([]) // holds ['HH:mm', ...] slot starts
   const [slotsLoading, setSlotsLoading] = useState(false)
+  const [concerns, setConcerns] = useState('') 
 
   // Add here (before any use of `date`)
   const toYMD = (d) => {
@@ -68,7 +68,7 @@ export default function BookApp() {
           education: Array.isArray(d.education) ? d.education : [],
           about: d.about || '',
           address1: d.address1 || '',
-          address2: d.address2 || '',
+          contact: d.contact || d.address2 || '',
           profileImage: d.profileImage || ''
         })
       })
@@ -81,21 +81,37 @@ export default function BookApp() {
   const displayName = doctor ? `${doctor.firstName} ${doctor.lastName}`.trim() : ''
 
   function hhmmTo12(hhmm) {
+    if (typeof hhmm !== 'string' || !/^\d{2}:\d{2}$/.test(hhmm)) return '—';
     const [h, m] = hhmm.split(':').map(Number);
+    if (Number.isNaN(h) || Number.isNaN(m)) return '—';
     const ampm = h >= 12 ? 'PM' : 'AM';
-    const h12 = h % 12 || 12;
-    return `${h12.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')} ${ampm}`;
+    const h12 = (h % 12) || 12;
+    return `${h12}:${m.toString().padStart(2, '0')} ${ampm}`;
+  }
+
+  function addMinutesHHMM(hhmm, mins) {
+    if (typeof hhmm !== 'string' || !/^\d{2}:\d{2}$/.test(hhmm)) return '—';
+    const [h, m] = hhmm.split(':').map(Number);
+    if (Number.isNaN(h) || Number.isNaN(m)) return '—';
+    const total = h * 60 + m + mins;
+    const capped = Math.min(total, (24 * 60)); // allow 24:00 as end-of-day label
+    const hh = String(Math.floor(capped / 60)).padStart(2, '0');
+    const mm = String(capped % 60).padStart(2, '0');
+    return `${hh}:${mm}`;
   }
 
   const fetchSlots = async (dId, ymd) => {
     if (!dId || !ymd) return;
     setSlotsLoading(true);
-    setSelectedSlot(''); // reset selection on date/doctor change
+    setSelectedSlot('');
     try {
-      const res = await axios.get('http://localhost:3001/api/doctor/' + dId + '/available-slots', {
-        params: { date: ymd, slot: 0 }
+      // Request split slots (default behavior), 60-minute intervals
+      const res = await axios.get(`http://localhost:3001/api/doctor/${dId}/available-slots`, {
+        params: { date: ymd, slot: 60 }
       });
-      setAvailableSlots(res.data?.slots || []);
+      const slots = Array.isArray(res.data?.slots) ? res.data.slots : [];
+      const clean = slots.filter(t => typeof t === 'string' && /^\d{2}:\d{2}$/.test(t));
+      setAvailableSlots(clean);
     } catch (e) {
       setAvailableSlots([]);
     } finally {
@@ -110,7 +126,7 @@ export default function BookApp() {
   }, [doctor, date]);
 
   const handleBookNow = async () => {
-    if (isSubmitting) return; // prevent double-click
+    if (isSubmitting) return;
     setSubmitNotice('');
     setIsSubmitting(true);
     try {
@@ -118,12 +134,18 @@ export default function BookApp() {
         setSubmitNotice('Please select a time.');
         return;
       }
-      const iso = new Date(`${date}T${selectedSlot}:00`).toISOString();
 
-      const patientEmail = localStorage.getItem('patientEmail') || localStorage.getItem('email')
+      const patientEmail = localStorage.getItem('patientEmail') || localStorage.getItem('email');
       if (!patientEmail) { setError('Missing patient email in localStorage. Please login again.'); return }
 
-      const payload = { doctorId: doctor.id, patientEmail, date: iso, notes: concerns }
+      // Send local date parts to avoid timezone shifts
+      const payload = {
+        doctorId: doctor.id,
+        patientEmail,
+        localYMD: date,        // 'YYYY-MM-DD' in local time
+        timeHHMM: selectedSlot, // 'HH:mm' 24h start time
+        notes: concerns
+      };
       const res = await axios.post('http://localhost:3001/api/appointments', payload);
       const created = res.data?.appointment;
       setSubmitNotice('Booked successfully. You will receive updates once approved.');
@@ -136,9 +158,7 @@ export default function BookApp() {
     } catch (err) {
       const r = err?.response;
       const msg = r?.status === 409
-        ? (r?.data?.message || (r?.data?.status === 'conflict'
-            ? 'This time slot is not available.'
-            : 'Booking cannot be created.'))
+        ? (r?.data?.message || 'This time slot is not available.')
         : (r?.data?.message || 'Booking failed. Please try again.');
       setSubmitNotice(msg);
     } finally {
@@ -171,6 +191,11 @@ export default function BookApp() {
                     <h4 className="bookDoctor-name">{displayName}</h4>
                     <p className="doctor-role">{doctor.specialty}</p>
                     <p className="doctor-fees">₱ {doctor.fees} / session</p>
+                  </div>
+
+                  <div style={{ marginTop: 8 }}>
+                    <h5 style={{ margin: '8px 0' }}>Contact</h5>
+                    <p style={{ margin: 0 }}>{doctor.contact || '—'}</p>
                   </div>
                 </div>
               </div>
@@ -229,21 +254,34 @@ export default function BookApp() {
               <div className="mb-2">
                 <label style={{ display: 'block', marginTop: 6, marginBottom: 6 }}>Select Time</label>
                 {slotsLoading ? (
-                  <p>Loading slots...</p>
+                  <p>Loading availability...</p>
                 ) : availableSlots.length === 0 ? (
                   <p className="no-availability">No availability for this date.</p>
                 ) : (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                    {availableSlots.map(s => (
-                      <button
-                        type="button"
-                        key={s}
-                        className={`btn ${selectedSlot === s ? 'btn-primary' : 'btn-secondary'}`}
-                        onClick={() => setSelectedSlot(s)}
-                      >
-                        {hhmmTo12(s)}
-                      </button>
-                    ))}
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                      gap: 8,
+                      width: '100%'
+                    }}
+                  >
+                    {availableSlots.map((t) => {
+                      const end = addMinutesHHMM(t, 60);
+                      const key = `${t}-${end}`;
+                      const label = `${hhmmTo12(t)} - ${hhmmTo12(end)}`;
+                      return (
+                        <button
+                          type="button"
+                          key={key}
+                          className={`btn ${selectedSlot === t ? 'btn-primary' : 'btn-secondary'}`}
+                          style={{ width: '100%' }}
+                          onClick={() => setSelectedSlot(t)}
+                        >
+                          {label}
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
               </div>

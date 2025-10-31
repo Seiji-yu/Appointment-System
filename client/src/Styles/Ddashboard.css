@@ -4,7 +4,7 @@
   height: 100vh;
   background-color: #ffffff;
   font-family: 'Poppins', sans-serif;
-  color: #7a6767;
+  color: #000000;
   overflow-x: hidden;
 }
 
@@ -19,10 +19,12 @@
   transition: margin-left 0.3s ease;
 }
 
-.sidebar-open .dashboard-main {
-  margin-left: 0px;
-  width: calc(100% - 0px);
+.dashboard.sidebar-open .dashboard-main {
+  margin-left: var(--doctor-sidebar-open); 
+  width: calc(100% - var(--doctor-sidebar-open));
 }
+
+
 
 .search-bar {
   width: 100%;
@@ -82,8 +84,10 @@
   /* left grows, right fixed */
   grid-template-areas:
     "cards calendar"
+    "charts calendar"
     "recent calendar";
-  gap: 16px 20px;
+  row-gap: 12px;
+  column-gap: 16px;
   align-items: start;
 }
 
@@ -92,7 +96,12 @@
   grid-area: cards;
 }
 
+.grid-charts {
+  grid-area: charts;
+}
+
 .grid-calendar {
+  position: sticky;
   grid-area: calendar;
 }
 
@@ -277,7 +286,7 @@
     flex-direction: column;
   }
 
-  .sidebar-open .dashboard-main {
+  .dashboard.sidebar-open .dashboard-main {
     margin-left: 0;
     width: 100%;
   }

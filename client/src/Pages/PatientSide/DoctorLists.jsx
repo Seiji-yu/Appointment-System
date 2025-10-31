@@ -125,7 +125,7 @@ function DoctorLists() {
 
                       <div className="card-info">
                         <h3 className="doctor-name">{(doc.firstName || '') + ' ' + (doc.lastName || '')}</h3>
-                        <p className="doctor-role">{doc.role || 'Psychiatrist'}</p>
+                        <p className="doctor-role">{doc.specialty ?? '—'}</p>
                         <p className="doctor-price">₱ {doc.fees ?? '—'} / session</p>
                         <p className="doctor-rating">{doc.avgRating ? `${doc.avgRating} ★ (${doc.ratingCount})` : 'No reviews yet'}</p>
                       </div>
@@ -177,7 +177,7 @@ function DoctorLists() {
 
                     <div className="card-info">
                       <h3 className="doctor-name">{(doc.firstName || '') + ' ' + (doc.lastName || '')}</h3>
-                      <p className="doctor-role">{doc.role || 'Psychiatrist'}</p>
+                      <p className="doctor-role">{doc.specialty ?? '—'}</p>
                       <p className="doctor-price">₱ {doc.fees ?? '—'} / session</p>
                       <p className="doctor-rating">{doc.avgRating ? `${doc.avgRating} ★ (${doc.ratingCount})` : 'No reviews yet'}</p>
                     </div>

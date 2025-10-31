@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import Navbar from '../../SideBar/Navbar.jsx';
-import '../../Styles/Ddashboard.css';
 
 export default function DoctorLogs() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -9,7 +8,7 @@ export default function DoctorLogs() {
   const [error, setError] = useState('');
   const [logs, setLogs] = useState([]);
 
-  // NEW: status filter
+  // status filter
   const [statusFilter, setStatusFilter] = useState('all'); // all | completed | cancelled
 
   const loadLogs = async () => {
@@ -46,7 +45,7 @@ export default function DoctorLogs() {
     loadLogs();
   }, []);
 
-  // NEW: derived list based on status filter
+  // Derived list based on status filter
   const filteredLogs = useMemo(() => {
     if (statusFilter === 'all') return logs;
     return logs.filter(a => (a.status || '').toLowerCase() === statusFilter);
@@ -70,7 +69,7 @@ export default function DoctorLogs() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
             <h1>Booking Logs</h1>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              {/* NEW: Filter buttons */}
+              {/* Filter buttons */}
               <div className="btn-group" role="group" aria-label="Filter by status">
                 <button
                   type="button"

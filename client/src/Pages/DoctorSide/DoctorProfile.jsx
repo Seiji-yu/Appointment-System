@@ -27,13 +27,36 @@ function DoctorProfile() {
     specialty: 'Mental Health',
     education: [''],
     address1: '',
-    address2: '',
+    contact: '',
     about: ''
   });
+
+  // phone input pieces (country code + local digits)
+  const COUNTRY_CODES = [
+    { code: '+63', label: '🇵🇭 Philippines (+63)' }
+  ];
+  const [countryCode, setCountryCode] = useState('+63');
+  const [localNumber, setLocalNumber] = useState('');
+  const LOCAL_MAX = 10; // limit local digits length
 
   // snapshots to restore on cancel
   const [origForm, setOrigForm] = useState(null);
   const [origPreview, setOrigPreview] = useState(null);
+
+  // Specialty options
+  const SPECIALTIES = [
+    'Mental Health',
+    'General Psychiatry',
+    'Child and Adolescent Psychiatry',
+    'Geriatric Psychiatry',
+    'Addiction Psychiatry',
+    'Consultation-Liaison Psychiatry',
+    'Forensic Psychiatry',
+    'Community Psychiatry',
+    'Psychotherapy',
+  ];
+  const OTHER_VALUE = '__OTHER__';
+  const specialtySelectValue = SPECIALTIES.includes(form.specialty) ? form.specialty : OTHER_VALUE;
 
   const toYMD = (d) => {
     const y = d.getFullYear();
@@ -54,6 +77,22 @@ function DoctorProfile() {
   const nowHHMM = () => {
     const n = new Date();
     return `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
+  };
+
+  // Round up an HH:mm string to the next step minute (default: 5 mins)
+  const roundUpHHMM = (hhmm, step = 5) => {
+    try {
+      const [h, m] = hhmm.split(':').map(Number);
+      if (Number.isNaN(h) || Number.isNaN(m)) return hhmm;
+      const mins = h * 60 + m;
+      const rounded = Math.ceil(mins / step) * step;
+      const capped = Math.min(rounded, (24 * 60) - 1);
+      const hh = String(Math.floor(capped / 60)).padStart(2, '0');
+      const mm = String(capped % 60).padStart(2, '0');
+      return `${hh}:${mm}`;
+    } catch {
+      return hhmm;
+    }
   };
 
   // Fetch doctor info
@@ -80,9 +119,23 @@ function DoctorProfile() {
             specialty: doctor.specialty || 'Mental Health',
             education: Array.isArray(doctor.education) ? doctor.education : [''],
             address1: doctor.address1 || '',
-            address2: doctor.address2 || '',
+            contact: doctor.contact || '',
             about: doctor.about || ''
           };
+          // derive phone parts from contact, e.g. +64 221234567
+          try {
+            const m = String(next.contact || '').match(/^(\+\d{1,4})\s*(.*)$/);
+            if (m) {
+              setCountryCode(m[1]);
+              setLocalNumber(((m[2] || '').replace(/\D/g, '')).slice(0, LOCAL_MAX));
+            } else {
+              setCountryCode('+63');
+              setLocalNumber(String(next.contact || '').replace(/\D/g, '').slice(0, LOCAL_MAX));
+            }
+          } catch {
+            setCountryCode('+63');
+            setLocalNumber('');
+          }
           setForm(next);
           setOrigForm(next);
           setProfilePreview(doctor.profileImage || null);
@@ -95,7 +148,8 @@ function DoctorProfile() {
         console.error('Error fetching doctor profile:', err);
         setMessage('Error loading profile data.');
       });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+
+      
   }, []);
 
   // Image upload handlers
@@ -115,7 +169,16 @@ function DoctorProfile() {
   // Form change handlers
   const handleChange = (e) => {
     if (!editMode) return;
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    // Enforce numeric-only input for contact number (keep leading zeros by using text input)
+    const nextVal = name === 'contact' ? value.replace(/\D/g, '') : value;
+    setForm({ ...form, [name]: nextVal });
+  };
+  const handleSpecialtySelect = (e) => {
+    if (!editMode) return;
+    const v = e.target.value;
+    // When choosing Other, switch to custom input by clearing stored specialty
+    setForm({ ...form, specialty: v === OTHER_VALUE ? '' : v });
   };
   const handleEducationChange = (index, value) => {
     if (!editMode) return;
@@ -159,6 +222,8 @@ function DoctorProfile() {
         return;
       }
 
+      // Compose contact in international format
+      const fullContact = `${countryCode} ${localNumber}`.trim();
       const dataToSend = {
         email: doctorEmail,
         firstName: form.firstName,
@@ -169,7 +234,7 @@ function DoctorProfile() {
         education: form.education,
         about: form.about,
         address1: form.address1,
-        address2: form.address2,
+        contact: fullContact,
         profileImage: profilePreview // save new/removed image
       };
 
@@ -177,7 +242,10 @@ function DoctorProfile() {
       if (res.data?.status === 'success') {
         setMessage('Profile saved successfully!');
         // commit snapshots and exit edit mode
-        setOrigForm(form);
+        // keep submitted contact in form state
+        const committed = { ...form, contact: fullContact };
+        setOrigForm(committed);
+        setForm(committed);
         setOrigPreview(profilePreview);
         setEditMode(false);
       } else {
@@ -208,7 +276,7 @@ function DoctorProfile() {
     }
   };
 
-  const addRange = () => setRanges(prev => [...prev, { start: '09:00', end: '10:00' }]);
+  const addRange = () => setRanges(prev => [...prev, { start: '09:00 ', end: '10:00' }]);
   const updateRange = (i, key, val) => {
     setRanges(prev => prev.map((r, idx) => idx === i ? { ...r, [key]: val } : r));
   };
@@ -231,9 +299,12 @@ function DoctorProfile() {
         return;
       }
       let payloadRanges = ranges;
+      let partialToday = false;
       if (picked.getTime() === todayStart.getTime()) {
         const now = nowHHMM();
         payloadRanges = ranges.filter(r => r.end > now);
+        // if any kept range overlaps now, mark partial
+        partialToday = payloadRanges.some(r => r.start < now && r.end > now);
         if (payloadRanges.length === 0) {
           setMessage('All time ranges are in the past for today.');
           return;
@@ -241,7 +312,16 @@ function DoctorProfile() {
       }
       const payload = { email: form.email, date: availDate, ranges: payloadRanges };
       const res = await axios.post('http://localhost:3001/doctor/availability', payload);
-      setMessage(res.data?.status === 'success' ? 'Availability saved.' : 'Error saving availability.');
+      if (res.data?.status === 'success') {
+        if (partialToday) {
+          const from = roundUpHHMM(nowHHMM());
+          setMessage(`For today, patients will only see times from ${from} onward.`);
+        } else {
+          setMessage('Availability saved.');
+        }
+      } else {
+        setMessage('Error saving availability.');
+      }
     } catch (e) {
       setMessage(e?.response?.data?.message || 'Error saving availability.');
     }
@@ -393,13 +473,25 @@ function DoctorProfile() {
                   <label className="form-label">Specialty</label>
                   <select
                     className="form-select"
-                    name="specialty"
-                    value={form.specialty}
-                    onChange={handleChange}
+                    name="specialtySelect"
+                    value={specialtySelectValue}
+                    onChange={handleSpecialtySelect}
                     disabled={!editMode}
                   >
-                    <option value="Mental Health">Mental Health</option>
+                    {SPECIALTIES.map((s) => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                    <option value={OTHER_VALUE}>Other…</option>
                   </select>
+                  {editMode && specialtySelectValue === OTHER_VALUE && (
+                    <input
+                      type="text"
+                      className="form-control mt-2"
+                      placeholder="Enter specialty"
+                      value={form.specialty}
+                      onChange={(e) => setForm({ ...form, specialty: e.target.value })}
+                    />
+                  )}
                 </div>
 
                 <div className="mb-3">
@@ -432,7 +524,7 @@ function DoctorProfile() {
                 </div>
 
                 <div className="mb-3">
-                  <label className="form-label">Primary Address</label>
+                  <label className="form-label">Clinic Address</label>
                   <input
                     type="text"
                     className="form-control"
@@ -444,15 +536,48 @@ function DoctorProfile() {
                 </div>
 
                 <div className="mb-3">
-                  <label className="form-label">Secondary Address</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    name="address2"
-                    value={form.address2}
-                    onChange={handleChange}
-                    readOnly={!editMode}
-                  />
+                  <label className="form-label">Contact Number</label>
+                  {!editMode ? (
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="contact"
+                      value={`${countryCode} ${localNumber}`.trim()}
+                      readOnly
+                    />
+                  ) : (
+                    <div className="d-flex gap-2">
+                      <select
+                        className="form-select"
+                        style={{ maxWidth: 210 }}
+                        value={countryCode}
+                        onChange={(e) => {
+                          const code = e.target.value;
+                          setCountryCode(code);
+                          setForm({ ...form, contact: `${code} ${localNumber}`.trim() });
+                        }}
+                      >
+                        {COUNTRY_CODES.map(c => (
+                          <option key={c.code} value={c.code}>{c.label}</option>
+                        ))}
+                      </select>
+                      <input
+                        type="tel"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        className="form-control"
+                        placeholder="e.g., 9123456789"
+                        maxLength={LOCAL_MAX}
+                        value={localNumber}
+                        onChange={(e) => {
+                          const digits = e.target.value.replace(/\D/g, '').slice(0, LOCAL_MAX);
+                          setLocalNumber(digits);
+                          setForm({ ...form, contact: `${countryCode} ${digits}`.trim() });
+                        }}
+                      />
+                    </div>
+                  )}
+                  <div className="form-text">Stores in international format (e.g., +64 221234567). Max {LOCAL_MAX} digits for the local number.</div>
                 </div>
 
                 <div className="mb-3">

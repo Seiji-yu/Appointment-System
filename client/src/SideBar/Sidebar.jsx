@@ -5,6 +5,7 @@ import * as FaIcons from "react-icons/fa"
 import * as IoIcons from "react-icons/io"
 import * as AiIcons from "react-icons/ai"
 import { IoInformationOutline } from "react-icons/io5";
+import { IoLogOutOutline } from "react-icons/io5";
 
 
 export const SidebarData = [
@@ -28,8 +29,8 @@ export const SidebarData = [
         icon: <FaIcons.FaCalendarPlus />,
         cName: 'nav-text'
     },
-    
-        {
+
+    {
         title: 'Account Profile',
         path: '/DoctorProfile',
         icon: <FaIcons.FaWpforms />,
@@ -38,7 +39,7 @@ export const SidebarData = [
 
     {
         title: 'Settings',
-        path: '/Settings',
+        path: '/DSettings',
         icon: <IoIcons.IoMdSettings />,
         cName: 'nav-text'
     },
@@ -49,6 +50,13 @@ export const SidebarData = [
         icon: <IoInformationOutline />,
         cName: 'nav-text'
     },
+    {
+        title: 'Logout',
+        path: '/Login',
+        icon: <IoLogOutOutline />,
+        cName: 'nav-text'
+    },
+
 
 ]
 

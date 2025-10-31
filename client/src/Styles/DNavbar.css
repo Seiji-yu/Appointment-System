@@ -9,6 +9,12 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+/* When doctor sidebar is open, offset the top bar like patient */
+.doctor-topbar-open .top-navbar {
+  padding-left: calc(20px + var(--sidebar-open-width));
+  transition: padding-left 0.3s ease;
+}
+
 .menu-icon {
   cursor: pointer;
 }
@@ -18,6 +24,104 @@
   align-items: center;
   gap: 0.8rem;
   margin-right: 10px;
+}
+
+/* Notification bell and dropdown */
+.nav-bell {
+  position: relative;
+  display: grid;
+.notif-item.unread .notif-text { font-weight: 600; }
+.notif-actions { display: flex; gap: 8px; margin-top: 6px; }
+.link-btn { background: transparent; border: 0; padding: 2px; color: #374151; cursor: pointer; }
+.link-btn:hover { color: #111827; }
+  place-items: center;
+  cursor: pointer;
+}
+
+.nav-bell:hover {
+  opacity: .85;
+}
+
+.nav-badge {
+  position: absolute;
+  top: -4px;
+.theme-dark .link-btn { color: #d1d5db; }
+.theme-dark .link-btn:hover { color: #fff; }
+  right: -4px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 11px;
+  line-height: 1;
+  padding: 2px 5px;
+  border-radius: 999px;
+  min-width: 18px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.notif-dropdown {
+  position: absolute;
+  right: 12px;
+  top: 56px;
+  width: 280px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  z-index: 1200;
+  overflow: hidden;
+}
+
+.notif-head {
+  font-weight: 600;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.notif-empty {
+  padding: 12px;
+  color: #6b7280;
+}
+
+.notif-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 320px;
+  overflow: auto;
+}
+
+.notif-item {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.notif-item:last-child {
+  border-bottom: 0;
+}
+
+.notif-text {
+  font-size: 0.92rem;
+}
+
+.notif-time {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+.theme-dark .notif-dropdown {
+  background: #0f172a;
+  border-color: #1f2937;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+
+.theme-dark .notif-head {
+  border-bottom-color: #1f2937;
+}
+
+.theme-dark .notif-item {
+  border-bottom-color: #1f2937;
 }
 
 :root {
@@ -30,11 +134,15 @@
   top: 0;
   left: 0;
   height: 100vh;
-  width: var(--sidebar-open-width) !important;
-  background-color: #081047 !important;
-  color: #fff !important;
+  width: var(--sidebar-open-width);
+  background: linear-gradient(180deg, rgba(14, 23, 41, 0.95) 0%, rgba(42, 46, 85, 0.92) 100%) !important;
+  color: #eef2ff !important;
+  backdrop-filter: saturate(140%) blur(8px);
+  -webkit-backdrop-filter: saturate(140%) blur(8px);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
   z-index: 1000;
-  transition: transform 0.3s ease, width 0.3s ease;
+  transition: transform 0.3s ease, width 0.3s ease, background 0.3s ease;
   padding-top: 60px;
   display: flex;
   flex-direction: column;
@@ -70,24 +178,39 @@ body.with-sidebar-collapsed {
 
 .sidebar-list {
   list-style: none;
-  padding: 0;
+  padding: 8px 10px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .sidebar-item {
-  padding: 15px 20px;
+  padding: 6px 8px;
 }
 
 .sidebar-item a {
   text-decoration: none;
-  color: #fff;
+  color: #e8edff;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  line-height: 1;
+  transition: background .2s ease, color .2s ease, transform .15s ease;
 }
 
 .sidebar-item a:hover {
-  background-color: #292a33;
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.10);
+  color: #fff;
+}
+
+/* Active pill like patient */
+.sidebar-item.active a,
+.sidebar-item a.active {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.28), rgba(99, 102, 241, 0.28)) !important;
+  color: #ffffff !important;
+  box-shadow: inset 0 0 0 1px rgba(99, 102, 241, 0.35), 0 6px 20px rgba(0, 0, 0, 0.18);
 }
 
 .sidebar-header svg {
@@ -107,9 +230,67 @@ body.with-sidebar-collapsed {
   margin-bottom: 20px;
 }
 
-.dashboard,
-.patient-dashboard,
-.dashboard-main {
-  font-family: 'Poppins', sans-serif;
-  color: #333;
+/* User card at bottom for doctor sidebar */
+.doctor-user-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  margin: 0 12px;
+  border-radius: 14px;
+  text-decoration: none;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.06);
+  transition: background .2s ease, transform .2s ease;
+}
+
+.doctor-user-card:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-1px);
+}
+
+.doctor-user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  display: grid;
+  place-items: center;
+}
+
+.doctor-user-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.doctor-user-name {
+  font-weight: 600;
+  font-size: .95rem;
+  line-height: 1.1;
+}
+
+.doctor-user-email {
+  font-size: .75rem;
+  opacity: .85;
+  color: #dbeafe;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+.doctor-user-cta {
+  margin-left: auto;
+  font-size: .8rem;
+  opacity: .9;
+  background: rgba(255, 255, 255, 0.16);
+  padding: 4px 8px;
+  border-radius: 8px;
+}
+
+/* Dark theme variant */
+.theme-dark .sidebar {
+  background: linear-gradient(180deg, rgba(5, 8, 30, 0.9) 0%, rgba(4, 6, 24, 0.92) 100%) !important;
+  color: #e5e7eb !important;
 }
