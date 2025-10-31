@@ -45,7 +45,7 @@ function PDashboard() {
 
       <div className={`main-content ${sidebarOpen ? "sidebar-open" : ""}`}>
         {/* Grid container with named areas */}
-        <div className="dashboard-grid">
+        <div className="pdashboard-grid">
           <div className="welcome-box">
             <h1>Welcome to Your Dashboard!</h1>
             <p className="lead">Healing is not linear, but it is possible.</p>

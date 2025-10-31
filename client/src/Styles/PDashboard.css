@@ -1,4 +1,4 @@
-.patient-dashboard .dashboard-grid {
+.patient-dashboard .pdashboard-grid {
   display: grid;
   grid-template-columns: 2fr 1fr;
   grid-template-rows: auto auto;
@@ -174,7 +174,7 @@
 
 /* responsive design */
 @media (max-width: 992px) {
-  .patient-dashboard .dashboard-grid {
+  .patient-dashboard .pdashboard-grid {
     display: grid;
     grid-template-columns: 1fr;
     grid-template-areas:

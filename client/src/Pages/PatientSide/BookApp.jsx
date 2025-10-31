@@ -3,7 +3,7 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import PNavbar from '../../SideBar/PNavbar'
 import CalendarC from '../../Calendar/CalendarC.jsx'
-import '../../Styles/Ddashboard.css'
+import '../../Styles/BookApp.css'
 
 export default function BookApp() {
   const { email: emailParam } = useParams() // Email parameters
@@ -154,61 +154,56 @@ export default function BookApp() {
           <p>Loading...</p>
         ) : error ? (
           <p style={{ color: 'red' }}>{error}</p>
-        ) : (
-          <div className="dashboard-grid">
-            {/* Left Side: Doctor info mirrors Doctor Profile */}
-            <section className="card" style={{ alignSelf: 'start' }}>
-              <h3 style={{ marginTop: 0 }}>Doctor Profile</h3>
-              <div style={{ display: 'flex', gap: 16 }}>
-                <img
-                  src={doctor.profileImage || 'https://via.placeholder.com/180'}
-                  alt="Doctor"
-                  style={{ width: 180, height: 180, borderRadius: 12, objectFit: 'cover', background: '#eee' }}
-                />
-                <div style={{ flex: 1 }}>
-                  <h4 style={{ margin: '4px 0 8px', fontSize: '1.25rem' }}>{displayName}</h4>
-                  <div style={{ margin: '4px 0', color: '#555' }}>{doctor.specialty}</div>
-                  <div style={{ margin: '4px 0' }}>₱ {doctor.fees}/hr</div>
-                  <hr />
+          ) : (
+          <div className="book-dashboard-grid">
+            {/* Left Side: Doctor info - use same structure/styling as PatientAppDetails */}
+            <section className="book-card doctor-profile">
+              <h3 className="doctor-profile-title">Doctor Profile</h3>
 
-                  <div>
-                    <h5 style={{ margin: '8px 0' }}>Experience</h5>
-                    <p style={{ margin: 0 }}>{doctor.experience || '—'}</p>
-                  </div>
-
-                  <div style={{ marginTop: 8 }}>
-                    <h5 style={{ margin: '8px 0' }}>About</h5>
-                    <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{doctor.about || '—'}</p>
-                  </div>
-
-                  <div style={{ marginTop: 8 }}>
-                    <h5 style={{ margin: '8px 0' }}>Education</h5>
-                    {doctor.education && doctor.education.length > 0 ? (
-                      <ul style={{ margin: 0, paddingLeft: 18 }}>
-                        {doctor.education.map((e, i) => <li key={i}>{e}</li>)}
-                      </ul>
-                    ) : (
-                      <p style={{ margin: 0 }}>—</p>
-                    )}
-                  </div>
-
-                  <div style={{ marginTop: 8 }}>
-                    <h5 style={{ margin: '8px 0' }}>Clinic Address</h5>
-                    <p style={{ margin: 0 }}>
-                      {doctor.address1 || '—'}
-                      {doctor.address2 ? <><br />{doctor.address2}</> : null}
-                    </p>
+              <div className="doctor-profile-top">
+                <div className="doctor-profile-row">
+                  <img
+                    className="doctor-avatar"
+                    src={doctor.profileImage || 'https://via.placeholder.com/180'}
+                    alt="Doctor"
+                  />
+                  <div className="doctor-info">
+                    <h4 className="bookDoctor-name">{displayName}</h4>
+                    <p className="doctor-role">{doctor.specialty}</p>
+                    <p className="doctor-fees">₱ {doctor.fees} / session</p>
                   </div>
                 </div>
               </div>
-            </section>
+
+            <div className="doctor-profile-bottom">
+              <div className="doctor-about">
+                <h5>About</h5>
+                <p className="doctor-about-text">{doctor.about || '—'}</p>
+              </div>
+
+              <div className="doctor-experience">
+                <h5>Experience</h5>
+                <p className="doctor-experience-text">{doctor.experience || '—'}</p>
+              </div>
+
+              <div className="doctor-specialty">
+                <h5>Specialization</h5>
+                <p className="doctor-specialty-text">{doctor.specialty || '—'}</p>
+              </div>
+
+              <div className="doctor-clinicAddress">
+                <h5>Clinic Address</h5>
+                <p className="doctor-clinicAddress-text">{doctor.address1 || '—'}</p>
+              </div>
+            </div>
+          </section>
 
             {/* Right Side: Booking */}
-            <aside className="card grid-calendar" style={{ alignSelf: 'start' }}>
-              <h3 style={{ marginTop: 0 }}>Booking Appointment</h3>
+            <aside className="book-card book-grid-calendar" style={{ alignSelf: 'start' }}>
+              <h3 style={{ marginTop: 0 }}>Book An Appointment</h3>
 
            <div className="mb-2">
-                <label style={{ display: 'block', marginBottom: 6 }}>Select Date</label>
+                <label style={{ display: 'block', marginTop: 6, marginBottom: 6 }}>Select Date</label>
                 {/* CalendarC */}
                 <CalendarC
                   value={new Date(date)}
@@ -232,11 +227,11 @@ export default function BookApp() {
               </div>
 
               <div className="mb-2">
-                <label style={{ display: 'block', marginBottom: 6 }}>Select Time</label>
+                <label style={{ display: 'block', marginTop: 6, marginBottom: 6 }}>Select Time</label>
                 {slotsLoading ? (
                   <p>Loading slots...</p>
                 ) : availableSlots.length === 0 ? (
-                  <p>No availability for this date.</p>
+                  <p className="no-availability">No availability for this date.</p>
                 ) : (
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                     {availableSlots.map(s => (
