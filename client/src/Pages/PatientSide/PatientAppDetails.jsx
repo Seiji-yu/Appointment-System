@@ -184,7 +184,7 @@ export default function PatientAppDetails() {
                 />
                 <div className="doctor-info">
                   <h4 className="padDoctor-name">{(doc.firstName || '') + ' ' + (doc.lastName || '')}</h4>
-                  <p className="doctor-role">{doc.role || 'Psychiatrist'}</p>
+                  <p className="doctor-role">{doc.specialty ?? '—'}</p>
                   <p className="doctor-fees">₱ {doc.fees ?? '—'} / session</p>
                 </div>
               </div>
@@ -203,7 +203,7 @@ export default function PatientAppDetails() {
 
               <div className="doctor-specialty">
                 <h5>Specialization</h5>
-                <p className="doctor-specialty-text">{doc.specialty || '—'}</p>
+                <p className="doctor-specialty-text">{doc.specialty ?? '—'}</p>
               </div>
 
               <div className="doctor-clinicAddress">

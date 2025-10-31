@@ -795,7 +795,7 @@ app.get('/api/appointments/:id', async (req, res) => {
     const appt = await AppointmentModel.findById(id)
       .populate('patient', 'firstName lastName name email age gender contact hmoNumber hmoCardImage')
       // include about/experience/education so clients can show full profile
-      .populate('doctor', 'firstName lastName email contact fees role profileImage experience education about address1 address2');
+  .populate('doctor', 'firstName lastName email contact fees role profileImage specialty experience education about address1 address2');
 
     if (!appt) return res.status(404).json({ status: 'not_found', message: 'Appointment not found' });
 

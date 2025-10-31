@@ -1,8 +1,12 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import axios from 'axios'
 import '../Styles/Signup.css'
 import { motion } from 'framer-motion'
+import LogoImg from '../Images/Auth Images/Logo.jpg'
+import Pic1 from '../Images/Auth Images/AuthPic1.jpg'
+import Pic2 from '../Images/Auth Images/AuthPic2.jpg'
+import Pic3 from '../Images/Auth Images/AuthPic3.jpg'
 
 function Signup() {
   const [activeTab, setActiveTab] = useState('signup')
@@ -13,6 +17,94 @@ function Signup() {
   const [role, setRole] = useState('')
   const [termsChecked, setTermsChecked] = useState(false)
   const navigate = useNavigate()
+  // slider state
+  const slideImgs = [LogoImg, Pic1, Pic2, Pic3]
+  const [current, setCurrent] = useState(0)
+  const [autoPlay, setAutoPlay] = useState(true)
+  const autoRef = useRef(null)
+  const resumeRef = useRef(null)
+  const RESUME_DELAY = 8000 // ms to resume autoplay after inactivity
+
+  useEffect(() => {
+    // clear any existing timer
+    if (autoRef.current) {
+      clearTimeout(autoRef.current)
+      autoRef.current = null
+    }
+    if (!autoPlay) return
+    // schedule next slide
+    console.debug('[slider] schedule timeout, current=', current)
+    autoRef.current = setTimeout(() => {
+      console.debug('[slider] timeout fired, advancing')
+      setCurrent((c) => (c + 1) % slideImgs.length)
+      autoRef.current = null
+    }, 3000)
+    return () => {
+      if (autoRef.current) {
+        clearTimeout(autoRef.current)
+        autoRef.current = null
+      }
+    }
+  }, [autoPlay, current, slideImgs.length])
+
+  const goPrev = () => {
+    // stop autoplay and go to previous slide; clear pending timer immediately
+    setAutoPlay(false)
+    if (autoRef.current) {
+      console.debug('[slider] goPrev clearing autoRef')
+      clearTimeout(autoRef.current)
+      autoRef.current = null
+    }
+    if (resumeRef.current) {
+      clearTimeout(resumeRef.current)
+      resumeRef.current = null
+    }
+    console.debug('[slider] goPrev -> current will update')
+    setCurrent((c) => (c - 1 + slideImgs.length) % slideImgs.length)
+    // schedule resume
+    resumeRef.current = setTimeout(() => setAutoPlay(true), RESUME_DELAY)
+  }
+
+  const goNext = () => {
+    // stop autoplay and go to next slide; clear pending timer immediately
+    setAutoPlay(false)
+    if (autoRef.current) {
+      console.debug('[slider] goNext clearing autoRef')
+      clearTimeout(autoRef.current)
+      autoRef.current = null
+    }
+    if (resumeRef.current) {
+      clearTimeout(resumeRef.current)
+      resumeRef.current = null
+    }
+    console.debug('[slider] goNext -> current will update')
+    setCurrent((c) => (c + 1) % slideImgs.length)
+    // schedule resume
+    resumeRef.current = setTimeout(() => setAutoPlay(true), RESUME_DELAY)
+  }
+
+  const goTo = (i) => {
+    setAutoPlay(false)
+    if (autoRef.current) {
+      console.debug('[slider] goTo clearing autoRef')
+      clearTimeout(autoRef.current)
+      autoRef.current = null
+    }
+    if (resumeRef.current) {
+      clearTimeout(resumeRef.current)
+      resumeRef.current = null
+    }
+    console.debug('[slider] goTo -> current will update to', i % slideImgs.length)
+    setCurrent(i % slideImgs.length)
+    resumeRef.current = setTimeout(() => setAutoPlay(true), RESUME_DELAY)
+  }
+
+  useEffect(() => {
+    return () => {
+      if (autoRef.current) clearTimeout(autoRef.current)
+      if (resumeRef.current) clearTimeout(resumeRef.current)
+    }
+  }, [])
   const handleGoLogin = () => {
     // Navigate immediately (no delay)
     navigate('/login')
@@ -51,13 +143,26 @@ function Signup() {
    return (
     <div className="signup-page">
       <div className="auth-container">
-        <div className="slider" aria-hidden="true">
-          <div className="slides">
-            <div className="slide" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=800&q=80')" }} />
-            <div className="slide" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=800&q=80')" }} />
-            <div className="slide" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80')" }} />
+        <div className="slider" aria-hidden="false">
+          {/* slides width is e.g. 400% for 4 slides; translateX should move by 100/numSlides% each step */}
+          <div className="slides" style={{ transform: `translateX(-${(current * 100) / slideImgs.length}%)`, width: `${slideImgs.length * 100}%` }}>
+            {slideImgs.map((src, i) => (
+              <div
+                key={i}
+                className="slide"
+                style={{ backgroundImage: `url(${src})`, width: `${100 / slideImgs.length}%` }}
+                aria-hidden={current !== i}
+              />
+            ))}
           </div>
           <div className="slider-overlay" />
+          <button className="slider-arrow prev" aria-label="Previous" onClick={goPrev}>&larr;</button>
+          <button className="slider-arrow next" aria-label="Next" onClick={goNext}>&rarr;</button>
+          <div className="dots">
+            {slideImgs.map((_, i) => (
+              <button key={i} className={`dot ${i === current ? 'active' : ''}`} onClick={() => goTo(i)} aria-label={`Go to slide ${i+1}`} />
+            ))}
+          </div>
         </div>
 
         <div className="glass-card auth-panel">

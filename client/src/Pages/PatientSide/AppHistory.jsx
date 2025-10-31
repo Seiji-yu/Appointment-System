@@ -3,6 +3,7 @@ import * as FaIcons from 'react-icons/fa';
 import PNavbar from '../../SideBar/PNavbar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../../Styles/AppHistory.css';
+import { useNavigate } from 'react-router-dom';
 
 export default function AppHistory() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -116,6 +117,7 @@ export default function AppHistory() {
       setError('Failed to delete log');
     }
   };
+  const navigate = useNavigate()
 
   return (
     <div className="apphistory-page">
@@ -166,7 +168,14 @@ export default function AppHistory() {
                   const statusColor = status === 'completed' ? '#16a34a' : (status === 'cancelled' ? '#ef4444' : '#374151');
                   const isLog = status === 'completed' || status === 'cancelled';
                   return (
-                    <tr key={appt._id} style={{ borderTop: '1px solid #eee' }}>
+                    <tr
+                      key={appt._id}
+                      style={{ borderTop: '1px solid #eee', cursor: 'pointer' }}
+                      role="link"
+                      tabIndex={0}
+                      onClick={() => navigate('/PatientAppDetails', { state: { appointmentId: appt._id, appointment: appt } })}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') navigate('/PatientAppDetails', { state: { appointmentId: appt._id, appointment: appt } }) }}
+                    >
                       <td>{when.toLocaleString()}</td>
                       <td style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <img src={d.profileImage || 'https://via.placeholder.com/32'} alt="avatar" style={{ width: 32, height: 32, borderRadius: '50%' }} />
@@ -184,7 +193,7 @@ export default function AppHistory() {
                       <td>{appt.notes || '—'}</td>
                       <td style={{ whiteSpace: 'nowrap' }}>
                         {isLog && (
-                          <button className="btn btn-outline-danger" title="Delete log" onClick={() => onDelete(appt._id)}>
+                          <button className="btn btn-outline-danger" title="Delete log" onClick={(e) => { e.stopPropagation(); onDelete(appt._id); }}>
                             <FaIcons.FaTrashAlt />
                           </button>
                         )}

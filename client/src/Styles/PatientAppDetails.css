@@ -348,17 +348,6 @@
     grid-template-columns: 1fr;
   }
 
-  .doctor-profile-row {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
-
-  .doctor-avatar {
-    width: 180px;
-    height: 180px;
-  }
-
   /* reduce gap to keep column aligned */
   .two-col {
     gap: 8px;

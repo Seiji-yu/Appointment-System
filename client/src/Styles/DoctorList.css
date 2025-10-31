@@ -17,6 +17,24 @@
   padding-bottom: 16px;
 }
 
+/* filter dropdown */
+.doctor-filter-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 8px; 
+  margin-bottom: 18px;
+}
+
+.doctor-filter {
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  font-size: 14px;
+  min-width: 220px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+
 .doctor-title::after {
   content: '';
   position: absolute;
@@ -62,10 +80,11 @@
 }
 
 .doctor-subtitle:first-of-type+.doctor-grid {
-  justify-content: center;
-  justify-items: center;
+  justify-content: start;
+  justify-items: start;
   grid-auto-flow: row;
-  grid-template-columns: repeat(auto, minmax(300px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
 }
 
 .doctor-subtitle:first-of-type+.doctor-grid .doctor-card {
@@ -74,14 +93,12 @@
 
 .doctor-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  justify-content: center;
-  gap: 25px;
-}
-
-/* Ensure grid items (cards) stretch to the same height so contents align */
-.doctor-grid {
-  align-items: stretch;
+  /* fixed 3 columns on desktop */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  justify-content: start; 
+  justify-items: start;
+  gap: 24px; 
+  align-items: stretch; 
 }
 
 .doctor-card {
@@ -92,12 +109,10 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   padding: 12px;
   width: 100%;
-  max-width: 400px;
   height: 300px;
-  margin: 0 auto;
+  margin: 0; 
 }
 
-/* Make each card a column flex container and occupy full grid cell height */
 .doctor-card {
   display: flex;
   flex-direction: column;
@@ -112,7 +127,6 @@
 .card-grid {
   display: grid;
   grid-template-columns: 140px 1fr;
-  /* make the main content row take remaining space so actions stay aligned at bottom */
   grid-template-rows: 1fr auto;
   gap: 0px 0px;
   align-items: center;
@@ -266,3 +280,29 @@
 .theme-dark .image-actions .book-btn,
 .theme-dark .card-action .book-btn,
 .theme-dark .card-action-left .book-btn { background: #8EACCD; color: #0f172a; }
+/* Responsive design */
+@media (max-width: 900px) {
+  .doctor-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    justify-content: center; 
+  }
+  .doctor-subtitle:first-of-type+.doctor-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    justify-content: center;
+  }
+}
+
+@media (max-width: 600px) {
+  .doctor-grid {
+    grid-template-columns: 1fr;
+    justify-content: center; 
+    gap: 18px;
+  }
+  .doctor-subtitle:first-of-type+.doctor-grid {
+    grid-template-columns: 1fr;
+    justify-content: center;
+  }
+  .doctor-card {
+    height: auto; 
+  }
+}
