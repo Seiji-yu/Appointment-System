@@ -6,7 +6,7 @@ import '../../Styles/PatientProfile.css';
 
 function DSettings() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [tab, setTab] = useState('profile'); // profile | appearance | password
+  const [tab, setTab] = useState('profile'); // profile | appearance | password | notifications
 
   // profile state
   const [loading, setLoading] = useState(true);
@@ -20,6 +20,10 @@ function DSettings() {
   const [pwdMsg, setPwdMsg] = useState('');
   const [pwdErr, setPwdErr] = useState('');
   const [pwdForm, setPwdForm] = useState({ current: '', next: '', confirm: '' });
+
+  // notifications prefs
+  const [notifMuted, setNotifMuted] = useState(() => (localStorage.getItem('notifMuted') ?? 'off') === 'on');
+  const [notifSound, setNotifSound] = useState(() => (localStorage.getItem('notifSound') ?? 'on') === 'on');
 
   const doLogout = () => {
     try {
@@ -96,7 +100,7 @@ function DSettings() {
         </div>
 
         <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-          {['profile','appearance','password'].map((t) => (
+          {['profile','appearance','password','notifications'].map((t) => (
             <button key={t} className={`btn ${tab===t? 'btn-primary':'btn-secondary'}`} onClick={() => setTab(t)}>
               {t.charAt(0).toUpperCase()+t.slice(1)}
             </button>
@@ -163,6 +167,36 @@ function DSettings() {
               <button className="btn btn-primary" disabled={pwdBusy}>{pwdBusy? 'Saving…':'Update Password'}</button>
               <a href="/forgot-password" style={{ marginLeft: 12 }}>Forgot password?</a>
             </form>
+          </section>
+        )}
+
+        {tab === 'notifications' && (
+          <section className="card" style={{ padding: 16, maxWidth: 520 }}>
+            <h3 style={{ marginTop: 0 }}>Notifications</h3>
+            <div className="mb-3" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <input
+                id="mute-all-notifs-d"
+                type="checkbox"
+                checked={notifMuted}
+                onChange={(e) => {
+                  const v = e.target.checked; setNotifMuted(v); localStorage.setItem('notifMuted', v ? 'on' : 'off');
+                }}
+              />
+              <label htmlFor="mute-all-notifs-d" className="form-label" style={{ margin: 0 }}>Mute all notifications (no sound)</label>
+            </div>
+            <div className="mb-1" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <input
+                id="sound-notifs-d"
+                type="checkbox"
+                checked={notifSound}
+                disabled={notifMuted}
+                onChange={(e) => {
+                  const v = e.target.checked; setNotifSound(v); localStorage.setItem('notifSound', v ? 'on' : 'off');
+                }}
+              />
+              <label htmlFor="sound-notifs-d" className="form-label" style={{ margin: 0 }}>Play sound for notifications</label>
+            </div>
+            <p style={{ marginTop: 6, color: '#6b7280' }}>These preferences are saved to this device and apply to the notification bell on the top bar.</p>
           </section>
         )}
 

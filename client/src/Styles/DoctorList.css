@@ -6,28 +6,69 @@
   text-align: center;
   margin-top: 10px;
   margin-bottom: 30px;
-  font-size: 35px;
-  color: #2c3e50;
-  font-weight: 600;
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  background: linear-gradient(135deg, #0f3460 0%, #16213e 50%, #1a1f3a 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  position: relative;
+  padding-bottom: 16px;
+}
+
+.doctor-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background: linear-gradient(90deg, #3b3dbf 0%, #0f3460 100%);
+  border-radius: 2px;
+  box-shadow: 0 0 12px rgba(59, 61, 191, 0.3);
 }
 
 /* My Favorites / Other Doctors */
 .doctor-subtitle {
-  font-size: 20px;
-  color: #223344;
+  font-size: 1.3rem;
+  color: #1a1f3a;
   font-weight: 700;
-  margin: 18px 0 10px 0;
-  text-align: left; 
+  margin: 24px 0 16px 0;
+  text-align: left;
+  letter-spacing: 0.3px;
+  position: relative;
+  padding-left: 12px;
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.doctor-subtitle:first-of-type + .doctor-grid {
+.doctor-subtitle::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 1.2em;
+  border-radius: 2px;
+  background: linear-gradient(135deg, #3b3dbf 0%, #0f3460 100%);
+  box-shadow: 0 0 10px rgba(59, 61, 191, 0.25);
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.doctor-subtitle:hover::before {
+  box-shadow: 0 0 16px rgba(59, 61, 191, 0.4);
+}
+
+.doctor-subtitle:first-of-type+.doctor-grid {
   justify-content: center;
   justify-items: center;
   grid-auto-flow: row;
   grid-template-columns: repeat(auto, minmax(300px, 1fr));
 }
 
-.doctor-subtitle:first-of-type + .doctor-grid .doctor-card {
+.doctor-subtitle:first-of-type+.doctor-grid .doctor-card {
   margin: 0 !important;
 }
 
@@ -39,8 +80,8 @@
 }
 
 /* Ensure grid items (cards) stretch to the same height so contents align */
-.doctor-grid { 
-  align-items: stretch; 
+.doctor-grid {
+  align-items: stretch;
 }
 
 .doctor-card {
@@ -57,10 +98,10 @@
 }
 
 /* Make each card a column flex container and occupy full grid cell height */
-.doctor-card { 
-  display: flex; 
-  flex-direction: column; 
-  height: 100%; 
+.doctor-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .doctor-card:hover {
@@ -105,14 +146,21 @@
   align-items: center;
 }
 
-.card-action-left { grid-column: 1 / 2; justify-content: center; }
-.card-action-right { grid-column: 2 / 3; justify-content: center; }
+.card-action-left {
+  grid-column: 1 / 2;
+  justify-content: center;
+}
+
+.card-action-right {
+  grid-column: 2 / 3;
+  justify-content: center;
+}
 
 /* right side info */
 .doctor-info {
   display: flex;
   flex-direction: column;
-  justify-content: space-between; 
+  justify-content: space-between;
   padding-left: 16px;
   flex: 1;
 }
@@ -159,12 +207,14 @@
 
 .image-actions .book-btn:hover,
 .card-action .book-btn:hover,
-.card-action-left .book-btn:hover { background-color: #172423; }
+.card-action-left .book-btn:hover {
+  background-color: #172423;
+}
 
 .info-actions {
   display: flex;
-  justify-content: center; 
-  margin-top: auto; 
+  justify-content: center;
+  margin-top: auto;
   width: 100%;
 }
 
@@ -178,16 +228,19 @@
   border: 1px solid #e5e7eb;
 }
 
-.fav-btn:hover { background: #f3f4f6; }
+.fav-btn:hover {
+  background: #f3f4f6;
+}
 
 /* star button */
 .fav-btn.filled {
-  color: #f5b301; 
+  color: #f5b301;
   background: transparent;
   border: none;
   font-size: 30px;
   padding: 6px 10px;
 }
+
 .fav-btn.hollow {
   color: #9aa0a6;
   background: transparent;
@@ -195,4 +248,8 @@
   font-size: 30px;
   padding: 6px 10px;
 }
-.fav-btn[disabled] { opacity: 0.6; cursor: default; }
+
+.fav-btn[disabled] {
+  opacity: 0.6;
+  cursor: default;
+}

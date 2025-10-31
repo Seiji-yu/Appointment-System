@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
+import * as FaIcons from 'react-icons/fa';
 import "../../Styles/Admin.css";
 
 export default function Admin() {
@@ -16,14 +17,18 @@ export default function Admin() {
   const [soundEnabled, setSoundEnabled] = useState(false);
   const [audioCtx, setAudioCtx] = useState(null);
 
-  const enableSound = async () => {
+  const toggleSound = async () => {
     try {
-      const Ctx = window.AudioContext || window.webkitAudioContext;
-      if (!Ctx) return;
-      const ctx = new Ctx();
-      if (ctx.state === 'suspended') await ctx.resume();
-      setAudioCtx(ctx);
-      setSoundEnabled(true);
+      const next = !soundEnabled;
+      if (next && !audioCtx) {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return;
+        const ctx = new Ctx();
+        if (ctx.state === 'suspended') await ctx.resume();
+        setAudioCtx(ctx);
+      }
+      setSoundEnabled(next);
+      localStorage.setItem('adminNotifSound', next ? 'on' : 'off');
     } catch {}
   };
 
@@ -112,6 +117,15 @@ export default function Admin() {
   }, [status]);
 
   // Subscribe to server-sent events for new pending requests
+  useEffect(() => {
+    // pick up persisted preference
+    setSoundEnabled((localStorage.getItem('adminNotifSound') ?? 'on') === 'on');
+    const unlock = async () => { try { if (audioCtx) await audioCtx.resume(); } catch {} };
+    window.addEventListener('pointerdown', unlock, { once: true });
+    return () => { try { window.removeEventListener('pointerdown', unlock); } catch {} };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     try {
       if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
@@ -247,13 +261,16 @@ export default function Admin() {
           <button className="btn btn-primary" onClick={() => fetchRequests()} disabled={loading}>
             {loading ? "Refreshing…" : "Refresh"}
           </button>
-          <button
-            className={`btn ${soundEnabled ? 'btn-secondary' : 'btn-outline-secondary'}`}
-            onClick={enableSound}
-            title={soundEnabled ? 'Sound is enabled' : 'Enable notification sound'}
+          <div
+            className={`sound-toggle ${soundEnabled ? 'active' : ''}`}
+            onClick={toggleSound}
+            title={soundEnabled ? 'Notification sound: On' : 'Notification sound: Off'}
+            role="button"
+            aria-label="Toggle notification sound"
+            style={{ display: 'grid', placeItems: 'center', width: 36, height: 36, borderRadius: 8, cursor: 'pointer' }}
           >
-            {soundEnabled ? 'Sound On' : 'Enable Sound'}
-          </button>
+            <FaIcons.FaBell />
+          </div>
         </div>
       </header>
 

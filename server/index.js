@@ -1385,6 +1385,47 @@ app.post('/auth/reset-password', async (req, res) => {
   }
 });
 
+// Change password with current password verification
+app.post('/change-password', async (req, res) => {
+  try {
+    const { email, userId, currentPassword, newPassword } = req.body || {};
+    if (!currentPassword || !newPassword) {
+      return res.json({ status: 'bad_request', message: 'Missing current or new password' });
+    }
+
+    // Find user by email (case-insensitive) or by id across both collections
+    let user = null;
+    if (email) {
+      const ci = new RegExp(`^${escapeRegex(String(email).trim())}$`, 'i');
+      user = await PsychiatristModel.findOne({ email: ci }) || await PatientModel.findOne({ email: ci });
+    } else if (userId) {
+      if (mongoose.Types.ObjectId.isValid(userId)) {
+        user = await PsychiatristModel.findById(userId) || await PatientModel.findById(userId);
+      }
+    }
+
+    if (!user) {
+      return res.json({ status: 'not_found', message: 'User not found' });
+    }
+
+    // Verify current password
+    const ok = await bcrypt.compare(String(currentPassword), String(user.password || ''));
+    if (!ok) {
+      return res.json({ status: 'wrong_password', message: 'Current password is incorrect' });
+    }
+
+    // Update to new hash
+    const hashed = await bcrypt.hash(String(newPassword), 10);
+    user.password = hashed;
+    await user.save();
+
+    return res.json({ status: 'success' });
+  } catch (err) {
+    console.error('change-password error:', err);
+    return res.status(500).json({ status: 'error', message: 'Server error' });
+  }
+});
+
 const sseClients = new Set();
 
 function sseBroadcast(event, payload) {

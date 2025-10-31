@@ -37,6 +37,10 @@ export default function Navbar(props) {
     } catch { return null; }
   };
   const playChime = async () => {
+    // respect settings from localStorage
+    const muted = (localStorage.getItem('notifMuted') ?? 'off') === 'on';
+    const soundOn = (localStorage.getItem('notifSound') ?? 'on') === 'on';
+    if (muted || !soundOn) return;
     try {
       const ctx = await initAudio();
       if (!ctx) return;
@@ -103,6 +107,13 @@ export default function Navbar(props) {
     };
     start();
     return () => { try { es && es.close(); } catch {} };
+  }, []);
+
+  useEffect(() => {
+    const unlock = async () => { try { const ctx = await initAudio(); await ctx?.resume(); } catch {} };
+    window.addEventListener('pointerdown', unlock, { once: true });
+    return () => { try { window.removeEventListener('pointerdown', unlock); } catch {} };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadNotifs = async (view, doctorIdParam) => {

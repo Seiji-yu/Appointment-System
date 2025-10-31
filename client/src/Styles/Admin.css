@@ -36,14 +36,21 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid transparent;
+  border-image: linear-gradient(135deg, #3b3dbf 0%, #0f3460 100%) 1;
 }
 
 .page-title {
   margin: 0;
-  font-size: 24px;
+  font-size: 1.8rem;
   font-weight: 800;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.3px;
+  background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .header-actions {
