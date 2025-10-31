@@ -203,7 +203,7 @@ export default function PatientAppDetails() {
 
               <div className="doctor-specialty">
                 <h5>Specialization</h5>
-                <p className="doctor-specialty-text">{doc.specialty || '—'}</p>
+                <p className="doctor-specialty-text">{doc.specialty ?? '—'}</p>
               </div>
 
               <div className="doctor-clinicAddress">

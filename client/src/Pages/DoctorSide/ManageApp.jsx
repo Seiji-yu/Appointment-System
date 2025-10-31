@@ -77,7 +77,7 @@ export default function ManageApp() {
 
   const onApprove = (id) => updateAppt(id, { status: 'approved' });
   const onComplete = (id) => updateAppt(id, { status: 'completed' });
-  const onCancel = (id) => updateAppt(id, { status: 'cancelled' });
+  const onCancel = (id) => updateAppt(id, { status: 'cancelled'});
 
   return (
     <div className={`doctor-layout ${sidebarOpen ? 'sidebar-open' : 'sidebar-collapsed'}`}>

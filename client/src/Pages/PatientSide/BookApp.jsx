@@ -192,11 +192,6 @@ export default function BookApp() {
                     <p className="doctor-role">{doctor.specialty}</p>
                     <p className="doctor-fees">₱ {doctor.fees} / session</p>
                   </div>
-
-                  <div style={{ marginTop: 8 }}>
-                    <h5 style={{ margin: '8px 0' }}>Contact</h5>
-                    <p style={{ margin: 0 }}>{doctor.contact || '—'}</p>
-                  </div>
                 </div>
               </div>
 

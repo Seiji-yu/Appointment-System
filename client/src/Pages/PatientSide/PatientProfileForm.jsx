@@ -52,7 +52,7 @@ function PatientProfileForm() {
     }
   }, [form.birthday]);
 
-  // check if patient is already registered and if their profile is complete
+  // check if patient is already registered and load existing profile (allow editing even if complete)
   useEffect(() => {
     const email = localStorage.getItem('email');
     if (!email) {
@@ -66,21 +66,11 @@ function PatientProfileForm() {
       .then(res => {
         const patient = res.data.patient;
         if (patient) {
-          const isComplete =
-            patient.firstName && patient.lastName && patient.birthday &&
-            patient.age && patient.gender && patient.contact && patient.address && 
-            patient.emergencyName && patient.emergencyContact && patient.emergencyAddress;
-
-          if (isComplete) {
-            navigate('/PatientDashboard'); //return to patient dashboard if profile is complete
-            return;
-          }
-
-          // patient profile form
+          // prefill form with existing values so user can edit
           setForm({
             firstName: patient.firstName || '',
             lastName: patient.lastName || '',
-            birthday: patient.birthday ? new Date(patient.birthday).toISOString().slice(0,10) : '',
+            birthday: patient.birthday ? new Date(patient.birthday).toISOString().slice(0, 10) : '',
             age: patient.age || '',
             gender: patient.gender || '',
             contact: patient.contact || '',
@@ -122,7 +112,7 @@ function PatientProfileForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const email = localStorage.getItem('email'); 
+      const email = localStorage.getItem('email');
       // HMO preview
       const submitForm = { ...form, email, hmoCardImage: hmoPreview };
       const res = await axios.post('http://localhost:3001/patient/profile', submitForm);
@@ -190,7 +180,7 @@ function PatientProfileForm() {
             style={{ display: 'none' }}
             ref={hmoInputRef}
             id="hmo-upload-input"
-          /> 
+          />
           {!hmoPreview ? (
             <label htmlFor="hmo-upload-input" className="hmo-upload-box">
               <span className="hmo-plus">+</span>
@@ -201,7 +191,7 @@ function PatientProfileForm() {
               style={{ backgroundImage: `url(${hmoPreview})` }}
               onMouseEnter={() => setShowHmoOptions(true)}
               onMouseLeave={() => setShowHmoOptions(false)}
-            > 
+            >
               {showHmoOptions && (
                 <div className="hmo-options">
                   <label htmlFor="hmo-upload-input" className="hmo-option-btn">Change</label>

@@ -58,7 +58,35 @@
 @media (min-width: 1400px) {
   .doctor-profile-page { padding-left: 48px; padding-right: 48px; }
 }
-.page-header { margin-bottom: 24px; }
+
+.page-header {
+  margin-bottom: 32px;
+  position: relative;
+}
+
+.page-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #0f3460;
+  letter-spacing: 0.4px;
+  margin: 0 0 8px 0;
+  background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.page-header h1::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100px;
+  height: 3px;
+  background: linear-gradient(90deg, #3b3dbf 0%, #0f3460 100%);
+  border-radius: 2px;
+  box-shadow: 0 0 12px rgba(59, 61, 191, 0.3);
+}
 
 /* Two-column grid with generous gap */
 .doctor-profile-grid {
