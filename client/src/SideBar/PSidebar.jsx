@@ -26,31 +26,5 @@ export const PSidebar = [
         icon: <AiIcons.AiOutlineHistory />,
         cName: 'nav-text'
     },
-
-    {
-        title: 'Account Profile',
-        path: '/PatientProfile',
-        icon: <FaIcons.FaUser />,
-        cName: 'nav-text'
-    },
-
-    {
-        title: 'Settings',
-        path: '/PSettings',
-        icon: <AiIcons.AiFillSetting />,
-        cName: 'nav-text'
-    },
-    {
-        title: 'About',
-        path: '/About',
-        icon: <IoInformationOutline />,
-        cName: 'nav-text'
-    },
-    {
-        title: 'Logout',
-        path: '/Login',
-        icon: <IoLogOutOutline />,
-        cName: 'nav-text'
-    },
-
+    
 ]

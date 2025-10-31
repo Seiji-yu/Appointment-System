@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './Styles/App.css'
+import './Styles/notifications.css'
 import Signup from './Auth/Signup'
 import Login from './Auth/Login'
 import Dashboard from './Pages/DoctorSide/Ddashboard'

@@ -1,13 +1,33 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import '../Styles/Login.css'
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('')
+  const [isLocked, setIsLocked] = useState(false)
   const [loading, setLoading] = useState(false)
   const [statusMessage, setStatusMessage] = useState('')
   const [error, setError] = useState('')
   const navigate = useNavigate()
+
+  // Pull the email from the Login screen (stored as 'lastLoginEmail') and lock it
+  useEffect(() => {
+    try {
+      const last = (localStorage.getItem('lastLoginEmail') || '').trim()
+      if (last) {
+        setEmail(last)
+        setIsLocked(true)
+        return
+      }
+      // Optional fallback: if user is already logged in, use stored email
+      const stored = (localStorage.getItem('email') || '').trim()
+      if (stored) {
+        setEmail(stored)
+        setIsLocked(true)
+      }
+    } catch (_) {}
+  }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -16,7 +36,14 @@ export default function ForgotPassword() {
     setLoading(true)
 
     try {
-      const res = await axios.post('http://localhost:3001/auth/forgot-password', { email: email.trim() })
+      const lockedEmail = (email || '').trim()
+      if (!lockedEmail) {
+        setError('Enter your email on the Login screen, then click "Forgot password?" to proceed.')
+        setLoading(false)
+        return
+      }
+
+      const res = await axios.post('http://localhost:3001/auth/forgot-password', { email: lockedEmail })
       if (res.data?.preview) {
         setStatusMessage(`Check your inbox! Preview: ${res.data.preview}`)
       } else {
@@ -30,75 +57,78 @@ export default function ForgotPassword() {
   }
 
   return (
-    <div style={{
-      backgroundColor: '#fff7e2',
-      minHeight: '100vh',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'flex-start',
-      paddingTop: '60px',
-      fontFamily: 'sans-serif'
-    }}>
-      <h2 style={{ marginBottom: '20px', color: '#333' }}>Forgot Password</h2>
+    <div className="login-page">
+      <div className="auth-container">
+        <div className="slider" aria-hidden="true">
+          <div className="slider-card">
+            <div className="slides">
+              <div className="slide" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=1200&q=80')" }} />
+              <div className="slide" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80')" }} />
+              <div className="slide" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1200&q=80')" }} />
+            </div>
+            <div className="slider-overlay" />
+            <div className="dots" aria-hidden="true">
+              <span className="dot" />
+              <span className="dot" />
+              <span className="dot" />
+            </div>
+          </div>
+        </div>
 
-      <div style={{
-        backgroundColor: 'rgba(241, 242, 200, 0.1)',
-        border: '2px solid black',
-        padding: '30px 20px',
-        borderRadius: '10px',
-        width: '320px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: '16px'
-      }}>
-        {error && <p style={{ color: 'red', fontSize: '0.9em', textAlign: 'center' }}>{error}</p>}
-        {statusMessage && <p style={{ color: 'green', fontSize: '0.9em', textAlign: 'center' }}>{statusMessage}</p>}
-        {loading && <p style={{ color: 'blue', fontSize: '0.9em', textAlign: 'center' }}>Sending...</p>}
+        <div className="glass-card auth-panel dark-card">
+          <h2>Forgot Password</h2>
+          
+          {error && <p className="auth-error">{error}</p>}
+          {statusMessage && <p className="auth-success">{statusMessage}</p>}
+          {loading && <p className="auth-loading">Sending...</p>}
 
-        <form onSubmit={handleSubmit} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <input
-            type="email"
-            placeholder="Enter your email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            disabled={loading}
-            style={{
-              width: '100%',
-              padding: '10px',
-              borderRadius: '5px',
-              border: '1px solid #ccc',
-              boxSizing: 'border-box'
-            }}
-          />
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              backgroundColor: '#a28ef9',
-              color: 'white',
-              padding: '10px',
-              width: '100%',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: loading ? 'not-allowed' : 'pointer'
-            }}
-          >
-            Send Reset Link
-          </button>
-        </form>
+          <form onSubmit={handleSubmit}>
+            <div style={{ width: '100%', marginBottom: '1rem' }}>
+              <label htmlFor="locked-email" style={{ display: 'block', marginBottom: 8, color: '#FAF8F1', fontSize: '0.95em' }}>
+                Email address
+              </label>
+              <input
+                id="locked-email"
+                type="email"
+                value={email}
+                readOnly
+                disabled
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  color: '#aaa',
+                  fontSize: '1rem',
+                  boxSizing: 'border-box'
+                }}
+              />
+              {!isLocked && (
+                <p style={{ marginTop: 8, fontSize: '0.85em', color: 'rgba(250, 248, 241, 0.7)' }}>
+                  Enter your email on the Login page first, then click "Forgot password?".
+                </p>
+              )}
+            </div>
 
-        <p style={{ marginTop: '10px', fontSize: '0.9em' }}>
-          Remember your password?{' '}
-          <span
-            style={{ color: '#a28ef9', cursor: 'pointer' }}
-            onClick={() => navigate('/login')}
-          >
-            Back to login
-          </span>
-        </p>
+            <button type="submit" className="submit-btn" disabled={loading}>
+              Send Reset Link
+            </button>
+          </form>
+
+          <div style={{ marginTop: 16, textAlign: 'center' }}>
+            <p style={{ fontSize: '0.9em', color: '#FAF8F1' }}>
+              Remember your password?{' '}
+              <button
+                type="button"
+                onClick={() => navigate('/login')}
+                style={{ background: 'transparent', border: 'none', color: '#a28ef9', textDecoration: 'underline', cursor: 'pointer', fontSize: '0.9em' }}
+              >
+                Back to login
+              </button>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   )

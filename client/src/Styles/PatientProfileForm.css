@@ -1,3 +1,29 @@
+.patient-form-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #ffffff 0%, #ffffff 100%);
+}
+
+/* Keep this page light even when dark mode is active */
+.theme-dark .patient-form-page {
+  background: linear-gradient(180deg, #ffffff 0%, #ffffff 100%) !important;
+  color: #111827;
+}
+
+.theme-dark .patient-form-page .bg-light {
+  background: #f8fafc !important;
+}
+
+.theme-dark .patient-form-page .form-label {
+  color: #34495e !important;
+}
+
+.theme-dark .patient-form-page .form-control,
+.theme-dark .patient-form-page .form-select,
+.theme-dark .patient-form-page textarea {
+  background: #ffffff !important;
+  color: #111827 !important;
+  border-color: #d1d5db !important;
+}
 .container {
   max-width: 600px;
   margin: 40px auto;
@@ -11,6 +37,14 @@ h1, h2 {
   color: #000000;
   font-weight: 700;
   margin-bottom: 16px;
+}
+
+.theme-dark h1 {
+  color: #000000;
+}
+
+.theme-dark h2 {
+  color: #f3f3f3;
 }
 
 form {

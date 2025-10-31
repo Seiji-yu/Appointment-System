@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import '../Styles/Login.css'
 
 export default function ResetPassword() {
   const [token, setToken] = useState('')
@@ -55,90 +56,70 @@ export default function ResetPassword() {
   }
 
   return (
-    <div style={{
-      backgroundColor: '#fff7e2',
-      minHeight: '100vh',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'flex-start',
-      paddingTop: '60px',
-      fontFamily: 'sans-serif'
-    }}>
-      <h2 style={{ marginBottom: '20px', color: '#333' }}>Reset Password</h2>
+    <div className="login-page">
+      <div className="auth-container">
+        <div className="slider" aria-hidden="true">
+          <div className="slider-card">
+            <div className="slides">
+              <div className="slide" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=1200&q=80')" }} />
+              <div className="slide" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80')" }} />
+              <div className="slide" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1200&q=80')" }} />
+            </div>
+            <div className="slider-overlay" />
+            <div className="dots" aria-hidden="true">
+              <span className="dot" />
+              <span className="dot" />
+              <span className="dot" />
+            </div>
+          </div>
+        </div>
 
-      <div style={{
-        backgroundColor: 'rgba(241, 242, 200, 0.1)',
-        border: '2px solid black',
-        padding: '30px 20px',
-        borderRadius: '10px',
-        width: '320px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: '16px'
-      }}>
-        {error && <p style={{ color: 'red', fontSize: '0.9em', textAlign: 'center' }}>{error}</p>}
-        {statusMessage && <p style={{ color: 'green', fontSize: '0.9em', textAlign: 'center' }}>{statusMessage}</p>}
-        {loading && <p style={{ color: 'blue', fontSize: '0.9em', textAlign: 'center' }}>Processing...</p>}
+        <div className="glass-card auth-panel dark-card">
+          <h2>Reset Password</h2>
+          
+          {error && <p className="auth-error">{error}</p>}
+          {statusMessage && <p className="auth-success">{statusMessage}</p>}
+          {loading && <p className="auth-loading">Processing...</p>}
 
-        <form onSubmit={handleSubmit} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <input
-            type="password"
-            placeholder="New password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            disabled={loading}
-            style={{
-              width: '100%',
-              padding: '10px',
-              borderRadius: '5px',
-              border: '1px solid #ccc',
-              boxSizing: 'border-box'
-            }}
-          />
-          <input
-            type="password"
-            placeholder="Confirm password"
-            value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
-            required
-            disabled={loading}
-            style={{
-              width: '100%',
-              padding: '10px',
-              borderRadius: '5px',
-              border: '1px solid #ccc',
-              boxSizing: 'border-box'
-            }}
-          />
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              backgroundColor: '#a28ef9',
-              color: 'white',
-              padding: '10px',
-              width: '100%',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: loading ? 'not-allowed' : 'pointer'
-            }}
-          >
-            Set New Password
-          </button>
-        </form>
+          <form onSubmit={handleSubmit}>
+            <input
+              type="password"
+              placeholder="New password"
+              name="password"
+              autoComplete="new-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              disabled={loading}
+            />
+            <input
+              type="password"
+              placeholder="Confirm password"
+              name="confirm-password"
+              autoComplete="new-password"
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              required
+              disabled={loading}
+            />
+            <button type="submit" className="submit-btn" disabled={loading}>
+              Set New Password
+            </button>
+          </form>
 
-        <p style={{ marginTop: '10px', fontSize: '0.9em' }}>
-          Remember your password?{' '}
-          <span
-            style={{ color: '#a28ef9', cursor: 'pointer' }}
-            onClick={() => navigate('/login')}
-          >
-            Back to login
-          </span>
-        </p>
+          <div style={{ marginTop: 16, textAlign: 'center' }}>
+            <p style={{ fontSize: '0.9em', color: '#FAF8F1' }}>
+              Remember your password?{' '}
+              <button
+                type="button"
+                onClick={() => navigate('/login')}
+                style={{ background: 'transparent', border: 'none', color: '#a28ef9', textDecoration: 'underline', cursor: 'pointer', fontSize: '0.9em' }}
+              >
+                Back to login
+              </button>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   )

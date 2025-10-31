@@ -1,41 +1,67 @@
+/* Fix selectors to match component class and add dark theme */
+
+.apphistory-page {
+  background: #f5f7fb;
+  min-height: 100vh;
+}
+.theme-dark .apphistory-page {
+  background: linear-gradient(135deg, #0f172a 0%, #1a2332 100%);
+}
+
 /* Center the page content */
-.patient-history .ph-container {
+.apphistory-page .ph-container {
   padding-left: 3rem !important;
   padding-right: 3rem !important;
 }
 
 /* Center the tabs row */
-.patient-history .nav-tabs {
+.apphistory-page .nav-tabs {
   display: flex !important;
   justify-content: center !important;
 }
 
 /* Calendar overrides (keep) */
-.patient-history .ph-calendar,
-.patient-history .calendar-section {
+.apphistory-page .ph-calendar,
+.apphistory-page .calendar-section {
   max-width: none !important;
   width: 100% !important;
   position: static !important;
   top: auto !important;
   margin-top: 0 !important;
-  background: #fff !important;
-  border: 1px solid #e5e7eb !important;
-  border-radius: 12px !important;
-  box-shadow: 0 1px 3px rgba(0,0,0,.06) !important;
-  padding: 1rem !important;
+  background: #ffffff !important;
+  border: 1px solid #f0f0f0 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+  padding: 1.25rem !important;
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
 
-.patient-history .react-calendar { 
-    width: 100% !important; 
+.apphistory-page .calendar-section:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 8px 28px rgba(142, 172, 205, 0.12) !important;
+  border-color: #8EACCD !important;
 }
 
-.patient-history .appointment-card .status {
+.apphistory-page .react-calendar {
+  width: 100% !important;
+}
+
+.apphistory-page .appointment-card .status {
   font-weight: 600 !important;
   color: #374151 !important;
 }
 
-.patient-history .row.justify-content-center {
+.apphistory-page .row.justify-content-center {
   justify-content: center !important;
 }
 
-
+/* Dark theme card surfaces for AppHistory */
+.theme-dark .apphistory-page .calendar-section,
+.theme-dark .apphistory-page .ph-calendar {
+  background: #2C3E50 !important;
+  border-color: #334155 !important;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.35) !important;
+}
+.theme-dark .apphistory-page .appointment-card .status {
+  color: #E8F1F5 !important;
+}

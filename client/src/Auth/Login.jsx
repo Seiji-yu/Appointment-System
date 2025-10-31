@@ -195,7 +195,15 @@ function Login() {
             <div style={{ marginTop: 8, textAlign: 'center' }}>
               <button
                 type="button"
-                onClick={() => navigate('/forgot-password')}
+                onClick={() => {
+                  try {
+                    const typed = (email || '').trim()
+                    if (typed) {
+                      localStorage.setItem('lastLoginEmail', typed)
+                    }
+                  } catch (_) {}
+                  navigate('/forgot-password')
+                }}
                 style={{ background: 'transparent', border: 'none', color: '#FAF8F1', textDecoration: 'underline', cursor: 'pointer' }}
               >
                 Forgot password?

@@ -172,7 +172,7 @@ export default function AppHistory() {
                         <img src={d.profileImage || 'https://via.placeholder.com/32'} alt="avatar" style={{ width: 32, height: 32, borderRadius: '50%' }} />
                         <div>
                           <div>{name}</div>
-                          <div style={{ fontSize: 12, color: '#666' }}>{d.email}</div>
+                          <div style={{ fontSize: 12, color: '#aa9af3ff' }}>{d.email}</div>
                         </div>
                       </td>
                       <td>{d.contact || '—'}</td>

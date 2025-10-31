@@ -39,7 +39,7 @@ body {
   margin-bottom: 24px;
   padding-bottom: 12px;
   border-bottom: 2px solid transparent;
-  border-image: linear-gradient(135deg, #3b3dbf 0%, #0f3460 100%) 1;
+  border-image: linear-gradient(135deg, #dcdcf8 0%, #cad5e2 100%) 1;
 }
 
 .page-title {

@@ -1,15 +1,36 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import Navbar from '../../SideBar/Navbar.jsx';
 
 export default function DoctorLogs() {
+  const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [logs, setLogs] = useState([]);
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
 
   // status filter
   const [statusFilter, setStatusFilter] = useState('all'); // all | completed | cancelled
+  const [patientEmail, setPatientEmail] = useState('');
+
+  // Initialize statusFilter from query (?filter=completed) or state
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(location.search);
+      const q = (params.get('filter') || '').toLowerCase();
+      if (q === 'completed' || q === 'cancelled' || q === 'all') setStatusFilter(q);
+      const pe = params.get('patientEmail') || '';
+      if (pe) setPatientEmail(pe);
+      else if (location.state && typeof location.state.filter === 'string') {
+        const s = location.state.filter.toLowerCase();
+        if (s === 'completed' || s === 'cancelled' || s === 'all') setStatusFilter(s);
+      }
+    } catch {}
+    // run only on mount and when search changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.search]);
 
   const loadLogs = async () => {
     try {
@@ -47,9 +68,17 @@ export default function DoctorLogs() {
 
   // Derived list based on status filter
   const filteredLogs = useMemo(() => {
-    if (statusFilter === 'all') return logs;
-    return logs.filter(a => (a.status || '').toLowerCase() === statusFilter);
-  }, [logs, statusFilter]);
+    let out = logs;
+    if (statusFilter !== 'all') {
+      out = out.filter(a => (a.status || '').toLowerCase() === statusFilter);
+    }
+    if (patientEmail) {
+      const pe = String(patientEmail).toLowerCase();
+      const getEmail = (a) => (a.patient?.email || a.patientEmail || a.email || '').toLowerCase();
+      out = out.filter(a => getEmail(a) === pe);
+    }
+    return out;
+  }, [logs, statusFilter, patientEmail]);
 
   const counts = useMemo(() => {
     const c = { completed: 0, cancelled: 0 };
@@ -61,8 +90,18 @@ export default function DoctorLogs() {
     return c;
   }, [logs]);
 
+  useEffect(() => {
+    const handleTheme = () => setTheme(localStorage.getItem('theme') || 'light');
+    window.addEventListener('storage', handleTheme);
+    window.addEventListener('themeChange', handleTheme);
+    return () => {
+      window.removeEventListener('storage', handleTheme);
+      window.removeEventListener('themeChange', handleTheme);
+    };
+  }, []);
+
   return (
-    <div className={`doctor-layout ${sidebarOpen ? 'sidebar-open' : 'sidebar-collapsed'}`}>
+    <div className={`doctor-layout ${theme === 'dark' ? 'theme-dark' : ''} ${sidebarOpen ? 'sidebar-open' : 'sidebar-collapsed'}`}>
       <Navbar isOpen={sidebarOpen} onToggle={setSidebarOpen} />
       <main className="doctor-main">
         <div className="dashboard-main">
@@ -137,7 +176,7 @@ export default function DoctorLogs() {
                           <img src={p.profileImage || 'https://via.placeholder.com/32'} alt="avatar" style={{ width: 32, height: 32, borderRadius: '50%' }} />
                           <div>
                             <div>{name}</div>
-                            <div style={{ fontSize: 12, color: '#666' }}>{p.email}</div>
+                            <div className="muted-subtext" style={{ fontSize: 12 }}>{p.email}</div>
                           </div>
                         </td>
                         <td>{p.contact || '—'}</td>

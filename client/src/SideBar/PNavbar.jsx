@@ -16,6 +16,7 @@ export default function PNavbar(props) {
   const [unread, setUnread] = useState(0);
   const [openDrop, setOpenDrop] = useState(false);
   const [tab, setTab] = useState('visible'); // 'visible' | 'hidden'
+  const [profilePic, setProfilePic] = useState(null);
 
   // sound
   const [audioCtx, setAudioCtx] = useState(null);
@@ -67,6 +68,20 @@ export default function PNavbar(props) {
     if (!patientEmail && !patientId) return;
     
     try {
+      // fetch patient profile to display avatar in sidebar bottom card
+      try {
+        if (patientEmail) {
+          const res = await fetch('http://localhost:3001/patient/get-profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: patientEmail })
+          });
+          const data = await res.json();
+          const pic = data?.patient?.profileImage || data?.patient?.profilePicture || null;
+          if (pic) setProfilePic(pic);
+        }
+      } catch {}
+
       // load persisted notifications
       await loadNotifs('visible', patientId, patientEmail);
 
@@ -229,7 +244,7 @@ export default function PNavbar(props) {
 
         <ul className="patient-sidebar-list">
           {PSidebar
-            .filter((i) => !['About', 'Logout', 'Settings', 'Account Profile'].includes(i.title))
+            .filter((i) => !['About', 'Logout', 'Settings', 'Account Profile', 'My Profile'].includes(i.title))
             .map((item, index) => {
               const isActive = location.pathname === item.path;
               return (
@@ -247,7 +262,11 @@ export default function PNavbar(props) {
         <div className="patient-sidebar-bottom">
           <Link to="/PSettings" className="patient-user-card" title="User settings">
             <div className="patient-user-avatar" aria-hidden>
-              <FaIcons.FaUser />
+              {profilePic ? (
+                <img src={profilePic} alt="Profile" />
+              ) : (
+                <FaIcons.FaUser />
+              )}
             </div>
             <div className="patient-user-meta">
               <div className="patient-user-name">{localStorage.getItem('name') || 'Your Account'}</div>

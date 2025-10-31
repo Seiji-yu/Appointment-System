@@ -350,8 +350,20 @@ function DoctorProfile() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.email, availDate]);
 
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
+
+  useEffect(() => {
+    const handleTheme = () => setTheme(localStorage.getItem('theme') || 'light');
+    window.addEventListener('storage', handleTheme);
+    window.addEventListener('themeChange', handleTheme);
+    return () => {
+      window.removeEventListener('storage', handleTheme);
+      window.removeEventListener('themeChange', handleTheme);
+    };
+  }, []);
+
  return (
-    <div className={`doctor-layout ${sidebarOpen ? 'sidebar-open' : 'sidebar-collapsed'}`}>
+    <div className={`doctor-layout ${theme === 'dark' ? 'theme-dark' : ''} ${sidebarOpen ? 'sidebar-open' : 'sidebar-collapsed'}`}>
       <Navbar isOpen={sidebarOpen} onToggle={setSidebarOpen} />
 
       <main className="doctor-main">

@@ -22,6 +22,7 @@ export default function Navbar(props) {
   const [unread, setUnread] = useState(0);
   const [openDrop, setOpenDrop] = useState(false);
   const [tab, setTab] = useState('visible'); // 'visible' | 'hidden'
+  const [profilePic, setProfilePic] = useState(null);
 
   // sound
   const [audioCtx, setAudioCtx] = useState(null);
@@ -75,6 +76,9 @@ export default function Navbar(props) {
         const prof = await fetch('http://localhost:3001/doctor/get-profile', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
         const data = await prof.json();
         doctorId = data?.doctor?._id || null;
+        // Set profile picture if available
+        const pic = data?.doctor?.profilePicture || data?.doctor?.profileImage || null;
+        if (pic) setProfilePic(pic);
         // load persisted notifications (visible by default)
         await loadNotifs('visible', doctorId);
 
@@ -258,7 +262,11 @@ export default function Navbar(props) {
             onClick={() => !open && toggle()}
           >
             <div className="doctor-user-avatar" aria-hidden>
-              <FaIcons.FaUser />
+              {profilePic ? (
+                <img src={profilePic} alt="Profile" />
+              ) : (
+                <FaIcons.FaUser />
+              )}
             </div>
             <div className="doctor-user-meta">
               <div className="doctor-user-name">
@@ -268,7 +276,7 @@ export default function Navbar(props) {
                 {localStorage.getItem('doctorEmail') || localStorage.getItem('email') || ''}
               </div>
             </div>
-            <div className="doctor-user-cta">
+            <div className="doctor-user-cta spin-on-hover">
               <RiExpandUpDownFill />
             </div>
           </Link>

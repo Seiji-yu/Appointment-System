@@ -10,7 +10,7 @@
   height: 120px;
   border-radius: 50%;
   overflow: hidden;
-  border: 3px solid #007bff;
+  border: 3px solid #8EACCD;
   cursor: pointer;
 }
 
@@ -51,9 +51,11 @@
 
 /* Page layout: wide, centered, roomy */
 .doctor-profile-page {
-  max-width: 1400px;      /* utilize page width but keep readable */
+  max-width: 1400px;
   margin: 0 auto;
   padding: 24px 32px;
+  background: linear-gradient(135deg, #F5F8FA 0%, #E8F1F5 100%);
+  min-height: 100vh;
 }
 @media (min-width: 1400px) {
   .doctor-profile-page { padding-left: 48px; padding-right: 48px; }
@@ -62,30 +64,16 @@
 .page-header {
   margin-bottom: 32px;
   position: relative;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(142, 172, 205, 0.15);
 }
 
 .page-header h1 {
   font-size: 2rem;
   font-weight: 700;
-  color: #0f3460;
+  color: #6B8FA3;
   letter-spacing: 0.4px;
-  margin: 0 0 8px 0;
-  background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.page-header h1::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100px;
-  height: 3px;
-  background: linear-gradient(90deg, #3b3dbf 0%, #0f3460 100%);
-  border-radius: 2px;
-  box-shadow: 0 0 12px rgba(59, 61, 191, 0.3);
+  margin: 0;
 }
 
 /* Two-column grid with generous gap */
@@ -105,3 +93,92 @@
 /* Panels */
 .left-panel, .right-panel { min-width: 0; }
 .right-panel { position: sticky; top: 84px; } /* keep schedule visible while scrolling */
+
+/* ============================================ */
+/*              DARK MODE STYLES                */
+/* ============================================ */
+
+.theme-dark .doctor-profile-page {
+  background: linear-gradient(135deg, #2C3E50 0%, #34495E 100%);
+}
+
+.theme-dark .page-header {
+  border-bottom-color: rgba(142, 172, 205, 0.25);
+}
+
+.theme-dark .page-header h1 {
+  color: #8EACCD;
+}
+
+.theme-dark .card {
+  background: #34495E;
+  border-color: rgba(142, 172, 205, 0.2);
+  color: #E8F1F5;
+}
+
+.theme-dark .form-label {
+  color: #D2E0FB;
+}
+
+.theme-dark .doctor-profile-page .form-control {
+  background: #2C3E50;
+  border-color: rgba(142, 172, 205, 0.3);
+  color: #E8F1F5;
+}
+
+.theme-dark .doctor-profile-page .form-control:focus {
+  background: #34495E;
+  border-color: #8EACCD;
+  color: #E8F1F5;
+}
+
+.theme-dark .doctor-profile-page .form-control:read-only,
+.theme-dark .doctor-profile-page .form-control:disabled {
+  background: #3A5368;
+  color: #B8D4E3;
+}
+
+.theme-dark .doctor-profile-page .form-select {
+  background: #2C3E50;
+  border-color: rgba(142, 172, 205, 0.3);
+  color: #E8F1F5;
+}
+
+.theme-dark .doctor-profile-page .form-select:focus {
+  background: #34495E;
+  border-color: #8EACCD;
+}
+
+.theme-dark .btn-outline-secondary {
+  color: #8EACCD;
+  border-color: #8EACCD;
+}
+
+.theme-dark .btn-outline-secondary:hover {
+  background: #8EACCD;
+  color: #fff;
+}
+
+.theme-dark .btn-outline-danger {
+  color: #f87171;
+  border-color: #f87171;
+}
+
+.theme-dark .btn-outline-danger:hover {
+  background: #f87171;
+  color: #fff;
+}
+
+.theme-dark .profile-picture-wrapper {
+  border-color: #8EACCD;
+}
+
+.theme-dark h3,
+.theme-dark h4,
+.theme-dark h5 {
+  color: #D2E0FB;
+}
+
+.theme-dark p {
+  color: #B8D4E3;
+}

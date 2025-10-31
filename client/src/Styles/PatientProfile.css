@@ -125,6 +125,40 @@
   min-height: 40px; 
 }
 
+/* ============================================ */
+/*              DARK MODE STYLES                */
+/* ============================================ */
+
+.theme-dark .profile-box {
+  background: #34495E;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+
+.theme-dark .profile-box h3 {
+  color: #D2E0FB;
+}
+
+.theme-dark .profile-img {
+  border-color: #2C3E50;
+  background: #2C3E50;
+}
+
+.theme-dark .profile-hero {
+  background: transparent;
+}
+
+.theme-dark .info-grid .label {
+  color: #8EACCD;
+}
+
+.theme-dark .info-grid .value {
+  color: #E8F1F5;
+}
+
+.theme-dark .medical-history {
+  color: #E8F1F5;
+}
+
 @media (max-width: 720px) {
   .patient-profile-container {
     max-width: 100%;

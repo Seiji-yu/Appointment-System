@@ -1,13 +1,23 @@
+.patient-dashboard {
+  background: #f5f7fb;
+  min-height: 100vh;
+  transition: background-color 0.3s ease, background 0.3s ease;
+}
+
+.theme-dark .patient-dashboard {
+  background-color: #2C3E50;
+}
+
 .patient-dashboard .dashboard-grid {
   display: grid;
   grid-template-columns: 2fr 1fr;
-  grid-template-rows: auto auto;
+  grid-template-rows: 190px;
   grid-template-areas:
     "welcome calendar"
     "appointments calendar";
   column-gap: 30px;
   row-gap: 30px;
-  max-width: 1100px;
+  max-width: 1200px;
   margin: 18px auto 0 auto;
   align-items: start;
   box-sizing: border-box;
@@ -18,29 +28,65 @@
   grid-area: welcome;
   background: #2c3e50;
   border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   padding: 22px;
   box-sizing: border-box;
 }
 
 .patient-dashboard .calendar-section {
   grid-area: calendar;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  background: linear-gradient(135deg, #8EACCD 0%, #D2E0FB 100%) !important;
+  border-radius: 16px;
+  border: 1px solid #8EACCD;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   padding: 22px;
   box-sizing: border-box;
   margin-top: 0px;
   align-self: flex-start;
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.patient-dashboard .calendar-section:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 28px rgba(142, 172, 205, 0.12);
+  border-color: #8EACCD;
 }
 
 .patient-dashboard .appointments-section {
   grid-area: appointments;
   background: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   padding: 22px;
   box-sizing: border-box;
+}
+
+.theme-dark .patient-dashboard .appointments-section {
+  background: #4c6c81;
+  color: #E8F1F5;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.35);
+}
+
+.theme-dark .patient-dashboard .appointments-section h3 {
+  color: #D2E0FB;
+}
+
+.theme-dark .patient-dashboard .calendar-section {
+  background: linear-gradient(135deg, #34495E 0%, #2C3E50 100%) !important;
+  border-color: #8EACCD;
+}
+
+.theme-dark .patient-dashboard .appt-item {
+  background: #263A4C;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+.theme-dark .patient-dashboard .doctor-name {
+  color: #E8F1F5;
+}
+
+.theme-dark .patient-dashboard .welcome-box {
+  background-color: #4c6c81;
 }
 
 .patient-dashboard .welcome-box h1 {
@@ -113,6 +159,10 @@
   color: #7f8c8d;
 }
 
+.theme-dark .patient-dashboard .appointments-section p {
+  color: #f1f1f1;
+}
+
 .patient-dashboard .book-btn {
   background-color: #081047;
   color: white;
@@ -123,7 +173,19 @@
   font-size: 15px;
 }
 
-.patient-dashboard .book-btn:hover { background-color: #050b36; }
+.patient-dashboard .book-btn:hover {
+  background-color: #050b36;
+}
+
+/* Dark theme button styling */
+.theme-dark .patient-dashboard .book-btn {
+  background-color: #6B8FA3;
+  color: #0f172a;
+}
+
+.theme-dark .patient-dashboard .book-btn:hover {
+  background-color: #5a7f94;
+}
 
 /* Appointments list (PDashboard) */
 .patient-dashboard .my-appointments-list {
@@ -140,24 +202,28 @@
   padding: 10px 12px;
   border-radius: 8px;
   background: #f8f9fb;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
 
 .patient-dashboard .appt-item[role="button"] {
   cursor: pointer;
 }
+
 .patient-dashboard .appt-item[role="button"]:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(8,16,71,0.08);
+  box-shadow: 0 6px 12px rgba(8, 16, 71, 0.08);
 }
 
-.patient-dashboard .appt-left { margin-right: 12px; }
+.patient-dashboard .appt-left {
+  margin-right: 12px;
+}
+
 .patient-dashboard .appt-avatar {
   width: 56px;
   height: 56px;
   border-radius: 8px;
   object-fit: cover;
-  border: 2px solid rgba(8,16,71,0.04);
+  border: 2px solid rgba(8, 16, 71, 0.04);
 }
 
 .patient-dashboard .appt-center {
@@ -166,23 +232,24 @@
   gap: 4px;
   flex: 1 1 auto;
 }
-.patient-dashboard .doctor-name { 
-  font-weight: 600; 
-  color: #081047; 
-  font-size: 20px; 
-  margin-top: 0px; 
-  margin-bottom: 0px; 
+
+.patient-dashboard .doctor-name {
+  font-weight: 600;
+  color: #081047;
+  font-size: 20px;
+  margin-top: 0px;
+  margin-bottom: 0px;
 }
 
-.patient-dashboard .appt-datetime { 
-  font-size: 13px; 
-  color: #606f7b; 
+.patient-dashboard .appt-datetime {
+  font-size: 13px;
+  color: #606f7b;
 }
 
-.patient-dashboard .appt-right { 
-  margin-left: 12px; 
-  display:flex; 
-  align-items:center; 
+.patient-dashboard .appt-right {
+  margin-left: 12px;
+  display: flex;
+  align-items: center;
 }
 
 .patient-dashboard .appt-status {
@@ -191,20 +258,21 @@
   font-size: 12px;
   font-weight: 700;
 }
-.patient-dashboard .status-pending { 
-  background:#fff4e5; 
-  color:#b36b00; 
+
+.patient-dashboard .status-pending {
+  background: #fff4e5;
+  color: #b36b00;
 }
 
-.patient-dashboard .status-approved { 
-  background:#e9f8ee; 
-  color:#1f7a3a; 
+.patient-dashboard .status-approved {
+  background: #e9f8ee;
+  color: #1f7a3a;
 }
 
-  .patient-dashboard .status-completed { 
-    background:#e8eefc; 
-    color:#1f3fa7; 
-  }
+.patient-dashboard .status-completed {
+  background: #e8eefc;
+  color: #1f3fa7;
+}
 
 /* row spacing for small screens */
 @media (max-width: 600px) {
@@ -213,9 +281,19 @@
     gap: 8px;
     padding: 8px;
   }
-  .patient-dashboard .appt-avatar { width:44px; height:44px; }
-  .patient-dashboard .doctor-name { font-size: 20px; }
-  .patient-dashboard .appt-datetime { font-size: 12px; }
+
+  .patient-dashboard .appt-avatar {
+    width: 44px;
+    height: 44px;
+  }
+
+  .patient-dashboard .doctor-name {
+    font-size: 20px;
+  }
+
+  .patient-dashboard .appt-datetime {
+    font-size: 12px;
+  }
 }
 
 

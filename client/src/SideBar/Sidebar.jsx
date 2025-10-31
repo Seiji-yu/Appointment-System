@@ -30,32 +30,7 @@ export const SidebarData = [
         cName: 'nav-text'
     },
 
-    {
-        title: 'Account Profile',
-        path: '/DoctorProfile',
-        icon: <FaIcons.FaWpforms />,
-        cName: 'nav-text'
-    },
-
-    {
-        title: 'Settings',
-        path: '/DSettings',
-        icon: <IoIcons.IoMdSettings />,
-        cName: 'nav-text'
-    },
-
-    {
-        title: 'About',
-        path: '/About',
-        icon: <IoInformationOutline />,
-        cName: 'nav-text'
-    },
-    {
-        title: 'Logout',
-        path: '/Login',
-        icon: <IoLogOutOutline />,
-        cName: 'nav-text'
-    },
+    
 
 
 ]

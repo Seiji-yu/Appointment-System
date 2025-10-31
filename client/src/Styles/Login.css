@@ -194,6 +194,7 @@ form {
 }
 
 .auth-error { color: #e03a3a; margin-bottom: 8px }
+.auth-success { color: #4caf50; margin-bottom: 8px }
 .auth-loading { color: #04406b; margin-bottom: 8px }
 .role-toggle { display:flex; gap:12px; margin-bottom:10px; color:#05304b }
 

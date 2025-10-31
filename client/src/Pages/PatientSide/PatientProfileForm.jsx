@@ -1,10 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
+import '../../Styles/Calendar.css';
 import '../../Styles/PatientProfileForm.css';
 
 function PatientProfileForm() {
   const hmoInputRef = useRef(null);
+  const [showBirthdayCalendar, setShowBirthdayCalendar] = useState(false);
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',
@@ -94,6 +98,16 @@ function PatientProfileForm() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const handleBirthdaySelect = (date) => {
+    // Convert Date object to YYYY-MM-DD format
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    const dateStr = `${y}-${m}-${d}`;
+    setForm({ ...form, birthday: dateStr });
+    setShowBirthdayCalendar(false);
+  };
+
   const handleHmoUpload = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -125,7 +139,8 @@ function PatientProfileForm() {
   };
 
   return (
-    <div className="container mt-5">
+    <div className="patient-form-page">
+      <div className="container mt-5">
       <h1 className="mb-4 text-center">Patient Profile Form</h1>
       <form onSubmit={handleSubmit} className="p-4 border rounded bg-light">
         <div className="mb-3">
@@ -138,7 +153,44 @@ function PatientProfileForm() {
         </div>
         <div className="mb-3">
           <label className="form-label">Birthday</label>
-          <input type="date" className="form-control" name="birthday" value={form.birthday} onChange={handleChange} required />
+          <div style={{ position: 'relative' }}>
+            <input
+              type="text"
+              className="form-control"
+              value={form.birthday}
+              onClick={() => setShowBirthdayCalendar(!showBirthdayCalendar)}
+              readOnly
+              placeholder="Click to select your birthday"
+              style={{
+                cursor: 'pointer',
+                background: '#ffffff',
+                borderColor: '#d1d5db',
+                borderWidth: '2px',
+                fontWeight: '600',
+                color: form.birthday ? '#6B8FA3' : '#aaa'
+              }}
+            />
+            {showBirthdayCalendar && (
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                left: 0,
+                zIndex: 1000,
+                background: '#ffffff',
+                padding: '16px',
+                borderRadius: '12px',
+                marginTop: '8px',
+                boxShadow: '0 8px 32px rgba(142, 172, 205, 0.15)',
+                minWidth: '360px'
+              }}>
+                <Calendar
+                  onChange={handleBirthdaySelect}
+                  value={form.birthday ? new Date(form.birthday) : new Date()}
+                  maxDate={new Date()}
+                />
+              </div>
+            )}
+          </div>
         </div>
         <div className="mb-3">
           <label className="form-label">Age</label>
@@ -219,6 +271,7 @@ function PatientProfileForm() {
         <button type="submit" className="btn btn-primary">Save Profile</button>
       </form>
       {message && <div className="alert alert-info mt-3">{message}</div>}
+      </div>
     </div>
   );
 }

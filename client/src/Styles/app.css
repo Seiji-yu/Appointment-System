@@ -1,35 +1,29 @@
 /* Global theme toggles */
 .theme-dark {
-	background-color: #0b1221;
-	color: #e5e7eb;
-}
-
-.theme-dark .card {
-	background: #0f172a;
-	color: #e5e7eb;
-	border-color: #1f2937;
+    background-color: #0b1221;
+    color: #e5e7eb;
 }
 
 .theme-dark .patient-sidebar {
-	background-color: #060a2f !important;
+    background-color: #060a2f !important;
 }
 
 .theme-dark .btn.btn-secondary {
-	background: #111827;
-	color: #e5e7eb;
-	border-color: #374151;
+    background: #111827;
+    color: #e5e7eb;
+    border-color: #374151;
 }
 
 .settings-container {
-	width: 100%;
-	max-width: 1080px;
-	margin: 0 auto;
-	box-sizing: border-box;
+    width: 100%;
+    max-width: 1080px;
+    margin: 0 auto;
+    box-sizing: border-box;
 }
 
 .settings-divider {
-	border: 0;
-	border-top: 1px solid #818080;
-	height: 0;
-	margin: 6px 0 16px;
+    border: 0;
+    border-top: 1px solid #818080;
+    height: 0;
+    margin: 6px 0 16px;
 }

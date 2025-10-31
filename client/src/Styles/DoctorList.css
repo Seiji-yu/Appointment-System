@@ -9,7 +9,7 @@
   font-size: 2.2rem;
   font-weight: 700;
   letter-spacing: 0.5px;
-  background: linear-gradient(135deg, #0f3460 0%, #16213e 50%, #1a1f3a 100%);
+  background: linear-gradient(135deg, #6B8FA3 0%, #8EACCD 50%, #D2E0FB 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -25,15 +25,15 @@
   transform: translateX(-50%);
   width: 80px;
   height: 3px;
-  background: linear-gradient(90deg, #3b3dbf 0%, #0f3460 100%);
+  background: linear-gradient(90deg, #8EACCD 0%, #6B8FA3 100%);
   border-radius: 2px;
-  box-shadow: 0 0 12px rgba(59, 61, 191, 0.3);
+  box-shadow: 0 0 12px rgba(142, 172, 205, 0.35);
 }
 
 /* My Favorites / Other Doctors */
 .doctor-subtitle {
   font-size: 1.3rem;
-  color: #1a1f3a;
+  color: #6B8FA3;
   font-weight: 700;
   margin: 24px 0 16px 0;
   text-align: left;
@@ -52,13 +52,13 @@
   width: 4px;
   height: 1.2em;
   border-radius: 2px;
-  background: linear-gradient(135deg, #3b3dbf 0%, #0f3460 100%);
-  box-shadow: 0 0 10px rgba(59, 61, 191, 0.25);
+  background: linear-gradient(135deg, #8EACCD 0%, #6B8FA3 100%);
+  box-shadow: 0 0 10px rgba(142, 172, 205, 0.3);
   transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .doctor-subtitle:hover::before {
-  box-shadow: 0 0 16px rgba(59, 61, 191, 0.4);
+  box-shadow: 0 0 16px rgba(142, 172, 205, 0.45);
 }
 
 .doctor-subtitle:first-of-type+.doctor-grid {
@@ -85,7 +85,7 @@
 }
 
 .doctor-card {
-  background-color: #FAF8F1;
+  background-color: #FFFFFF;
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
   overflow: hidden;
@@ -181,14 +181,14 @@
 
 .doctor-price {
   font-size: 14px;
-  color: #34656D;
+  color: #6B8FA3;
   font-weight: 500;
   margin: 6px 0 10px 0;
 }
 
 .doctor-rating {
   font-size: 14px;
-  color: #34656D;
+  color: #6B8FA3;
   font-weight: 500;
   margin: 6px 0 10px 0;
 }
@@ -253,3 +253,16 @@
   opacity: 0.6;
   cursor: default;
 }
+
+/* Dark mode overrides for patient doctor list */
+.theme-dark .doctor-card {
+  background: #2C3E50;
+  border: 1px solid rgba(142,172,205,0.2);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+.theme-dark .doctor-name { color: #E8F1F5; }
+.theme-dark .doctor-role { color: #B8D4E3; }
+.theme-dark .fav-btn { border-color: rgba(210,224,251,0.2); color: #E8F1F5; background: transparent; }
+.theme-dark .image-actions .book-btn,
+.theme-dark .card-action .book-btn,
+.theme-dark .card-action-left .book-btn { background: #8EACCD; color: #0f172a; }

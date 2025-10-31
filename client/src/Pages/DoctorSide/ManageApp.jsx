@@ -7,6 +7,7 @@ export default function ManageApp() {
   const [doctor, setDoctor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
 
   const [appointments, setAppointments] = useState([]);
   const [filter, setFilter] = useState('active'); // show pending + approved
@@ -56,6 +57,16 @@ export default function ManageApp() {
     return () => { cancelled = true; };
   }, [filter]);
 
+  useEffect(() => {
+    const handleTheme = () => setTheme(localStorage.getItem('theme') || 'light');
+    window.addEventListener('storage', handleTheme);
+    window.addEventListener('themeChange', handleTheme);
+    return () => {
+      window.removeEventListener('storage', handleTheme);
+      window.removeEventListener('themeChange', handleTheme);
+    };
+  }, []);
+
   const updateAppt = async (id, payload) => {
     const prev = [...appointments];
     try {
@@ -80,7 +91,7 @@ export default function ManageApp() {
   const onCancel = (id) => updateAppt(id, { status: 'cancelled'});
 
   return (
-    <div className={`doctor-layout ${sidebarOpen ? 'sidebar-open' : 'sidebar-collapsed'}`}>
+    <div className={`doctor-layout ${theme === 'dark' ? 'theme-dark' : ''} ${sidebarOpen ? 'sidebar-open' : 'sidebar-collapsed'}`}>
       <Navbar isOpen={sidebarOpen} onToggle={setSidebarOpen} />
       <main className="doctor-main">
         <div className="dashboard-main">
@@ -115,11 +126,13 @@ export default function ManageApp() {
                     return (
                       <tr key={appt._id} style={{ borderTop: '1px solid #eee' }}>
                         <td>{when.toLocaleString()}</td>
-                        <td style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <img src={p.profileImage || 'https://via.placeholder.com/32'} alt="avatar" style={{ width: 32, height: 32, borderRadius: '50%' }} />
-                          <div>
-                            <div>{name}</div>
-                            <div style={{ fontSize: 12, color: '#666' }}>{p.email}</div>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <img src={p.profileImage || 'https://via.placeholder.com/32'} alt="avatar" style={{ width: 32, height: 32, borderRadius: '50%' }} />
+                            <div>
+                              <div>{name}</div>
+                              <div className="muted-subtext" style={{ fontSize: 12 }}>{p.email}</div>
+                            </div>
                           </div>
                         </td>
                         <td>{p.contact || '—'}</td>

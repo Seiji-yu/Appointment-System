@@ -97,11 +97,33 @@ export default function Ddashboard() {
         // Recent patients from completed appointments
         if (recentRes.data?.status === 'success' && Array.isArray(recentRes.data.patients)) {
           const mapped = recentRes.data.patients.map(p => ({
-            id: p.patientId,
-            name: `${p.firstName || ''} ${p.lastName || ''}`.trim() || p.email || 'Patient',
-            email: p.email || ''
+            id: p.patientId || p._id || p.id,
+            name: `${p.firstName || ''} ${p.lastName || ''}`.trim() || p.name || p.email || p.patientEmail || 'Patient',
+            email: p.email || p.patientEmail || p.userEmail || '',
+            profilePicture: p.profileImage || p.profilePicture || p.avatar || null
           }));
           setRecentPatients(mapped);
+          // Enrich missing avatars by fetching patient profile
+          try {
+            const toFetch = mapped.filter(x => !x.profilePicture && x.email);
+            if (toFetch.length > 0) {
+              const results = await Promise.allSettled(toFetch.map(x => axios.post('http://localhost:3001/patient/get-profile', { email: x.email })));
+              if (!cancelled) {
+                const enriched = [...mapped];
+                results.forEach((res, idx) => {
+                  if (res.status === 'fulfilled') {
+                    const pic = res.value?.data?.patient?.profileImage || res.value?.data?.patient?.profilePicture;
+                    if (pic) {
+                      const email = toFetch[idx].email;
+                      const i = enriched.findIndex(e => e.email === email);
+                      if (i >= 0) enriched[i] = { ...enriched[i], profilePicture: pic };
+                    }
+                  }
+                });
+                setRecentPatients(enriched);
+              }
+            }
+          } catch {}
         } else {
           setRecentPatients([]);
         }
@@ -327,9 +349,9 @@ export default function Ddashboard() {
                       nameKey="name"
                       cx="50%"
                       cy="50%"
-                      innerRadius={360}
-                      outerRadius={360}
-                      paddingAngle={100}
+                      innerRadius={60}
+                      outerRadius={90}
+                      paddingAngle={2}
                     >
                       {pieData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
@@ -369,26 +391,27 @@ export default function Ddashboard() {
                 markedDates={markedDates}
               />
               {/*  Upcoming-only schedule */}
-              <div className="card" style={{ marginTop: 12, padding: 12 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                  <h4 style={{ margin: 0 }}>Schedule</h4>
-                  <span className="section-subtitle">{prettyLongDate(selectedDate)}</span>
+              <div className="schedule-card">
+                <div className="schedule-header">
+                  <h4>Schedule</h4>
+                  <span className="schedule-date">{prettyLongDate(selectedDate)}</span>
                 </div>
 
-                <div style={{ marginTop: 8 }}>
-                  <h5 style={{ margin: '8px 0' }}>Selected Date</h5>
+                <div className="schedule-section">
+                  <h5>Selected Date</h5>
                   {selectedUpcoming.length === 0 ? (
-                    <div style={{ color: '#000000ff' }}>No upcoming appointments for this day.</div>
+                    <div className="schedule-empty">No upcoming appointments for this day.</div>
                   ) : (
-                    <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                    <ul className="schedule-list">
                       {selectedUpcoming.map((a, i) => {
                         const label = a.title || a.reason || a.purpose || 'Appointment';
                         const who = a.patient?.name || `${a.patient?.firstName || ''} ${a.patient?.lastName || ''}`.trim() || a.patient?.email || '';
-                        const status = (a.status || '').charAt(0).toUpperCase() + (a.status || '').slice(1);
+                        const status = (a.status || '').toLowerCase();
+                        const statusClass = `status-badge status-${status}`;
                         return (
-                          <li key={a._id || i} style={{ padding: '8px 0', borderBottom: '1px solid #eef2f7' }}>
-                            <div style={{ fontWeight: 600 }}>{formatRange(a)} - {label}{who ? ` (${who})` : ''}</div>
-                            <div style={{ fontSize: 12, color: '#8b646aff' }}>{status}</div>
+                          <li key={a._id || i} className="schedule-item">
+                            <div className="schedule-item-title">{formatRange(a)} - {label}{who ? ` (${who})` : ''}</div>
+                            <span className={statusClass}>{status}</span>
                           </li>
                         );
                       })}
@@ -396,32 +419,24 @@ export default function Ddashboard() {
                   )}
                 </div>
 
-                <div style={{ marginTop: 16 }}>
-                  <h5 style={{ margin: '8px 0' }}>Other Upcoming Dates</h5>
+                <div className="schedule-section">
+                  <h5>Other Upcoming Dates</h5>
                   {otherUpcomingGroups.length === 0 ? (
-                    <div style={{ color: '#000000ff' }}>No other upcoming appointments.</div>
+                    <div className="schedule-empty">No other upcoming appointments.</div>
                   ) : (
                     otherUpcomingGroups.map(group => (
-                      <div key={group.date}
-                        style={{ marginBottom: 12 }}>
-                        <div style={{
-                          fontWeight: 600,
-                          marginBottom: 4
-                        }}>
-                          {prettyLongDate(group.date)}</div>
-                        <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                      <div key={group.date} className="schedule-group">
+                        <div className="schedule-group-date">{prettyLongDate(group.date)}</div>
+                        <ul className="schedule-group-list">
                           {group.items.map((a, i) => {
                             const label = a.title || a.reason || a.purpose || 'Appointment';
                             const who = a.patient?.name || `${a.patient?.firstName || ''} ${a.patient?.lastName || ''}`.trim() || a.patient?.email || '';
-                            const status = (a.status || '').charAt(0).toUpperCase() + (a.status || '').slice(1);
+                            const status = (a.status || '').toLowerCase();
+                            const statusClass = `status-badge status-${status}`;
                             return (
-                              <li key={(a._id || '') + i} style={{ padding: '6px 0', borderBottom: '1px dashed #eef2f7' }}>
+                              <li key={(a._id || '') + i} className="schedule-group-item">
                                 <div>{formatRange(a)} - {label}{who ? ` (${who})` : ''}</div>
-                                <div style={{
-                                  fontSize: 12,
-                                  color: '#000000ff'
-                                }}
-                                >{status}</div>
+                                <span className={statusClass}>{status}</span>
                               </li>
                             );
                           })}
@@ -446,12 +461,14 @@ export default function Ddashboard() {
               ) : (
                 <div className="patient-grid">
                   {recentPatients.map((p) => (
-                    <div key={p.id} className="patient-card">
-                      <div className="avatar-skeleton" />
+                    <div key={p.id || p.email} className="patient-card">
+                      <div className="avatar-skeleton">
+                        <img src={p.profilePicture || 'https://via.placeholder.com/128?text=Avatar'} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} />
+                      </div>
                       <div className="patient-meta">
                         <h5 className="patient-name">{p.name}</h5>
                         <div className="patient-actions">
-                          <button className="btn btn-secondary" onClick={() => alert('History (placeholder)')}>History</button>
+                          <button className="btn btn-secondary" onClick={() => navigate(`/DoctorLogs?filter=completed${p.email ? `&patientEmail=${encodeURIComponent(p.email)}` : ''}`)}>History</button>
                           <button
                             className="btn btn-primary"
                             onClick={() => navigate(`/Doctor/Patient/${encodeURIComponent(p.email)}`)}

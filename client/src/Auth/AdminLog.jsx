@@ -26,82 +26,67 @@ function AdminLogin() {
   }
 
   return (
-    <div className="admin-login" style={{
-      backgroundColor: '#fff7e2',
-      minHeight: '100vh',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'flex-start',
-      paddingTop: '60px',
-      fontFamily: 'sans-serif'
-    }}>
-      <h2 style={{ marginBottom: '20px', color: '#333' }}>Admin Login</h2>
+    <div className="login-page">
+      <div className="auth-container">
+        <div className="slider" aria-hidden="true">
+          <div className="slider-card">
+            <div className="slides">
+              <div className="slide" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=1200&q=80')" }} />
+              <div className="slide" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80')" }} />
+              <div className="slide" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1200&q=80')" }} />
+            </div>
+            <div className="slider-overlay" />
+            <div className="dots" aria-hidden="true">
+              <span className="dot" />
+              <span className="dot" />
+              <span className="dot" />
+            </div>
+          </div>
+        </div>
 
-      <div style={{
-        backgroundColor: 'rgba(241, 242, 200, 0.1)',
-        border: '2px solid black',
-        padding: '30px 20px',
-        borderRadius: '10px',
-        width: '320px',
-        boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: '16px'
-      }}>
-        {error && <p style={{ color: 'red', fontSize: '0.9em', textAlign: 'center' }}>{error}</p>}
-        {loading && <p style={{ color: 'blue', fontSize: '0.9em', textAlign: 'center' }}>Loading...</p>}
+        <div className="glass-card auth-panel dark-card">
+          <h2>Admin Login</h2>
+          
+          {error && <p className="auth-error">{error}</p>}
+          {loading && <p className="auth-loading">Loading...</p>}
 
-        <form onSubmit={handleSubmit} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <input
-            type="text"
-            placeholder="Username"
-            name="username"
-            autoComplete="username"
-            value={adminName}
-            onChange={(e) => setAdminName(e.target.value)}
-            required
-            style={{
-              width: '100%',
-              padding: '10px',
-              borderRadius: '5px',
-              border: '1px solid #ccc',
-              boxSizing: 'border-box'
-            }}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            name="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={{
-              width: '100%',
-              padding: '10px',
-              borderRadius: '5px',
-              border: '1px solid #ccc',
-              boxSizing: 'border-box'
-            }}
-          />
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              backgroundColor: '#a28ef9',
-              color: 'white',
-              padding: '10px',
-              width: '100%',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: loading ? 'not-allowed' : 'pointer'
-            }}
-          >
-            Sign in
-          </button>
-        </form>
+          <form onSubmit={handleSubmit}>
+            <input
+              type="text"
+              placeholder="Username"
+              name="username"
+              autoComplete="username"
+              value={adminName}
+              onChange={(e) => setAdminName(e.target.value)}
+              required
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              name="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <button type="submit" className="submit-btn" disabled={loading}>
+              Sign in
+            </button>
+          </form>
+
+          <div style={{ marginTop: 16, textAlign: 'center' }}>
+            <p style={{ fontSize: '0.9em', color: '#FAF8F1' }}>
+              Need help?{' '}
+              <button
+                type="button"
+                onClick={() => navigate('/login')}
+                style={{ background: 'transparent', border: 'none', color: '#a28ef9', textDecoration: 'underline', cursor: 'pointer', fontSize: '0.9em' }}
+              >
+                Regular login
+              </button>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   )

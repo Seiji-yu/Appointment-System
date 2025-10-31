@@ -11,7 +11,7 @@
   width: 100%;
   height: 60px;
   padding: 0 20px;
-  background-color: #fff !important;
+  background-color: #fff ;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
@@ -38,53 +38,13 @@
   color: #111827;
 }
 
-/* Notification bell and dropdown */
-.nav-bell { position: relative; display: grid; place-items: center; cursor: pointer; }
-.nav-bell:hover { opacity: .85; }
-.nav-badge {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  background: #ef4444;
-  color: #fff;
-  font-size: 11px;
-  line-height: 1;
-  padding: 2px 5px;
-  border-radius: 999px;
-  min-width: 18px;
-  text-align: center;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-}
-.notif-dropdown {
-  position: absolute;
-  right: 12px;
-  top: 56px;
-  width: 280px;
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-  z-index: 1200;
-  overflow: hidden;
-}
-.notif-head { font-weight: 600; padding: 10px 12px; border-bottom: 1px solid #e5e7eb; }
-.notif-empty { padding: 12px; color: #6b7280; }
-.notif-list { list-style: none; padding: 0; margin: 0; max-height: 320px; overflow: auto; }
-.notif-item { padding: 10px 12px; border-bottom: 1px solid #f3f4f6; cursor: pointer; }
-.notif-item:last-child { border-bottom: 0; }
-.notif-item:hover { background: #f9fafb; }
-.notif-text { font-size: 0.92rem; }
-.notif-time { font-size: 0.75rem; color: #6b7280; margin-top: 2px; }
-.notif-item.unread .notif-text { font-weight: 600; }
-.notif-actions { display: flex; gap: 8px; margin-top: 6px; }
-.link-btn { background: transparent; border: 0; padding: 2px; color: #374151; cursor: pointer; }
-.link-btn:hover { color: #111827; }
-
-.theme-dark .notif-dropdown { background: #0f172a; border-color: #1f2937; box-shadow: 0 10px 30px rgba(0,0,0,0.45); }
-.theme-dark .notif-head { border-bottom-color: #1f2937; }
-.theme-dark .notif-item { border-bottom-color: #1f2937; }
-.theme-dark .link-btn { color: #d1d5db; }
-.theme-dark .link-btn:hover { color: #fff; }
+/* Notification UI moved to notifications.css */
+/* Dark topbar icon colors to match doctor */
+.theme-dark .menu-icon { color: #E8F1F5; }
+.theme-dark .nav-icons { color: #E8F1F5; }
+.theme-dark .nav-bell,
+.theme-dark .sound-toggle { color: #D2E0FB; }
+.theme-dark .sound-toggle.active { background: rgba(142,172,205,0.25); color: #FEF9D9; }
 /* Patient Navbar */
 .patient-sidebar {
   position: fixed;
@@ -92,12 +52,13 @@
   left: 0;
   height: 100vh;
   width: var(--sidebar-open-width);
-  background: linear-gradient(135deg, #1a1f3a 0%, #16213e 50%, #0f3460 100%) !important;
-  color: #eef2ff !important;
+  /* match doctor sidebar gradient */
+  background: linear-gradient(135deg, #D2E0FB 0%, #E8F1F5 50%, #F5F8FA 100%) !important;
+  color: #2C3E50 !important;
   backdrop-filter: saturate(140%) blur(12px);
   -webkit-backdrop-filter: saturate(140%) blur(12px);
   border-right: 1px solid rgba(148,163,184,0.12);
-  box-shadow: 4px 0 20px rgba(0,0,0,0.35);
+  box-shadow: 4px 0 20px rgba(142,172,205,0.15);
   z-index: 1000;
   transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.35s ease, background 0.3s ease;
   padding-top: 60px;
@@ -113,6 +74,14 @@
   transform: translateX(-100%);
   pointer-events: none;
   opacity: 0;
+}
+
+/* Override the doctor sidebar margin behavior for patient pages */
+/* Patient sidebar is fixed and shouldn't push content */
+body.with-sidebar-open .dashboard-main,
+body.with-sidebar-collapsed .dashboard-main {
+  margin-left: 0 !important;
+  width: 100% !important;
 }
 
 .patient-sidebar-header {
@@ -139,17 +108,17 @@
 
 .patient-sidebar-item a {
   text-decoration: none;
-  color: #e8edff !important;
+  color: #2C3E50 !important;
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 12px 14px;
   border-radius: 12px;
   line-height: 1;
-  transition: background 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), 
-              color 0.28s ease, 
-              transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
-              box-shadow 0.28s ease;
+  transition: background 0.25s ease, 
+              color 0.25s ease, 
+              transform 0.25s ease,
+              box-shadow 0.25s ease;
   position: relative;
   overflow: hidden;
 }
@@ -169,10 +138,10 @@
 }
 
 .patient-sidebar-item a:hover {
-  background: rgba(255,255,255,0.10) !important;
-  color: #fff !important;
-  transform: translateX(8px);
-  box-shadow: inset 0 0 0 1px rgba(148,163,184,0.2);
+  background: rgba(142,172,205,0.15);
+  color: #1a2332 !important;
+  transform: translateX(6px);
+  box-shadow: none;
 }
 
 .patient-sidebar-item a:hover::before {
@@ -182,24 +151,8 @@
 /* Active pill */
 .patient-sidebar-item.active a,
 .patient-sidebar-item a.active {
-  background: linear-gradient(135deg, rgba(59,130,246,0.35), rgba(139,92,246,0.3)) !important;
-  color: #ffffff !important;
-  box-shadow: inset 0 0 0 1.5px rgba(99,102,241,0.5), 0 8px 24px rgba(59,130,246,0.25);
-  transform: translateX(6px) scale(1.02);
-  position: relative;
-}
-
-.patient-sidebar-item.active a::after {
-  content: '';
-  position: absolute;
-  right: -2px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 4px;
-  height: 24px;
-  background: linear-gradient(180deg, rgba(59,130,246,0.8) 0%, rgba(139,92,246,0.8) 100%);
-  border-radius: 2px;
-  box-shadow: 0 0 12px rgba(59,130,246,0.4);
+  background: rgba(142,172,205,0.25) !important;
+  color: #1a2332 !important;
 }
 
 .patient-sidebar-header svg {
@@ -231,33 +184,36 @@
   margin: 0 12px;
   border-radius: 14px;
   text-decoration: none;
-  color: #fff !important;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(148,163,184,0.15);
-  transition: background 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), 
-              transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
-              border-color 0.3s ease,
-              box-shadow 0.3s ease;
+  color: #2C3E50 !important;
+  background: rgba(142,172,205,0.15);
+  border: 1px solid rgba(142,172,205,0.2);
+  transition: background 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
   position: relative;
   overflow: hidden;
 }
 
 .patient-user-card:hover { 
-  background: rgba(59,130,246,0.15);
-  border-color: rgba(148,163,184,0.25);
-  transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(59,130,246,0.2);
+  background: rgba(142,172,205,0.25);
+  border-color: rgba(142,172,205,0.35);
+  transform: translateY(-2px);
+  box-shadow: none;
 }
 
 .patient-user-avatar { 
   width: 36px; 
   height: 36px; 
   border-radius: 8px; 
-  background: linear-gradient(135deg, rgba(59,130,246,0.25), rgba(139,92,246,0.2));
+  background: rgba(142,172,205,0.3);
   display: grid; 
   place-items: center;
-  border: 1px solid rgba(148,163,184,0.2);
-  box-shadow: 0 0 12px rgba(59,130,246,0.15);
+  border: 1px solid rgba(142,172,205,0.3);
+  overflow: hidden;
+}
+
+.patient-user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .patient-user-meta { 
@@ -276,7 +232,7 @@
 .patient-user-email { 
   font-size: .75rem; 
   opacity: .85; 
-  color: #dbeafe; 
+  color: #2C3E50; 
   white-space: nowrap; 
   overflow: hidden; 
   text-overflow: ellipsis; 
@@ -286,20 +242,56 @@
 .patient-user-cta { 
   margin-left: auto; 
   font-size: .8rem; 
-  opacity: .9; 
-  background: rgba(59,130,246,0.2);
-  padding: 4px 8px; 
-  border-radius: 8px; 
-  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s ease;
+  opacity: .7; 
+  transition: transform 0.25s ease;
 }
 
 .patient-user-card:hover .patient-user-cta {
-  background: rgba(59,130,246,0.35);
   transform: rotate(180deg);
 }
 
 /* Dark theme tweaks already supported via global app.css; ensure contrast */
+/* Dark theme: match doctor */
 .theme-dark .patient-sidebar {
-  background: linear-gradient(135deg, #0d0f20 0%, #1a1a2e 50%, #16213e 100%) !important;
-  color: #e5e7eb !important;
+  background: linear-gradient(135deg, #34495E 0%, #2C3E50 50%, #1a2332 100%) !important;
+  color: #E8F1F5 !important;
+}
+
+/* Dark theme: readable sidebar links and states */
+.theme-dark .patient-sidebar-item a {
+  color: #E8F1F5 !important;
+}
+.theme-dark .patient-sidebar-item a:hover {
+  background: rgba(142,172,205,0.15);
+  color: #F5F8FA !important;
+}
+.theme-dark .patient-sidebar-item.active a,
+.theme-dark .patient-sidebar-item a.active {
+  background: rgba(142,172,205,0.25) !important;
+  color: #F5F8FA !important;
+}
+
+/* Dark theme: bottom user card styling */
+.theme-dark .patient-user-card {
+  color: #E8F1F5 !important;
+  background: rgba(26,35,50,0.6);
+  border-color: rgba(142,172,205,0.25);
+}
+.theme-dark .patient-user-card:hover {
+  background: rgba(26,35,50,0.75);
+  border-color: rgba(142,172,205,0.4);
+}
+.theme-dark .patient-user-avatar {
+  background: rgba(142,172,205,0.25);
+  border-color: rgba(142,172,205,0.35);
+}
+.theme-dark .patient-user-email {
+  color: #D2E0FB;
+  opacity: 0.9;
+}
+
+/* Match doctor topbar in dark mode */
+.theme-dark .top-navbar {
+  background-color: #2C3E50 !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
 }

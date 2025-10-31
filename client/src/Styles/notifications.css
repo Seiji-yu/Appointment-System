@@ -1,0 +1,167 @@
+/* Shared notification UI across doctor and patient navbars */
+
+.nav-bell {
+    position: relative;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+}
+
+.nav-bell:hover {
+    opacity: .85;
+}
+
+.nav-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #ef4444;
+    color: #fff;
+    font-size: 11px;
+    line-height: 1;
+    padding: 2px 5px;
+    border-radius: 999px;
+    min-width: 18px;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.notif-dropdown {
+    position: absolute;
+    right: 12px;
+    top: 56px;
+    width: 280px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    z-index: 1200;
+    overflow: hidden;
+}
+
+.notif-head {
+    font-weight: 600;
+    padding: 10px 12px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.notif-empty {
+    padding: 12px;
+    color: #6b7280;
+}
+
+.notif-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 320px;
+    overflow: auto;
+}
+
+.notif-item {
+    padding: 10px 12px;
+    border-bottom: 1px solid #f3f4f6;
+    cursor: pointer;
+}
+
+.notif-item:last-child {
+    border-bottom: 0;
+}
+
+.notif-item:hover {
+    background: #f9fafb;
+}
+
+.notif-text {
+    font-size: 0.92rem;
+}
+
+.notif-time {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-top: 2px;
+}
+
+.notif-item.unread .notif-text {
+    font-weight: 600;
+}
+
+.notif-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.link-btn {
+    background: transparent;
+    border: 0;
+    padding: 2px;
+    color: #374151;
+    cursor: pointer;
+}
+
+.link-btn:hover {
+    color: #111827;
+}
+
+/* Dark theme */
+.theme-dark .notif-dropdown {
+    background: #0f172a;
+    border-color: #1f2937;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+
+.theme-dark .notif-head {
+    border-bottom-color: #1f2937;
+    color: #f7fafc;
+}
+
+.theme-dark .notif-empty {
+    color: #9ca3af;
+}
+
+.theme-dark .notif-item {
+    border-bottom-color: #1f2937;
+}
+
+.theme-dark .notif-item:hover {
+    background: rgba(142, 172, 205, 0.12);
+}
+
+.theme-dark .notif-text {
+    color: #e5e7eb;
+}
+
+.theme-dark .notif-time {
+    color: #9ca3af;
+}
+
+.theme-dark .link-btn {
+    color: #d1d5db;
+}
+
+.theme-dark .link-btn:hover {
+    color: #fff;
+}
+
+.theme-dark .notif-dropdown .btn.btn-link {
+    color: #8EACCD;
+}
+
+.theme-dark .notif-dropdown .btn.btn-link:hover {
+    color: #D2E0FB;
+}
+
+.theme-dark .notif-dropdown .btn-sm {
+    background: transparent;
+    border: none;
+}
+
+/* Improve bell visibility in dark mode */
+.theme-dark .nav-bell {
+    color: #D2E0FB;
+    border-radius: 8px;
+}
+.theme-dark .nav-bell:hover {
+    background: rgba(142, 172, 205, 0.16);
+}

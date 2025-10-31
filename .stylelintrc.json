@@ -1,0 +1,14 @@
+{
+  "extends": ["stylelint-config-standard"],
+  "ignoreFiles": [
+    "**/*.js",
+    "**/*.jsx",
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "rules": {
+    "no-descending-specificity": null,
+    "color-hex-length": "short",
+    "selector-class-pattern": null
+  }
+}
